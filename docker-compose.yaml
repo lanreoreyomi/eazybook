@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: 'postgres'
+    environment:
+      - 'POSTGRES_USER=eazybook_dbuser'
+      - 'POSTGRES_PASSWORD=eazybook_dbpassword'
+      - 'POSTGRES_DB=eazybooks'
+    ports:
+      - '5432:5432'

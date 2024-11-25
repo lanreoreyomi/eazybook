@@ -1,0 +1,11 @@
+CREATE DATABASE eazybooks;
+CREATE USER eazybook_dbuser WITH PASSWORD 'eazybook_dbpassword';
+\c postgres
+GRANT ALL PRIVILEGES ON DATABASE eazybooks TO eazybook_dbuser;
+GRANT CONNECT ON DATABASE eazybooks To eazybook_dbuser;
+GRANT pg_read_all_data TO eazybook_dbuser;
+GRANT pg_write_all_data TO eazybook_dbuser;
+GRANT USAGE ON SCHEMA public TO eazybook_dbuser;
+GRANT ALL ON SCHEMA public TO eazybook_dbuser;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public to eazybook_dbuser;
+GRANT ALL PRIVILEGES ON ALL SEQUENCEs IN SCHEMA public to eazybook_dbuser;
