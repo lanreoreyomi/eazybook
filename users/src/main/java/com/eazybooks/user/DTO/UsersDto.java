@@ -1,4 +1,4 @@
-package com.eazybooks.user.controller.DTO;
+package com.eazybooks.user.DTO;
 
 public class UsersDto {
 

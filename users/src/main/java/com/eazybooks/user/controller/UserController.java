@@ -1,6 +1,6 @@
 package com.eazybooks.user.controller;
 
-import com.eazybooks.user.controller.DTO.UsersDto;
+import com.eazybooks.user.DTO.UsersDto;
 import com.eazybooks.user.model.Users;
 import com.eazybooks.user.service.UserService;
 import java.util.Optional;
@@ -95,9 +95,9 @@ public class UserController {
       Users updatedUser = userService.updateUser(userToUpdate);
       UsersDto updatedUsersDto = new UsersDto();
 
-      updatedUsersDto.setFirstname(usersDto.getFirstname());
-      updatedUsersDto.setLastname(usersDto.getLastname());
-      updatedUsersDto.setEmail(usersDto.getEmail());
+      updatedUsersDto.setFirstname(updatedUser.getFirstname());
+      updatedUsersDto.setLastname(updatedUser.getLastname());
+      updatedUsersDto.setEmail(updatedUser.getEmail());
 
       logger.info("Successfully updated user with ID: {}", id);
 
@@ -134,9 +134,9 @@ public class UserController {
       logger.info("Successfully updated user with username: {}", username);
       UsersDto updatedUsersDto = new UsersDto();
 
-      updatedUsersDto.setFirstname(usersDto.getFirstname());
-      updatedUsersDto.setLastname(usersDto.getLastname());
-      updatedUsersDto.setEmail(usersDto.getEmail());
+      updatedUsersDto.setFirstname(updatedUser.getFirstname());
+      updatedUsersDto.setLastname(updatedUser.getLastname());
+      updatedUsersDto.setEmail(updatedUser.getEmail());
 
       return ResponseEntity.ok(updatedUsersDto);  // Or return the actual user data
 
