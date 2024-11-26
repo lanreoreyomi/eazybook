@@ -3,7 +3,7 @@ package com.eazybooks.user.model;
 
 public interface UserRepositoryImpl {
 
-  void createUser(Users user);
+  Users createUser(Users user);
 
   Users updateUser(Users user);
 

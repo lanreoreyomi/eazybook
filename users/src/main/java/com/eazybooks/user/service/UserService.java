@@ -32,7 +32,7 @@ public class UserService implements UserRepositoryImpl {
   }
 
   @Override
-  public void createUser(Users user) {
+  public Users createUser(Users user) {
     SecureRandom random = new SecureRandom();
     byte[] salt = new byte[16];
     random.nextBytes(salt);
@@ -41,8 +41,7 @@ public class UserService implements UserRepositoryImpl {
 
     user.setPassword(hashedPassword);
     user.setSalt(encodedSalt);
-
-    userRepository.save(user);
+   return userRepository.save(user);
   }
 
   @Override
