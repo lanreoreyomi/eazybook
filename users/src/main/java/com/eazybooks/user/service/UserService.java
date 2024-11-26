@@ -1,15 +1,17 @@
 package com.eazybooks.user.service;
 
 
-import com.eazybooks.user.model.User;
+import com.eazybooks.user.model.Users;
 import com.eazybooks.user.model.UserRepositoryImpl;
 import com.eazybooks.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 public class UserService implements UserRepositoryImpl {
 
   private final HashService hashService;
@@ -22,15 +24,15 @@ public class UserService implements UserRepositoryImpl {
   }
 
   public boolean isUsernameAvailable(String username) {
-    return Optional.ofNullable(userRepository.findByUsername(username)).isPresent();
+    return Optional.ofNullable(userRepository.getUsersByUsername(username)).isPresent();
   }
 
   public boolean isEmailAvailable(String email) {
-    return Optional.ofNullable(userRepository.findByEmail(email)).isPresent();
+    return Optional.ofNullable(userRepository.getUsersByEmail(email)).isPresent();
   }
 
   @Override
-  public User createUser(User user) {
+  public void createUser(Users user) {
     SecureRandom random = new SecureRandom();
     byte[] salt = new byte[16];
     random.nextBytes(salt);
@@ -38,18 +40,24 @@ public class UserService implements UserRepositoryImpl {
     String hashedPassword = hashService.getHashedValue(user.getPassword(), encodedSalt);
 
     user.setPassword(hashedPassword);
+    user.setSalt(encodedSalt);
 
-    return userRepository.createUser(user);
+    userRepository.save(user);
   }
 
   @Override
-  public User findUserByUserId(String userId) {
-    return userRepository.findUserByUserId(userId);
+  public Users updateUser(Users user) {
+   return userRepository.save(user);
   }
 
   @Override
-  public User findByUsername(String username) {
-    return userRepository.findByUsername(username);
+  public Users findUserByUserId(Long userId) {
+    return userRepository.getUsersByUserId(userId);
+  }
+
+  @Override
+  public Users findByUsername(String username) {
+    return userRepository.getUsersByUsername(username);
   }
 
 

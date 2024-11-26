@@ -1,7 +1,18 @@
 package com.eazybooks.user.model;
 
-public class User {
-  private  Integer userId;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+public class Users {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @Column(nullable = false)
+  private  Long userId;
   private String username;
   private  String salt;
   private String password;
@@ -9,13 +20,6 @@ public class User {
   private String lastname;
   private String email;
 
-  public Integer getUserId() {
-    return userId;
-  }
-
-  public void setUserId(Integer userId) {
-    this.userId = userId;
-  }
 
   public String getUsername() {
     return username;
@@ -64,7 +68,7 @@ public class User {
   }
 
 
-  public User(Integer userId,String email, String username, String salt, String password, String firstname,
+  public Users(Long userId,String email, String username, String salt, String password, String firstname,
       String lastname) {
     this.userId = userId;
     this.username = username;
@@ -75,7 +79,28 @@ public class User {
     this.email = email;
   }
 
-  public User() {
+  public Long getUserId() {
+    return userId;
+  }
+
+  public void setUserId(Long userId) {
+    this.userId = userId;
+  }
+
+  public Users() {
+  }
+
+  @Override
+  public String toString() {
+    return "Users{" +
+        "userId=" + userId +
+        ", username='" + username + '\'' +
+        ", salt='" + salt + '\'' +
+        ", password='" + password + '\'' +
+        ", firstname='" + firstname + '\'' +
+        ", lastname='" + lastname + '\'' +
+        ", email='" + email + '\'' +
+        '}';
   }
 }
 
