@@ -24,11 +24,11 @@ public class UserService implements UserRepositoryImpl {
   }
 
   public boolean isUsernameAvailable(String username) {
-    return Optional.ofNullable(userRepository.getUsersByUsername(username)).isPresent();
+    return Optional.ofNullable(userRepository.findUsersByUsername(username)).isPresent();
   }
 
   public boolean isEmailAvailable(String email) {
-    return Optional.ofNullable(userRepository.getUsersByEmail(email)).isPresent();
+    return Optional.ofNullable(userRepository.findUsersByEmail(email)).isPresent();
   }
 
   @Override
@@ -51,12 +51,12 @@ public class UserService implements UserRepositoryImpl {
 
   @Override
   public Users findUserByUserId(Long userId) {
-    return userRepository.getUsersByUserId(userId);
+    return userRepository.findUsersByUserId(userId);
   }
 
   @Override
   public Users findByUsername(String username) {
-    return userRepository.getUsersByUsername(username);
+    return userRepository.findUsersByUsername(username);
   }
 
 

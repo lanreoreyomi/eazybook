@@ -9,3 +9,15 @@ GRANT USAGE ON SCHEMA public TO eazybook_dbuser;
 GRANT ALL ON SCHEMA public TO eazybook_dbuser;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public to eazybook_dbuser;
 GRANT ALL PRIVILEGES ON ALL SEQUENCEs IN SCHEMA public to eazybook_dbuser;
+
+
+
+------------------
+sudo -u postgres psql
+create user eazybook_dbuser;
+create database eazybooks;
+grant all priviledges on database eazybooks to eazybook_dbuser;
+\c eazybooks
+Create extension if not exists pg_trim with schema public;
+\c postgres;
+\password eazybook_dbuser
