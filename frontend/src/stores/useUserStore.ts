@@ -12,7 +12,7 @@ interface UserState {
   email: string;
 }
 
-export const useUserStore = defineStore('user', {
+ export const useUserStore = defineStore('user', {
   state: () => ({
     user: {
       username: '',
@@ -22,21 +22,35 @@ export const useUserStore = defineStore('user', {
       email: ''
     } as UserState, // Define type for user object
     loading: false,
-    error: null
+    statusCode: 0,
+    statusText:'',
+    errorResponse: {
+      status: 0,
+      message: ''
+    }
   }),
   actions: {
     async createUser() {
       this.loading = true;
-      this.error = null;
-      try {
+       try {
         const response = await axios.post<UserState>(SIGNUP, this.user);
         // Handle successful user creation
-        console.log('User created:', response.headers);
+        this.$patch({
+          statusCode: response.status,
+          statusText: String(response.data) // Ensure statusText is a string
+        });
+
       } catch (error) {
-         console.error('Error creating user:', error);
-      } finally {
-        this.loading = false;
-      }
+       if (axios.isAxiosError(error) && error.response) {
+         this.$patch({
+           statusCode: error.response.status,
+           statusText: String(error.response.data) // Ensure statusText is a string
+         });
+
+       } else {
+         console.log('An unexpected error occurred:', error);
+       }
+}
     }
   }
 });

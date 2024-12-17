@@ -28,22 +28,28 @@
       </div>
       <button type="submit" id="submit-form">Create Account</button>
 
-      <div v-if="isLoading">Creating user...</div>
-      <div v-if="error">Error: {{ error.message }}</div>
-    </form>
+      <div v-if="isSuccessful" id="user_created">{{statusText}}</div>
+      <div v-else-if="!isSuccessful" id="user_created">{{statusText}}</div>
+      </form>
 
   </div>
 </template>
 <script lang="ts">
 import { useUserStore } from '@/stores/useUserStore.js'
+import { computed } from 'vue'
 
 export default {
   setup() {
     const userStore = useUserStore();
-    return { user: userStore.user,
+    const isSuccessful = computed(() => userStore.statusCode === 201);
+  const statusText = computed(() => userStore.statusText);
+    return {
+      user: userStore.user,
       isLoading: userStore.loading,
-      error: userStore.error,
-      createUser: userStore.createUser };
+      createUser: userStore.createUser,
+       isSuccessful,
+      statusText
+    };
   }
 };
 </script>
@@ -107,6 +113,10 @@ html, body, #app {
       font-weight: 600;
       border-radius: 2rem;
       font-size: 20px;
+    }
+    #user_created{
+      color: colors.$text-color;
+      font-weight: bolder;
     }
   }
 }
