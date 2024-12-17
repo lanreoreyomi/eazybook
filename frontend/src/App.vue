@@ -1,14 +1,14 @@
-<script setup>
- import MainHeader from '@/components/main-header.vue'
-  </script>
+<script setup lang="ts">
+ import MainHeader from '@/components/MainHeader.vue'
+</script>
 <template>
   <header>
-    <main-header/>
+    <MainHeader/>
   </header>
- </template>
+</template>
 
 <style lang="scss" >
-@use "src/assets/scss/colors.scss";
+@use '/src/assets/scss/colors.scss';
 html, body, #app {
   margin: 0;
   padding: 0;

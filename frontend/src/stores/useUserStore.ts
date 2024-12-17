@@ -1,7 +1,16 @@
-// stores/user.js
+// stores/user.ts
 import { defineStore } from 'pinia';
 import axios from 'axios';
-import { SIGNUP } from '@/API/api.js'
+import { SIGNUP } from '@/api/apis.ts'
+
+
+interface UserState {
+  username: string;
+  password: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+}
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -11,7 +20,7 @@ export const useUserStore = defineStore('user', {
       firstname: '',
       lastname: '',
       email: ''
-    },
+    } as UserState, // Define type for user object
     loading: false,
     error: null
   }),
@@ -20,12 +29,11 @@ export const useUserStore = defineStore('user', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.post(SIGNUP, this.user);
+        const response = await axios.post<UserState>(SIGNUP, this.user);
         // Handle successful user creation
         console.log('User created:', response.headers);
       } catch (error) {
-        this.error = error;
-        console.error('Error creating user:', error);
+         console.error('Error creating user:', error);
       } finally {
         this.loading = false;
       }
