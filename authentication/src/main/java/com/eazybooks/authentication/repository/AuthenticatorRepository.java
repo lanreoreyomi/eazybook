@@ -1,16 +1,16 @@
 package com.eazybooks.authentication.repository;
 
-import com.eazybooks.authentication.model.Users;
+import com.eazybooks.authentication.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AuthenticatorRepository extends JpaRepository<Users, Long> {
+public interface AuthenticatorRepository extends JpaRepository<User, Long> {
 
-  Users findUsersByUsername(String username);
+   User findUserByUsername(String username);
 
-  Users findUsersByEmail(String email);
+  User findUserByEmail(String email);
 
-  Users save(Users user);
+  User save(User user);
 
 }

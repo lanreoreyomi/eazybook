@@ -1,6 +1,8 @@
 package com.eazybooks.authentication.controller;
 
-import com.eazybooks.authentication.model.Users;
+import com.eazybooks.authentication.model.LoginRequest;
+import com.eazybooks.authentication.model.User;
+import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
 import com.eazybooks.authentication.service.AuthenticatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/create-account")
-    public ResponseEntity<String> signUp(@RequestBody Users createAccountRequest) {  // Use @RequestBody
+    public ResponseEntity<String> signUp(@RequestBody User createAccountRequest) {  // Use @RequestBody
 
       if (createAccountRequest == null) {
         logger.warn("Invalid signup request: User request is null");
@@ -42,9 +44,34 @@ public class AuthenticationController {
         return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
       }
 
-      authenticatorService.createUser(createAccountRequest);
-      logger.info("User '{}' successfully created", createAccountRequest.getUsername());
+      final AuthenticationResponse authenticationResponse = authenticatorService.registerUser(
+          createAccountRequest);
 
+      System.out.println("authenticationResponse");
+      System.out.println(authenticationResponse.getToken().toString());
       return new ResponseEntity<>("User successfully created", HttpStatus.CREATED);
     }
+/**
+Example from Vidoe
+  @PostMapping("/create-account")
+  public ResponseEntity<AuthenticationResponse> signUp(@RequestBody User createAccountRequest) {  // Use @RequestBod
+
+    final AuthenticationResponse authenticationResponse = authenticatorService.registerUser(
+        createAccountRequest);
+    return ResponseEntity.ok(authenticationResponse);
+  }
+  **/
+@PostMapping("/login")
+  public ResponseEntity<AuthenticationResponse> logIn(@RequestBody LoginRequest loginRequest) {
+  logger.info("Log in Request {}", loginRequest.toString());
+
+  if (loginRequest == null) {
+     logger.warn("Invalid login request: Log in details is e");
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+  final AuthenticationResponse authenticate = authenticatorService.authenticate(loginRequest);
+  logger.info("Log in successful with generated token {}", authenticate.toString());
+  return ResponseEntity.ok(authenticate);
+  }
   }

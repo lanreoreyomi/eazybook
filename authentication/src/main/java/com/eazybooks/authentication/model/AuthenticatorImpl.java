@@ -1,9 +1,11 @@
 package com.eazybooks.authentication.model;
 
 
+import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
+
 public interface AuthenticatorImpl {
 
-  Users createUser(Users user);
+  AuthenticationResponse registerUser(User user);
 
   Boolean findByUsername(String username);
 

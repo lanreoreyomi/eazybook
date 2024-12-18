@@ -23,7 +23,7 @@
     <developer/>
   </developers>
   <modules>
-    <module>users</module>
+    <module>user</module>
     <module>bookcatalogue</module>
     <module>borrowhistory</module>
     <module>authentication</module>
