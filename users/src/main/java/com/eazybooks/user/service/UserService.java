@@ -14,13 +14,10 @@ import org.springframework.stereotype.Service;
 @Transactional
 public class UserService implements UserRepositoryImpl {
 
-  private final HashService hashService;
   private final UserRepository userRepository;
 
-
-  public UserService(UserRepository userRepository, HashService hashService) {
+  public UserService(UserRepository userRepository) {
     this.userRepository = userRepository;
-    this.hashService = hashService;
   }
 
   public boolean isUsernameAvailable(String username) {
@@ -31,33 +28,10 @@ public class UserService implements UserRepositoryImpl {
     return Optional.ofNullable(userRepository.findUsersByEmail(email)).isPresent();
   }
 
-  @Override
-  public Users createUser(Users user) {
-    SecureRandom random = new SecureRandom();
-    byte[] salt = new byte[16];
-    random.nextBytes(salt);
-    String encodedSalt = Base64.getEncoder().encodeToString(salt);
-    String hashedPassword = hashService.getHashedValue(user.getPassword(), encodedSalt);
-
-    user.setPassword(hashedPassword);
-    user.setSalt(encodedSalt);
-   return userRepository.save(user);
-  }
 
   @Override
   public Users updateUser(Users user) {
    return userRepository.save(user);
   }
-
-  @Override
-  public Users findUserByUserId(Long userId) {
-    return userRepository.findUsersByUserId(userId);
-  }
-
-  @Override
-  public Users findByUsername(String username) {
-    return userRepository.findUsersByUsername(username);
-  }
-
 
 }

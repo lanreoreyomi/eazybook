@@ -1,4 +1,4 @@
-package com.eazybooks.user.service;
+package com.eazybooks.authentication.service;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
