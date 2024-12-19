@@ -9,6 +9,6 @@ public interface AuthenticatorImpl {
   AuthenticationResponse createUserAccount(CreateAccountRequest user);
 
   Boolean findByUsername(String username);
-
   Boolean findByEmail(String username);
+  Boolean isTokenValid(String token);
 }
