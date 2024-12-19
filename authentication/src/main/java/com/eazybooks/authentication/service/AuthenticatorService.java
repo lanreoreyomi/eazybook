@@ -2,11 +2,12 @@ package com.eazybooks.authentication.service;
 
 import com.eazybooks.authentication.model.AuthenticatorImpl;
 import com.eazybooks.authentication.model.LoginRequest;
+import com.eazybooks.authentication.model.Role;
 import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
+import com.eazybooks.authentication.model.UserDto.CreateAccountRequest;
 import com.eazybooks.authentication.repository.AuthenticatorRepository;
 import jakarta.transaction.Transactional;
-import java.security.SecureRandom;
-import java.util.Base64;
+
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,38 +23,23 @@ import com.eazybooks.authentication.model.User;
 public class AuthenticatorService implements AuthenticatorImpl {
 
   private static final Logger log = LoggerFactory.getLogger(AuthenticatorService.class);
-  private final HashService hashService;
-  private final AuthenticatorRepository authenticatorRepository;
+   private final AuthenticatorRepository authenticatorRepository;
   private final AuthenticationManager authenticationManager;
 
   private AuthenticatorRepository userRepository;
   private PasswordEncoder passwordEncoder;
   private JwtService jwtService;
 
-  public AuthenticatorService(HashService hashService,
+  public AuthenticatorService(
       AuthenticatorRepository authenticatorRepository, AuthenticationManager authenticationManager,
       AuthenticatorRepository userRepository,
       PasswordEncoder passwordEncoder, JwtService jwtService) {
-    this.hashService = hashService;
     this.authenticatorRepository = authenticatorRepository;
     this.authenticationManager = authenticationManager;
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
   }
-
-//  @Override
-//  public User createUser(User user) {
-//    SecureRandom random = new SecureRandom();
-//    byte[] salt = new byte[16];
-//    random.nextBytes(salt);
-//    String encodedSalt = Base64.getEncoder().encodeToString(salt);
-//    String hashedPassword = hashService.getHashedValue(user.getPassword(), encodedSalt);
-//
-//    user.setPassword(hashedPassword);
-//    user.setSalt(encodedSalt);
-//    return authenticatorRepository.save(user);
-//  }
 
   @Override
   public Boolean findByUsername(String username) {
@@ -66,14 +52,15 @@ public class AuthenticatorService implements AuthenticatorImpl {
   }
 
   @Override
-  public AuthenticationResponse registerUser(User request) {
+  public AuthenticationResponse createUserAccount(CreateAccountRequest request) {
     User user = new User();
     user.setFirstname(request.getFirstname());
     user.setLastname(request.getLastname());
     user.setEmail(request.getEmail());
     user.setUsername(request.getUsername());
     user.setPassword(passwordEncoder.encode(request.getPassword()));
-    user.setRole(request.getRole());
+
+    user.setRole(Role.USER);
 
     user = authenticatorRepository.save(user);
 

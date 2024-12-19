@@ -1,7 +1,7 @@
 // stores/user.ts
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { SIGNUP } from '@/api/apis.ts'
+import { CREATEACCOUUNT } from '@/api/apis.ts'
 
 //TODO: Add confirm password field and adjust backend API
 interface UserState {
@@ -33,7 +33,7 @@ export const useUserStore = defineStore('user', {
     async createUser() {
       this.loading = true
       try {
-        const response = await axios.post<UserState>(SIGNUP, this.user)
+        const response = await axios.post<UserState>(CREATEACCOUUNT, this.user)
         // Handle successful user creation
         this.$patch({
           statusCode: response.status,

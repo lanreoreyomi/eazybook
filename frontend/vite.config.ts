@@ -17,8 +17,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/signup': {
-        target: 'http://eazybooks.com:9083',
+      '/auth/create-account': {
+        target: 'http://eazybooks.com:9084',
         changeOrigin: true
       }
     }

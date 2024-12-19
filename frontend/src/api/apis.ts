@@ -1,1 +1,1 @@
-export const SIGNUP = '/auth/create-account'
+export const CREATEACCOUUNT = '/auth/create-account'

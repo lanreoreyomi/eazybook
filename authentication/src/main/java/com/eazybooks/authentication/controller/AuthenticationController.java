@@ -3,6 +3,7 @@ package com.eazybooks.authentication.controller;
 import com.eazybooks.authentication.model.LoginRequest;
 import com.eazybooks.authentication.model.User;
 import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
+import com.eazybooks.authentication.model.UserDto.CreateAccountRequest;
 import com.eazybooks.authentication.service.AuthenticatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/create-account")
-    public ResponseEntity<String> signUp(@RequestBody User createAccountRequest) {  // Use @RequestBody
+    public ResponseEntity<String> signUp(@RequestBody CreateAccountRequest createAccountRequest) {  // Use @RequestBody
 
       if (createAccountRequest == null) {
         logger.warn("Invalid signup request: User request is null");
@@ -44,11 +45,9 @@ public class AuthenticationController {
         return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
       }
 
-      final AuthenticationResponse authenticationResponse = authenticatorService.registerUser(
+      final AuthenticationResponse authenticationResponse = authenticatorService.createUserAccount(
           createAccountRequest);
 
-      System.out.println("authenticationResponse");
-      System.out.println(authenticationResponse.getToken().toString());
       return new ResponseEntity<>("User successfully created", HttpStatus.CREATED);
     }
 /**
@@ -66,7 +65,7 @@ Example from Vidoe
   logger.info("Log in Request {}", loginRequest.toString());
 
   if (loginRequest == null) {
-     logger.warn("Invalid login request: Log in details is e");
+     logger.warn("Invalid login request: Log in details recieved ");
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
