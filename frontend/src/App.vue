@@ -14,6 +14,6 @@ body,
 #app {
   margin: 0;
   padding: 0;
-  background-color: colors.$color-primary;
-}
+  background-color: colors.$white-color;
+ }
 </style>

@@ -9,7 +9,7 @@ import { RouterLink, RouterView } from 'vue-router'
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/catalogue">Catalogue</router-link></li>
         <li><router-link to="/borrowhistory">Borrow History</router-link></li>
-        <li><router-link to="/login">Log In</router-link></li>
+        <li id="log_in"><router-link to="/login">Log In</router-link></li>
         <li id="signup"><router-link to="/create-account">Create Account</router-link></li>
       </ul>
     </nav>
@@ -31,7 +31,7 @@ body,
 }
 header {
   header {
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 1px 4px 6px rgba(0, 0, 0, 0.1);
   }
   nav {
     width: 100%;
@@ -39,17 +39,16 @@ header {
     text-align: center;
 
     ul {
+      padding: 0;
+      margin: 0;
       display: flex;
       text-align: center;
       justify-content: center;
       align-items: center;
-
       li {
-        font-weight: bolder;
         list-style: none;
-        margin: 0 10px 10px;
-        font-size: 20px;
-        padding: 20px;
+        font-size: 16px;
+        padding: 30px;
         a {
           padding: 20px;
           color: colors.$text-color;
@@ -59,11 +58,22 @@ header {
       }
       #signup {
         a {
-          color: colors.$color-primary;
+          padding: 15px;
+          color: colors.$white-color;
           background-color: colors.$text-color;
-          border-radius: 2rem;
+          border-radius: 0.5rem;
         }
       }
+      #log_in {
+
+        a {
+          border-radius: 0.5rem;
+          padding: 15px;
+          border: 0.1rem solid colors.$text-color;
+          color: colors.$text-color;
+        }
+      }
+
     }
   }
 }

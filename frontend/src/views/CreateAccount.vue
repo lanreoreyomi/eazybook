@@ -13,11 +13,6 @@
         <input type="password" id="password" v-model="user.password" required />
       </div>
       <div>
-        <label for="confirmPassword">Confirm Password:</label>
-        <input type="password" id="confirmPassword" v-model="user.password" required />
-      </div>
-
-      <div>
         <label for="firstname">First Name:</label>
         <input type="text" id="firstname" v-model="user.firstname" required />
       </div>
@@ -43,7 +38,21 @@ import { computed } from 'vue'
 export default {
   setup() {
     const userStore = useUserStore()
-    const isSuccessful = computed(() => userStore.statusCode === 201)
+    const isSuccessful = computed(
+      () =>{
+        if (userStore.statusCode === 201) {
+          // eslint-disable-next-line vue/no-async-in-computed-properties
+           setTimeout(function() {
+            window.location.href="/login";
+            }, 120)
+
+          return true
+        }else {
+          return false
+        }
+
+      }
+    )
     const statusText = computed(() => userStore.statusText)
     return {
       user: userStore.user,
@@ -69,16 +78,16 @@ body,
   display: unset;
 }
 #create-account-form {
-  height: 100vh;
-  padding: 80px;
+   padding: 20px;
   justify-items: center;
   margin: 0 auto;
   div {
     h2 {
+      text-align: center;
       font-weight: bolder;
       color: colors.$accent-color;
-      font-size: 50px;
-      padding-bottom: 40px;
+      font-size: 40px;
+      padding-bottom: 20px;
     }
   }
 
@@ -90,10 +99,9 @@ body,
       justify-items: start;
       input {
         width: 100%;
-        padding: 20px;
-        background-color: colors.$color-primary;
-        border: 1px solid colors.$text-color;
-        border-radius: 2rem;
+        padding: 10px;
+         border: 1px solid colors.$text-color;
+        border-radius: 1rem;
         margin: 10px 0;
         font-size: 20px;
       }
@@ -110,9 +118,9 @@ body,
       padding: 20px;
       text-align: center;
       justify-items: center;
-      background-color: colors.$text-color;
+      background-color: colors.$accent-color;
       border: none;
-      color: colors.$color-primary;
+      color: colors.$white-color;
       font-weight: 600;
       border-radius: 2rem;
       font-size: 20px;
