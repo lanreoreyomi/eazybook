@@ -81,15 +81,21 @@ public class JwtService {
   }
 
   public String generateToken(User user) {
-    String token = Jwts
-        .builder()
-        .setSubject(user.getUsername())
-        .issuedAt(new Date(System.currentTimeMillis()))
-        .expiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
-        .signWith(getSignInKey())
-        .compact();
 
-    return token;
+    try {
+      String token = Jwts
+          .builder()
+          .setSubject(user.getUsername())
+          .issuedAt(new Date(System.currentTimeMillis()))
+          .expiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
+          .signWith(getSignInKey())
+          .compact();
+      return token;
+    } catch (Exception e) {
+      log.error("Error generating token {}", e.getMessage());
+    }
+return null;
+
   }
 
   private SecretKey getSignInKey() {

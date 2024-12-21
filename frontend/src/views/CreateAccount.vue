@@ -45,7 +45,6 @@ export default {
            setTimeout(function() {
             window.location.href="/login";
             }, 120)
-
           return true
         }else {
           return false
@@ -65,7 +64,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @use '/src/assets/scss/colors.scss';
 
 html,
@@ -118,11 +117,11 @@ body,
       padding: 20px;
       text-align: center;
       justify-items: center;
-      background-color: colors.$accent-color;
+      background-color: colors.$text-color;
       border: none;
       color: colors.$white-color;
       font-weight: 600;
-      border-radius: 2rem;
+      border-radius: 0.5rem;
       font-size: 20px;
     }
     #user_created {

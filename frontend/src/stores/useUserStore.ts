@@ -3,7 +3,6 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { CREATEACCOUUNT } from '@/api/apis.ts'
 
-//TODO: Add confirm password field and adjust backend API
 interface UserState {
   username: string
   password: string

@@ -5,7 +5,7 @@ import LogIn from '@/views/LogIn.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
+   routes: [
     {
       path: '/',
       name: 'home',
@@ -24,4 +24,4 @@ const router = createRouter({
   ],
 })
 
-export default router
+ export default router

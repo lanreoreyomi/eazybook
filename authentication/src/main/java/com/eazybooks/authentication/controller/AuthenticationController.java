@@ -19,50 +19,61 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthenticationController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
-    AuthenticatorService authenticatorService;
+  private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
+  AuthenticatorService authenticatorService;
 
-    public AuthenticationController(AuthenticatorService authenticatorService) {
-      this.authenticatorService = authenticatorService;
+  public AuthenticationController(AuthenticatorService authenticatorService) {
+    this.authenticatorService = authenticatorService;
 
-    }
+  }
 
-    @PostMapping("/create-account")
-    public ResponseEntity<String> signUp(@RequestBody CreateAccountRequest createAccountRequest) {  // Use @RequestBody
+  @PostMapping("/create-account")
+  public ResponseEntity<String> signUp(
+      @RequestBody CreateAccountRequest createAccountRequest) {  // Use @RequestBody
 
-      if (createAccountRequest == null) {
-        logger.warn("Invalid signup request: User request is null");
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-      }
-
-      if (authenticatorService.findByUsername(createAccountRequest.getUsername())) {
-        logger.warn("Username '{}' is already taken", createAccountRequest.getUsername());
-        return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
-      }
-
-      if (authenticatorService.findByEmail(createAccountRequest.getEmail())) {
-        logger.warn("Email '{}' is already taken", createAccountRequest.getEmail());
-        return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
-      }
-
-      final AuthenticationResponse authenticationResponse = authenticatorService.createUserAccount(
-          createAccountRequest);
-
-      return new ResponseEntity<>("User successfully created", HttpStatus.CREATED);
-    }
-
-@PostMapping("/login")
-  public ResponseEntity<AuthenticationResponse> logIn(@RequestBody LoginRequest loginRequest) {
-  logger.info("Log in Request {}", loginRequest.toString());
-
-  if (loginRequest == null) {
-     logger.warn("Invalid login request: Log in details recieved ");
+    if (createAccountRequest == null) {
+      logger.warn("Invalid signup request: User request is null");
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-  final AuthenticationResponse authenticate = authenticatorService.authenticate(loginRequest);
-  logger.info("Log in successful with generated token {}", authenticate.toString());
-  return ResponseEntity.ok(authenticate);
+    if (authenticatorService.findByUsername(createAccountRequest.getUsername())) {
+      logger.warn("Username '{}' is already taken", createAccountRequest.getUsername());
+      return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
+    }
+
+    if (authenticatorService.findByEmail(createAccountRequest.getEmail())) {
+      logger.warn("Email '{}' is already taken", createAccountRequest.getEmail());
+      return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
+    }
+
+    final AuthenticationResponse authenticationResponse = authenticatorService.createUserAccount(
+        createAccountRequest);
+
+    return new ResponseEntity<>("User successfully created", HttpStatus.CREATED);
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<String> logIn(@RequestBody LoginRequest loginRequest) {
+    logger.info("Log in Request {}", loginRequest.toString());
+
+    if (loginRequest == null) {
+      logger.warn("Invalid login request: Log in details recieved ");
+      return new ResponseEntity<String>("Log In Request is empty", HttpStatus.BAD_REQUEST);
+    }
+    try {
+      final Boolean isUserAuthenticated = authenticatorService.authenticate(loginRequest);
+      logger.info("User authenticated: {}", isUserAuthenticated);
+      if (isUserAuthenticated) {
+        logger.info("Log in successful with generated token for user {}",
+            loginRequest.getUsername());
+        return new ResponseEntity<String>("Log In Successful", HttpStatus.OK);
+      }
+    } catch (Exception e) {
+    logger.warn("Log in failed", e);
+      return new ResponseEntity<String>("User log in Failed", HttpStatus.UNAUTHORIZED);
+    }
+return null;
+
   }
 
   @PostMapping("/validate-token")
@@ -87,4 +98,4 @@ public class AuthenticationController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
     }
   }
-  }
+}

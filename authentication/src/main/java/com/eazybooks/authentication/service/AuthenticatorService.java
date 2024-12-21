@@ -73,18 +73,17 @@ public class AuthenticatorService implements AuthenticatorImpl {
     return new AuthenticationResponse(token);
   }
 
-  public AuthenticationResponse authenticate(LoginRequest request) {
+  public Boolean authenticate(LoginRequest request) {
 
-    log.info("recieved authentication request inside Service{}", request);
+    log.info("Recieved authentication request inside Service{}", request);
     authenticationManager
         .authenticate(new UsernamePasswordAuthenticationToken(
             request.getUsername(), request.getPassword())
         );
 
     User user = authenticatorRepository.findUserByUsername(request.getUsername());
-    String token = jwtService.generateToken(user);
-    return new AuthenticationResponse(token);
-  }
+    return jwtService.generateToken(user) !=null;
+   }
 
   @Override
   public Boolean isTokenValid(String token) {

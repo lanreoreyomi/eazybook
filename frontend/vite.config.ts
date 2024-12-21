@@ -20,6 +20,10 @@ export default defineConfig({
       '/auth/create-account': {
         target: 'http://eazybooks.com:9084',
         changeOrigin: true
+      },
+      '/auth/login': {
+        target: 'http://eazybooks.com:9084',
+        changeOrigin: true
       }
     }
   }
