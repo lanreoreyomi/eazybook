@@ -7,6 +7,7 @@ import com.eazybooks.authentication.model.VerifyToken;
 import com.eazybooks.authentication.service.AuthenticatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,19 +61,24 @@ public class AuthenticationController {
       logger.warn("Invalid login request: Log in details recieved ");
       return new ResponseEntity<String>("Log In Request is empty", HttpStatus.BAD_REQUEST);
     }
+
     try {
-      final Boolean isUserAuthenticated = authenticatorService.authenticate(loginRequest);
-      logger.info("User authenticated: {}", isUserAuthenticated);
-      if (isUserAuthenticated) {
-        logger.info("Log in successful with generated token for user {}",
-            loginRequest.getUsername());
-        return new ResponseEntity<String>("Log In Successful", HttpStatus.OK);
+
+      final String token = authenticatorService.authenticate(loginRequest);
+
+      if (token != null && !token.isEmpty()) {
+        logger.info("User {} successfully logged in", loginRequest.getUsername());
+
+        return ResponseEntity.ok()
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+            .body("Login successful");
       }
+
     } catch (Exception e) {
-    logger.warn("Log in failed", e);
+      logger.warn("Log in failed", e);
       return new ResponseEntity<String>("User log in Failed", HttpStatus.UNAUTHORIZED);
     }
-return null;
+    return null;
 
   }
 

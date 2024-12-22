@@ -73,7 +73,7 @@ public class AuthenticatorService implements AuthenticatorImpl {
     return new AuthenticationResponse(token);
   }
 
-  public Boolean authenticate(LoginRequest request) {
+  public String authenticate(LoginRequest request) {
 
     log.info("Recieved authentication request inside Service{}", request);
     authenticationManager
@@ -82,7 +82,7 @@ public class AuthenticatorService implements AuthenticatorImpl {
         );
 
     User user = authenticatorRepository.findUserByUsername(request.getUsername());
-    return jwtService.generateToken(user) !=null;
+    return jwtService.generateToken(user);
    }
 
   @Override

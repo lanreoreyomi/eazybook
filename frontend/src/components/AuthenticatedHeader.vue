@@ -1,15 +1,32 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-</script>
+<script lang="ts">
+ import router from '@/router'
+export default {
+  name: 'AuthenticatedHeader',
+ setup(){
 
+    const logOut = () => {
+      router.push("/");
+    }
+
+    return{
+      logOut:logOut
+    }
+ }
+}
+
+
+</script>
 <template>
   <header>
     <nav>
       <ul>
-        <li><router-link to="/">Home</router-link></li>
-         <li id="log_in"><router-link to="/login">Log In</router-link></li>
-        <li id="signup"><router-link to="/create-account">Create Account</router-link></li>
-      </ul>
+         <li><router-link to="/catalogue">Catalogue</router-link></li>
+        <li><router-link to="/borrowhistory">Borrow History</router-link></li>
+        <li id="profile"><router-link to="/profile">Profile</router-link></li>
+        <li id="wishList"><router-link to="/wishlist">WishList</router-link></li>
+<!--        <li id="log_out"><button @click="logOut">Log Out</button></li>-->
+        <li id="logout"><router-link to="/logout">Log Out</router-link></li>
+       </ul>
     </nav>
   </header>
   <RouterView />

@@ -7,7 +7,7 @@ interface LogInState {
   password: string
 }
 
-export const useLogInStore = defineStore('user', {
+export const useLogInStore = defineStore('login', {
   state: () => ({
     userLogIn: {
       username: '',
@@ -16,6 +16,7 @@ export const useLogInStore = defineStore('user', {
     loading: false,
     statusCode: 0,
     statusText: '',
+    isLoggedIn: false,
 
   }),
   actions: {
@@ -24,19 +25,18 @@ export const useLogInStore = defineStore('user', {
       try {
         const response = await axios.post<LogInState>(LOGIN, this.userLogIn)
         // Handle successful user creation
-
-        console.log(`response.data: ${JSON.stringify(response.data)}`)
-        console.log(`response.status: ${JSON.stringify(response.status)}`)
         this.$patch({
           statusCode: response.status,
           statusText: String(response.data),
+          isLoggedIn: response.status===200,
          })
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           console.log(JSON.stringify(error.response.data))
            this.$patch({
             statusCode: error.response.status,
-             statusText: String(error.response.data)
+             statusText: String(error.response.data),
+             isLoggedIn: false,
            })
         } else {
           console.log('An unexpected error occurred:', error)

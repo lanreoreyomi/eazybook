@@ -1,5 +1,7 @@
 <template>
   <div id="create-account-form">
+
+    <p>Hey</p>
     <form @submit.prevent="createUser">
       <div>
         <h2>Create Account</h2>
@@ -32,7 +34,7 @@
   </div>
 </template>
 <script lang="ts">
-import { useUserStore } from '@/stores/useUserStore.js'
+import { useUserStore } from '@/stores/useUserStore.ts'
 import { computed } from 'vue'
 
 export default {
@@ -41,10 +43,7 @@ export default {
     const isSuccessful = computed(
       () =>{
         if (userStore.statusCode === 201) {
-          // eslint-disable-next-line vue/no-async-in-computed-properties
-           setTimeout(function() {
-            window.location.href="/login";
-            }, 120)
+        window.location.href="/login";
           return true
         }else {
           return false

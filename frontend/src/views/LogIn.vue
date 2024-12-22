@@ -15,7 +15,6 @@
       <input type="password" id="password" v-model="user.password" required />
     </div>
     <button type="submit" id="submit-form">Log In</button>
-
     <div v-if="isSuccessful" id="user_created">{{statusText}}</div>
     <div v-else-if="!isSuccessful" id="user_not_created">{{statusText}}</div>
   </form>
@@ -23,14 +22,36 @@
 </template>
 <script lang="ts">
  import { useLogInStore } from '@/stores/useLogInStore.js'
-import { computed } from 'vue'
+ import { computed, watch } from 'vue'
+ import router from '@/router'
 
 export default {
   setup() {
     const logInStore = useLogInStore()
-    const isSuccessful = computed(() => logInStore.statusCode == 200);
-    const statusText = computed(() => logInStore.statusText)
+    // Example using a watcher
+    const isSuccessful = computed(() =>{
 
+      if(logInStore.statusCode === 200){
+        router.push('/catalogue')
+        return true
+      }else {
+        return false
+      }
+
+    }
+    );
+
+    watch(isSuccessful, async (newVal) => {
+      if (newVal) {
+        router.push('/catalogue').catch(error => {
+          console.error('Error navigating to /catalogue:', error);
+          // Handle the error, e.g., display an error message
+
+        });
+      }
+    });
+
+    const statusText = computed(() => logInStore.statusText)
     return {
       user: logInStore.userLogIn,
       isLoading: logInStore.loading,
