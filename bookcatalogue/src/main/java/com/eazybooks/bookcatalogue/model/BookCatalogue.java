@@ -16,16 +16,13 @@ public class BookCatalogue {
   @Column(nullable = false)
   private Long id;
   private String title;
+
   private String author;
   private String isbn;
   private String publicationYear;
   private String description;
   private boolean isAvailable;
   private int quantityForRent;
-
-  public Long getId() {
-    return id;
-  }
 
   public void setId(Long id) {
     this.id = id;

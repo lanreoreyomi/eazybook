@@ -30,20 +30,23 @@ export default {
     const logInStore = useLogInStore()
     // Example using a watcher
     const isSuccessful = computed(() =>{
-
       if(logInStore.statusCode === 200){
         router.push('/catalogue')
         return true
+
       }else {
         return false
       }
 
     }
+
     );
 
     watch(isSuccessful, async (newVal) => {
       if (newVal) {
+
         router.push('/catalogue').catch(error => {
+
           console.error('Error navigating to /catalogue:', error);
           // Handle the error, e.g., display an error message
 
@@ -55,7 +58,7 @@ export default {
     return {
       user: logInStore.userLogIn,
       isLoading: logInStore.loading,
-       logIn: logInStore.LogIn,
+      logIn: logInStore.LogIn,
       isSuccessful,
       statusText
      }

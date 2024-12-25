@@ -4,18 +4,26 @@ import com.eazybooks.authentication.UserDetails.UserDetailsService;
 import com.eazybooks.authentication.model.AuthenticatorImpl;
 import com.eazybooks.authentication.model.LoginRequest;
 import com.eazybooks.authentication.model.Role;
+import com.eazybooks.authentication.model.Token;
 import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
 import com.eazybooks.authentication.model.UserDto.CreateAccountRequest;
 import com.eazybooks.authentication.repository.AuthenticatorRepository;
+import com.eazybooks.authentication.repository.TokenRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import com.eazybooks.authentication.model.User;
 
@@ -25,20 +33,22 @@ import com.eazybooks.authentication.model.User;
 public class AuthenticatorService implements AuthenticatorImpl {
 
   private static final Logger log = LoggerFactory.getLogger(AuthenticatorService.class);
-   private final AuthenticatorRepository authenticatorRepository;
+  private final AuthenticatorRepository authenticatorRepository;
   private final AuthenticationManager authenticationManager;
   private final UserDetailsService userDetailService;
+  private final TokenRepository tokenRepository;
 
   private PasswordEncoder passwordEncoder;
   private JwtService jwtService;
 
   public AuthenticatorService(
       AuthenticatorRepository authenticatorRepository, AuthenticationManager authenticationManager,
-      UserDetailsService userDetailService,
+       UserDetailsService userDetailService, TokenRepository tokenRepository,
       PasswordEncoder passwordEncoder, JwtService jwtService) {
     this.authenticatorRepository = authenticatorRepository;
     this.authenticationManager = authenticationManager;
-    this.userDetailService = userDetailService;
+     this.userDetailService = userDetailService;
+    this.tokenRepository = tokenRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
   }
@@ -75,14 +85,33 @@ public class AuthenticatorService implements AuthenticatorImpl {
 
   public String authenticate(LoginRequest request) {
 
-    log.info("Recieved authentication request inside Service{}", request);
     authenticationManager
         .authenticate(new UsernamePasswordAuthenticationToken(
             request.getUsername(), request.getPassword())
         );
 
+    // Generate new token
     User user = authenticatorRepository.findUserByUsername(request.getUsername());
-    return jwtService.generateToken(user);
+    final String jwtToken = jwtService.generateToken(user);
+
+    //gets existing tokens for user
+    final List<Token> existingTokensByUsername = tokenRepository.findAllByUsername(user.getUsername());
+
+    //sets token to logout
+    existingTokensByUsername.forEach(token -> {
+      token.setLoggedOut(true);
+    });
+    tokenRepository.saveAll(existingTokensByUsername);
+
+    Token token = new Token();
+    token.setToken(jwtToken);
+    token.setLoggedOut(false);
+    token.setUsername(user.getUsername());
+
+    //saves token
+    tokenRepository.save(token);
+    return jwtToken;
+
    }
 
   @Override

@@ -5,7 +5,7 @@ import org.springframework.cloud.consul.serviceregistry.ConsulRegistrationCustom
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+
 public class ConsulConfig {
 
   @Bean

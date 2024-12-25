@@ -1,19 +1,14 @@
 <script lang="ts">
- import router from '@/router'
+import { useLogOutStore } from '@/stores/useLogOutStore.ts'
 export default {
   name: 'AuthenticatedHeader',
  setup(){
-
-    const logOut = () => {
-      router.push("/");
-    }
-
-    return{
-      logOut:logOut
-    }
+    const logoutStore = useLogOutStore();
+    return {
+      logOut: logoutStore.LogOut,
+     }
  }
 }
-
 
 </script>
 <template>
@@ -24,8 +19,8 @@ export default {
         <li><router-link to="/borrowhistory">Borrow History</router-link></li>
         <li id="profile"><router-link to="/profile">Profile</router-link></li>
         <li id="wishList"><router-link to="/wishlist">WishList</router-link></li>
-<!--        <li id="log_out"><button @click="logOut">Log Out</button></li>-->
-        <li id="logout"><router-link to="/logout">Log Out</router-link></li>
+        <li id="logout" ><button @click="logOut">Log Out</button></li>
+
        </ul>
     </nav>
   </header>

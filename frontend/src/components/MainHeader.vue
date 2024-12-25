@@ -1,14 +1,44 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+<script lang="ts">
+import { useLogOutStore } from '@/stores/useLogOutStore.ts';
+import { computed, onBeforeMount } from 'vue'
+import router from '@/router';
+
+export default {
+  name: 'MainHeader',
+  setup() {
+    const logoutStore = useLogOutStore();
+    const isLoggedOut = computed(() => !logoutStore.isLoggedIn); // Check login status directly
+
+    const logOut = async () => {
+      await logoutStore.LogOut();
+      await router.push('/');
+    };
+
+    // Check login status when the component mounts
+    onBeforeMount(async () => {
+      logoutStore.checkAuth(); // Assuming you have this method in your store
+    });
+
+    return {
+      logOut,
+      isLoggedOut,
+    };
+  }
+};
 </script>
 
 <template>
   <header>
     <nav>
       <ul>
-        <li><router-link to="/">Home</router-link></li>
-         <li id="log_in"><router-link to="/login">Log In</router-link></li>
-        <li id="signup"><router-link to="/create-account">Create Account</router-link></li>
+        <li><router-link to="/" v-if="isLoggedOut">Home</router-link></li>
+         <li id="log_in" v-if="isLoggedOut"><router-link to="/login">Log In</router-link></li>
+        <li id="signup" v-if="isLoggedOut"><router-link to="/create-account">Create Account</router-link></li>
+        <li  v-if="!isLoggedOut"><router-link to="/catalogue">Catalogue</router-link></li>
+        <li v-if="!isLoggedOut"><router-link to="/borrowhistory">Borrow History</router-link></li>
+        <li id="profile"  v-if="!isLoggedOut"><router-link to="/profile">Profile</router-link></li>
+        <li id="wishList"  v-if="!isLoggedOut"><router-link to="/wishlist">WishList</router-link></li>
+        <li id="logout"  v-if="!isLoggedOut"><button @click="logOut">Log Out</button></li>
       </ul>
     </nav>
   </header>

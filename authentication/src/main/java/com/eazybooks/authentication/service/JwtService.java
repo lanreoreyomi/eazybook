@@ -1,6 +1,8 @@
 package com.eazybooks.authentication.service;
 
+import com.eazybooks.authentication.model.Token;
 import com.eazybooks.authentication.model.User;
+import com.eazybooks.authentication.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -23,6 +25,11 @@ public class JwtService {
 
   private static final Logger log = LoggerFactory.getLogger(JwtService.class);
   private final String SECRET_KEY = "f61ef9704a9371effefe9e5e684dd9e1b4a49d9576c91f64191a9a159cfb765e";
+  private final TokenRepository tokenRepository;
+
+  public JwtService(TokenRepository tokenRepository) {
+    this.tokenRepository = tokenRepository;
+  }
 
   private Claims extractAllClaims(String token) {
 
@@ -61,7 +68,8 @@ public class JwtService {
 
   public boolean isTokenValid(String token, UserDetails user) {
     String username = extractUsername(token);
-    return (username.equals(user.getUsername()) && !isTokenExpired(token));
+    final Token isTokenLoggedOut = tokenRepository.findByToken(token);
+    return (username.equals(user.getUsername()) && !isTokenExpired(token) && !isTokenLoggedOut.getLoggedOut());
   }
 
   private boolean isTokenExpired(String token) {

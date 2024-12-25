@@ -24,6 +24,14 @@ export default defineConfig({
       '/auth/login': {
         target: 'http://eazybooks.com:9084',
         changeOrigin: true
+      },
+      '/auth/logout': {
+        target: 'http://eazybooks.com:9084',
+        changeOrigin: true
+      },
+      '/bookcatalogue': {
+        target: 'http://eazybooks.com:9089',
+        changeOrigin: true
       }
     }
   }

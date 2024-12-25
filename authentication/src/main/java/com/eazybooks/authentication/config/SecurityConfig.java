@@ -1,19 +1,5 @@
 package com.eazybooks.authentication.config;
 
-//import static org.springframework.security.config.Customizer.withDefaults;
-//
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.core.userdetails.User;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-//import org.springframework.security.web.SecurityFilterChain;
 
 import com.eazybooks.authentication.Filter.JwtAuthenticationFilter;
 import com.eazybooks.authentication.UserDetails.UserDetailsService;
@@ -25,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -37,64 +24,43 @@ public class SecurityConfig {
 
   private final UserDetailsService userDetailsService;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final CustomLogOutHandler logoutHandler;
 
   public SecurityConfig(UserDetailsService userDetailsService,
-      JwtAuthenticationFilter jwtAuthenticationFilter) {
+      JwtAuthenticationFilter jwtAuthenticationFilter, CustomLogOutHandler logoutHandler) {
     this.userDetailsService = userDetailsService;
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    this.logoutHandler = logoutHandler;
   }
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http
         .csrf(AbstractHttpConfigurer::disable)
+        .logout(logoutRequest -> logoutRequest.logoutUrl("/logout"))
         .authorizeHttpRequests(
             req->
                 req.requestMatchers("/auth/login/**",
                         "/auth/create-account/**",
-                        "/welcome**",
-                        "/actuator/**")
+                         "/actuator/**")
                     .permitAll()
                     .requestMatchers("/admin_only_pages/**").hasAuthority("ADMIN")
                     .anyRequest()
                     .authenticated()
+
         ).userDetailsService(userDetailsService)
         .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .logout(logoutRequest -> logoutRequest.logoutUrl("/auth/logout")
+            .addLogoutHandler(logoutHandler)
+            .logoutSuccessHandler((request,
+                response, authentication)
+                ->SecurityContextHolder.clearContext()))
          .build();
 
   }
 
-//  @Bean
-//  public UserDetailsService userDetailsService(PasswordEncoder encoder) {
-//    // InMemoryUserDetailsManager setup with two users
-//    UserDetails admin = User.withUsername("Amiya")
-//        .password(encoder.encode("123"))
-//        .roles("ADMIN", "USER")
-//        .build();
-//
-//    UserDetails user = User.withUsername("Ejaz")
-//        .password(encoder.encode("123"))
-//        .roles("USER")
-//        .build();
-//
-//    return new InMemoryUserDetailsManager(admin, user);
-//  }
-//  // Configuring HttpSecurity
-//  @Bean
-//  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//    http
-//        .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity
-//        .authorizeHttpRequests(auth -> auth
-//            .requestMatchers("/auth/welcome").permitAll() // Permit all access to /auth/welcome
-//            .requestMatchers("/auth/user/**").authenticated() // Require authentication for /auth/user/**
-//            .requestMatchers("/auth/admin/**").authenticated() // Require authentication for /auth/admin/**
-//        )
-//        .formLogin(withDefaults()); // Enable form-based login
-//
-//    return http.build();
-//  }
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();

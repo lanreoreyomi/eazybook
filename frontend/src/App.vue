@@ -1,27 +1,15 @@
 <template>
-  <header v-if="isSuccessful">
-    <AuthenticatedHeader />
-  </header>
-  <header v-else>
-    <MainHeader />
+  <header>
+  <MainHeader/>
   </header>
 </template>
 <script lang="ts">
-import { computed, defineComponent } from 'vue'
-import { useLogInStore } from '@/stores/useLogInStore.ts'
 import MainHeader from '@/components/MainHeader.vue'
-import AuthenticatedHeader from '@/components/AuthenticatedHeader.vue'
+import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'App',
-  components: { AuthenticatedHeader, MainHeader },
-  setup: function () {
-    const logInStore = useLogInStore()
-    const isSuccessful = computed(() => logInStore.isLoggedIn)
-    return {
-      logInStore,
-      isSuccessful,
-    }
-  },
+  components: {MainHeader },
+
 })
 </script>
 <style lang="scss">
