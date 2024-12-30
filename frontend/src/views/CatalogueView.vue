@@ -1,74 +1,61 @@
 <template>
   <div v-if="isCatalogueLoaded" id="catalogue_component">
     <div id="wishlist_control" v-if="confirmation">
-      <p id="addedToWishlist"  >{{confirmation}}</p>
-     <p id="cancel_img"><img src="../assets/images/cancel.svg" alt="lib_img" @click="toggleConfirmation" ></p>
+      <p id="addedToWishlist">{{ confirmation }}</p>
+      <p id="cancel_img">
+        <img src="https://img.icons8.com/?size=30&id=7703&format=png&color=FFFFFF" alt="lib_img" @click="toggleConfirmation" />
+
+      </p>
     </div>
-     <div class="book_detail">
-      <BookComponent :books="books" @getBookDetails="displayBook"/>
+    <div class="book_detail">
+      <BookComponent :books="books" @getBookDetails="displayBook" />
     </div>
-   </div>
+  </div>
 </template>
 <script lang="ts">
-  import { computed, defineComponent, onBeforeMount, ref } from 'vue'
+import { computed, defineComponent, onBeforeMount, ref } from 'vue'
 import { useBookCatalogueStore } from '@/stores/BookCatalogue.ts'
 import type { BookCatalogue } from '@/model/model.ts'
 import BookComponent from '@/views/BookComponent.vue'
- export default defineComponent({
+export default defineComponent({
   name: 'CatalogueView',
-  components: { BookComponent,  },
+  components: { BookComponent },
   setup() {
-    const confirmation= ref('');
-    const bookCatalogueStore = useBookCatalogueStore();
-    const books = ref<BookCatalogue[]>([]);
-    const waitList: BookCatalogue[] = [];
+    const confirmation = ref('')
+    const bookCatalogueStore = useBookCatalogueStore()
+    const books = ref<BookCatalogue[]>([])
+    const waitList: BookCatalogue[] = []
 
-    const displayBook = (book: BookCatalogue): void => {
-        addBookToWaitList(book);
-     }
+    const displayBook = (book: BookCatalogue): void => {addBookToWaitList(book)}
     const isCatalogueLoaded = computed(() => bookCatalogueStore.statusCode === 200)
-
     const addBookToWaitList = (book: BookCatalogue): void => {
-      const existingBook = waitList.find((el: BookCatalogue) => el.isbn === book.isbn);
-
+       const existingBook = waitList.find((el: BookCatalogue) => el.isbn === book.isbn)
       if (existingBook) {
-        confirmation.value = `${book.title} already added to wishlist`;
+        confirmation.value = `${book.title} already added to wishlist`
       } else {
-        waitList.push(book);
-        confirmation.value = `Added ${book.title} to wishlist`;
+        waitList.push(book)
+        confirmation.value = `Added ${book.title} to wishlist`
       }
-    };
-
-    const toggleConfirmation = function(){
-      confirmation.value='';
     }
+    const toggleConfirmation = function () {confirmation.value = ''}
 
-      onBeforeMount(async () => {
-        // Fetch the catalog when the component is mounted
-        await bookCatalogueStore.getAllBookCatalogues()
-        // Set the books array to the value from the store
-        books.value = bookCatalogueStore.bookCatalogue
-      })
+    onBeforeMount(async () => {
+       await bookCatalogueStore.getAllBookCatalogues()
+       books.value = bookCatalogueStore.bookCatalogue
+    })
 
-      // //TODO: address this.
-      // const dd = computed(() => {
-      //   return bookCatalogueStore.statusCode
-      // })
     return {
       isCatalogueLoaded,
-      // dd,
       books,
       displayBook,
       confirmation,
-      toggleConfirmation
-     }
-
+      toggleConfirmation,
+      }
   },
 })
 </script>
 <style lang="scss">
 @use '/src/assets/scss/colors.scss';
-
 
 #catalogue_component {
   padding: 10px;
@@ -76,31 +63,36 @@ import BookComponent from '@/views/BookComponent.vue'
   color: colors.$text-color;
   width: 100%;
 
-  #wishlist_control{
+  #wishlist_control {
     display: flex;
-   flex-direction: row;
+    flex-direction: row;
     position: sticky;
     top: 0;
     padding: 18px;
     font-size: 16px;
-    color: colors.$text-color;
+    color: colors.$white-color;
     text-align: center;
     width: 30%;
-    background-color: #ecf0f1;
+    background-color: colors.$text-color;
     border-radius: 0.5rem;
     align-content: center;
     box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1);
     justify-content: center;
     margin: 20px auto;
 
-    #cancel_img{
+    #cancel_img {
       width: 10%;
       cursor: pointer;
-      img{
-        width: 20px;
+       outline: none;
+      border: none;
+  border-radius: 2.0rem;
+      img {
+       padding-top: 5px;
+
       }
-     }
-    #addedToWishlist{
+    }
+
+    #addedToWishlist {
       width: 90%;
     }
   }
@@ -114,6 +106,5 @@ import BookComponent from '@/views/BookComponent.vue'
     color: colors.$text-color;
     width: 100%;
   }
-
 }
 </style>

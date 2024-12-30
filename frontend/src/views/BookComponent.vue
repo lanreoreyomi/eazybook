@@ -1,7 +1,7 @@
 <template>
    <div class="book_card" v-for="(book, index) in books" :key="index">
-    <img class="book_card-img" src="../assets/images/library_bg.png" alt="lib_img" />
-    <div class="book_card-body">
+    <img class="book_card-img" :src="`/src/assets/images/${index + 1}-min.jpg`" alt="lib_img" />
+     <div class="book_card-body">
       <h5 class="book_card-title">{{ book.title }}</h5>
       <p class="book_card-text">Description: {{ book.description }}</p>
     </div>
@@ -31,18 +31,18 @@ export default defineComponent({
       required: true // Make the prop required
     }
   },
-emits: ['getBookDetails'],
+  emits: ['getBookDetails'],
   setup(props, {emit} ) {
+
     const getCurrentBook = (book: BookCatalogue) => {
        emit('getBookDetails', book);
     };
-
 
     return {
       getCurrentBook,
       open,
       close,
-      emit
+      emit,
 
 
     }
@@ -77,6 +77,7 @@ emits: ['getBookDetails'],
     padding: 0;
     width: 100%;
     border: 0.5rem;
+
   }
 
   .book_card_menu {
@@ -102,9 +103,7 @@ emits: ['getBookDetails'],
       box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    VButton {
-      cursor: pointer;
-    }
+
 
     #checkout_book {
       color: colors.$white-color;
