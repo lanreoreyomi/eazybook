@@ -18,36 +18,30 @@ public class UserService implements UserRepositoryImpl {
     this.userRepository = userRepository;
   }
 
-  public boolean isUsernameAvailable(String username) {
-    return Optional.ofNullable(userRepository.findUserByUsername(username)).isPresent();
-  }
-
-  public boolean isEmailAvailable(String email) {
-    return Optional.ofNullable(userRepository.findUserByEmail(email)).isPresent();
-  }
-
-
   @Override
   public User updateUser(User user) {
    return userRepository.save(user);
   }
 
+
   @Override
-  public User findUserById(Long id) {
-    return null;
+  public User findByEmail(String email) {
+
+   return Optional.ofNullable(userRepository.findByEmail(email)).get().orElse(null);
+
   }
 
   @Override
-  public User findUserByEmail(String email) {
-    return Optional.ofNullable(userRepository.findUserByEmail(email)).get();
+  public User findByUsername(String username) {
+    return Optional.ofNullable(userRepository.findByUsername(username)).get().orElse(null);
   }
 
   @Override
-  public User findUserByUsername(String username) {
-    return Optional.ofNullable(userRepository.findUserByUsername(username)).get();
+  public User createUser(User user) {
+    return userRepository.save(user);
   }
 
-  public User findUserByUserId(Long id) {
-    return Optional.ofNullable(userRepository.findUserByUserId(id)).get();
+  public User findById(Long id) {
+  return Optional.ofNullable(userRepository.findById(id)).get().orElse(null);
   }
 }

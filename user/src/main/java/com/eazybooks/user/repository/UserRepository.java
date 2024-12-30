@@ -1,18 +1,18 @@
 package com.eazybooks.user.repository;
 
 import com.eazybooks.user.model.User;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import reactor.util.annotation.NonNullApi;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-   User findUserByUserId(Long userId);
+   Optional<User> findById(Long userId);
 
-   User findUserByUsername(String username);
+   Optional<User> findByUsername(String username);
 
-   User findUserByEmail(String email);
+   Optional<User> findByEmail(String email);
 
    User save(User user);
 

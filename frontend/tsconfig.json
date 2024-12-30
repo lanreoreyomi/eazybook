@@ -1,5 +1,6 @@
 {
   "files": [],
+
   "references": [
     {
       "path": "./tsconfig.node.json"
@@ -10,5 +11,13 @@
     {
       "path": "./tsconfig.vitest.json"
     }
-  ]
+
+  ],
+
+  "compilerOptions": {
+    "lib": [
+      "es5", "es6", "dom", "dom.iterable"
+    ]
+  }
+
 }

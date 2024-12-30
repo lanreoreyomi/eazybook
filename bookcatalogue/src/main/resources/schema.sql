@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS book_catalogue (
                        isbn VARCHAR(20) UNIQUE,  -- ISBNs should be unique
                        publication_year INT,
                        description TEXT,
-                       is_available BOOLEAN DEFAULT TRUE,
+                       available BOOLEAN DEFAULT TRUE,
                        quantity_for_rent INT DEFAULT 0,
                        CHECK (quantity_for_rent >= 0)  -- Ensure quantity is not negative
 );

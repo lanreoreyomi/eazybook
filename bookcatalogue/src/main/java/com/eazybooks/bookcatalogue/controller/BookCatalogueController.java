@@ -21,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,7 +36,8 @@ public class BookCatalogueController {
   private DiscoveryClient discoveryClient;
   RestTemplate restTemplate = new RestTemplate();
 
-  public BookCatalogueController(BookCatalogueService bookCatalogueService, DiscoveryClient discoveryClient) {
+  public BookCatalogueController(BookCatalogueService bookCatalogueService,
+      DiscoveryClient discoveryClient) {
     this.bookCatalogueService = bookCatalogueService;
     this.discoveryClient = discoveryClient;
   }
@@ -42,14 +45,14 @@ public class BookCatalogueController {
   @GetMapping()
   public ResponseEntity<List<BookCatalogue>> getAllBookCatalogues(HttpServletRequest request) {
 
-    log.info("request {}", request);
+    log.info("request {}", request.toString());
     String authHeader = request.getHeader("Authorization");
+
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
       log.warn("Authorization header missing or invalid");
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     String token = authHeader.substring(7);
-
     try {
       List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
       if (instances.isEmpty()) {
@@ -81,5 +84,4 @@ public class BookCatalogueController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
   }
-
 }

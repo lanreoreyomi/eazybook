@@ -2,10 +2,14 @@ package com.eazybooks.user.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -16,35 +20,17 @@ public class User {
   @Column(nullable = false)
   private  Long userId;
   private String username;
-  private  String salt;
-  private String password;
   private  String firstname;
   private String lastname;
   private String email;
-
 
   public String getUsername() {
     return username;
   }
 
+
   public void setUsername(String username) {
     this.username = username;
-  }
-
-  public String getSalt() {
-    return salt;
-  }
-
-  public void setSalt(String salt) {
-    this.salt = salt;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
   }
 
   public String getFirstname() {
@@ -70,23 +56,12 @@ public class User {
   }
 
 
-  public User(Long userId,String email, String username, String salt, String password, String firstname,
+  public User(Long userId,String email, String username, String firstname,
       String lastname) {
-    this.userId = userId;
     this.username = username;
-    this.salt = salt;
-    this.password = password;
-    this.firstname = firstname;
+      this.firstname = firstname;
     this.lastname = lastname;
     this.email = email;
-  }
-
-  public Long getUserId() {
-    return userId;
-  }
-
-  public void setUserId(Long userId) {
-    this.userId = userId;
   }
 
   public User() {
@@ -95,11 +70,8 @@ public class User {
   @Override
   public String toString() {
     return "User{" +
-        "userId=" + userId +
         ", username='" + username + '\'' +
-        ", salt='" + salt + '\'' +
-        ", password='" + password + '\'' +
-        ", firstname='" + firstname + '\'' +
+           ", firstname='" + firstname + '\'' +
         ", lastname='" + lastname + '\'' +
         ", email='" + email + '\'' +
         '}';

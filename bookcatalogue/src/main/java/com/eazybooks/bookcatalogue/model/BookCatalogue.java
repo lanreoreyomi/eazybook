@@ -1,11 +1,15 @@
 package com.eazybooks.bookcatalogue.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import java.awt.print.Book;
+import java.util.List;
 
 @Entity
 @Table(name="book_catalogue")
@@ -21,8 +25,10 @@ public class BookCatalogue {
   private String isbn;
   private String publicationYear;
   private String description;
-  private boolean isAvailable;
+  private boolean available;
   private int quantityForRent;
+
+  //I need to build the user Entity and so proper mapping. and then update the service and controller classes.
 
   public void setId(Long id) {
     this.id = id;
@@ -69,11 +75,11 @@ public class BookCatalogue {
   }
 
   public boolean isAvailable() {
-    return isAvailable;
+    return available;
   }
 
   public void setAvailable(boolean available) {
-    isAvailable = available;
+    this.available = available;
   }
 
   public int getQuantityForRent() {
@@ -93,7 +99,7 @@ public class BookCatalogue {
         ", isbn='" + isbn + '\'' +
         ", publicationYear=" + publicationYear +
         ", description='" + description + '\'' +
-        ", isAvailable=" + isAvailable +
+        ", isAvailable=" + available +
         ", quantityForRent=" + quantityForRent +
         '}';
   }

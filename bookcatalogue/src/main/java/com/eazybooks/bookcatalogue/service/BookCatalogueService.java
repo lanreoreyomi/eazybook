@@ -43,5 +43,4 @@ public class BookCatalogueService implements BookCatalogueImpl {
     return bookCatalogueRepository.save(book);
   }
 
-
 }

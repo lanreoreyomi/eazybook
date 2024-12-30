@@ -14,4 +14,5 @@ public interface BookCatalogueRepository extends JpaRepository<BookCatalogue, Lo
   List<BookCatalogue> findByAuthor(String authorName);
   BookCatalogue findByTitle(String title);
 
+
 }

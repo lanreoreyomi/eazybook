@@ -59,7 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           SecurityContextHolder.getContext().setAuthentication(authToken);
         }
       } catch (Exception e) {
-        log.error("Error validating user token {}", e.getMessage());
+        log.error("Error validating user token. User should be logged in for token to be validated{}", e.getMessage());
       }
 
 

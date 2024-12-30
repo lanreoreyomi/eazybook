@@ -3,54 +3,38 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { GETALLBOOKCATALOGUE } from '@/api/apis.ts'
 import { accessToken } from '@/Utils/AppUtils.ts'
+import type { BookCatalogue } from '@/model/model.ts'
 
 interface BookCatalogueState {
-  title: string
-  author: string
-  isbn: string
-  publicationYear: string
-  description: string
-  isAvailable: boolean
-  quantityForRent: number
-
+  bookCatalogue: BookCatalogue[]; // Array of BookCatalogue
+  loading: boolean;
+  statusCode: number;
+  statusText: string;
 }
 
-let BookCatalogueState
 export const useBookCatalogueStore = defineStore('bookCatalogue', {
-  state: () => ({
-    bookCatalogue: {
-      title: '',
-      author: '',
-      isbn: '',
-      publicationYear: '',
-      description: '',
-      isAvailable: false,
-      quantityForRent: 0
-    } as BookCatalogueState, // Define type for user object
+  state: (): BookCatalogueState => ({
+    bookCatalogue: [],
     loading: false,
     statusCode: 0,
-    errorResponse: {
-      status: 0,
-      message: ''
-    }
+    statusText: '',
   }),
   actions: {
     async getAllBookCatalogues() {
       this.loading = true
-
       try {
-        const response = await axios.get<BookCatalogueState>(GETALLBOOKCATALOGUE, {
+        const response = await axios.get<BookCatalogue[]>(GETALLBOOKCATALOGUE, {
           headers: {
             Authorization: accessToken
           }
         })
         // Handle successful user creation
-
-        this.$patch({
+         this.$patch({
           statusCode: response.status,
-          bookCatalogue: response.data // Ensure statusText is a string
+          bookCatalogue : response.data
+          // Ensure statusText is a string
         })
-      } catch (error) {
+       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           this.$patch({
             statusCode: error.response.status

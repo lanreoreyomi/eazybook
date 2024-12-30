@@ -1,46 +1,119 @@
+<template>
+  <div v-if="isCatalogueLoaded" id="catalogue_component">
+    <div id="wishlist_control" v-if="confirmation">
+      <p id="addedToWishlist"  >{{confirmation}}</p>
+     <p id="cancel_img"><img src="../assets/images/cancel.svg" alt="lib_img" @click="toggleConfirmation" ></p>
+    </div>
+     <div class="book_detail">
+      <BookComponent :books="books" @getBookDetails="displayBook"/>
+    </div>
+   </div>
+</template>
 <script lang="ts">
-import { defineComponent, computed, onBeforeMount } from 'vue'
+  import { computed, defineComponent, onBeforeMount, ref } from 'vue'
 import { useBookCatalogueStore } from '@/stores/BookCatalogue.ts'
-
-
-export default defineComponent({
+import type { BookCatalogue } from '@/model/model.ts'
+import BookComponent from '@/views/BookComponent.vue'
+ export default defineComponent({
   name: 'CatalogueView',
+  components: { BookComponent,  },
   setup() {
+    const confirmation= ref('');
     const bookCatalogueStore = useBookCatalogueStore();
+    const books = ref<BookCatalogue[]>([]);
+    const waitList: BookCatalogue[] = [];
 
-    // Fetch the catalog when the component is created
-    bookCatalogueStore.getAllBookCatalogues();
+    const displayBook = (book: BookCatalogue): void => {
+        addBookToWaitList(book);
+     }
+    const isCatalogueLoaded = computed(() => bookCatalogueStore.statusCode === 200)
 
-    const isCatalogueLoaded = computed(() =>
+    const addBookToWaitList = (book: BookCatalogue): void => {
+      const existingBook = waitList.find((el: BookCatalogue) => el.isbn === book.isbn);
 
-      bookCatalogueStore.statusCode === 200);
-    const catalogueData = computed(() => bookCatalogueStore.bookCatalogue);
-    const dd = computed(() => {
-      return bookCatalogueStore.statusCode;
-    });
-
-    return {
-      isCatalogueLoaded,
-      catalogueData,
-      dd,
+      if (existingBook) {
+        confirmation.value = `${book.title} already added to wishlist`;
+      } else {
+        waitList.push(book);
+        confirmation.value = `Added ${book.title} to wishlist`;
+      }
     };
 
-    onBeforeMount(async () => {
-      await logoutStore.checkAuth(); // Assuming you have this method in your store
-    });
+    const toggleConfirmation = function(){
+      confirmation.value='';
+    }
+
+      onBeforeMount(async () => {
+        // Fetch the catalog when the component is mounted
+        await bookCatalogueStore.getAllBookCatalogues()
+        // Set the books array to the value from the store
+        books.value = bookCatalogueStore.bookCatalogue
+      })
+
+      // //TODO: address this.
+      // const dd = computed(() => {
+      //   return bookCatalogueStore.statusCode
+      // })
+    return {
+      isCatalogueLoaded,
+      // dd,
+      books,
+      displayBook,
+      confirmation,
+      toggleConfirmation
+     }
+
   },
-
-});
+})
 </script>
+<style lang="scss">
+@use '/src/assets/scss/colors.scss';
 
-<template>
-<h2 v-if="isCatalogueLoaded">{{catalogueData}}</h2>
-</template>
 
-<style scoped lang="scss">
+#catalogue_component {
+  padding: 10px;
+  font-size: 16px;
+  color: colors.$text-color;
+  width: 100%;
 
-h2{
-  color:red;
+  #wishlist_control{
+    display: flex;
+   flex-direction: row;
+    position: sticky;
+    top: 0;
+    padding: 18px;
+    font-size: 16px;
+    color: colors.$text-color;
+    text-align: center;
+    width: 30%;
+    background-color: #ecf0f1;
+    border-radius: 0.5rem;
+    align-content: center;
+    box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1);
+    justify-content: center;
+    margin: 20px auto;
+
+    #cancel_img{
+      width: 10%;
+      cursor: pointer;
+      img{
+        width: 20px;
+      }
+     }
+    #addedToWishlist{
+      width: 90%;
+    }
+  }
+
+  .book_detail {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-gap: 20px;
+    padding: 30px;
+    font-size: 16px;
+    color: colors.$text-color;
+    width: 100%;
+  }
+
 }
-
 </style>
