@@ -53,7 +53,7 @@ public class UserController {
     return null;
   }
 
-  @GetMapping("userid/{id}")
+  @GetMapping("/userid/{id}")
   public ResponseEntity<User> getUserById(@PathVariable Long id) {
     logger.info("Received request to get user with ID: {}", id);
 
@@ -95,6 +95,30 @@ public class UserController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching user");
     }
   }
+
+  @GetMapping("/{username}")
+  public ResponseEntity<Long> getUserIdUsingUsername(@PathVariable String username) {
+    logger.info("Received request to get user with username: {}", username);
+
+    //TODO: remove Ids from the loggers
+    try {
+      final User userByUsername = userService.findByUsername(username);
+
+      if (userByUsername != null && userByUsername.getUsername().equals(username)) {
+        logger.info("Successfully retrieved user with username: {}", username);
+        logger.info("User found {}", userByUsername.getUserId());
+        return ResponseEntity.ok(userByUsername.getUserId()); // Or return the actual user data
+      } else {
+        logger.warn("User with username: {} not found", username);
+        return ResponseEntity.notFound().build();
+      }
+
+    } catch (Exception e) {
+      logger.error("Error while fetching user with username: {}", username, e);
+      return (ResponseEntity<Long>) ResponseEntity.internalServerError();
+    }
+  }
+
 
   @PutMapping("/userid/{id}")
   public ResponseEntity<UsersDto> updateUserById(@PathVariable Long id,
@@ -193,8 +217,11 @@ public class UserController {
 
     final ResponseEntity<String> verified = verifyRequestToken(request);
 
+    logger.info("verified {}", verified);
     try {
+
       User user = new User();
+      user.setUserId(createAccountRequest.getUserId());
       user.setUsername(createAccountRequest.getUsername());
       user.setEmail(createAccountRequest.getEmail());
       user.setFirstname(createAccountRequest.getFirstname());
@@ -219,6 +246,7 @@ public class UserController {
     String token = authHeader.substring(7);
 
     logger.info("Received request to verify token {}", token);
+
     try {
       List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
       if (instances.isEmpty()) {

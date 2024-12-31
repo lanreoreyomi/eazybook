@@ -1,6 +1,6 @@
-DELETE  FROM book_catalogue where id is not null;
+DELETE  FROM book_catalogue where book_id is not null;
 
-INSERT INTO book_catalogue  (id, title, author, isbn, publication_year, description, available, quantity_for_rent) VALUES
+INSERT INTO book_catalogue  (book_id, title, author, isbn, publication_year, description, available, quantity_for_rent) VALUES
                                                                                                                 (1, 'The Lord of the Rings', 'J.R.R. Tolkien', '9780618002213', '1954', 'Epic high fantasy trilogy', TRUE, 5),
                                                                                                                 (2, 'Pride and Prejudice', 'Jane Austen', '9780141439518', '1813', 'Classic romantic novel', TRUE, 3),
                                                                                                                 (3, 'The Hitchhiker''s Guide to the Galaxy', 'Douglas Adams', '9780345391803', '1979', 'Sci-fi comedy series', FALSE, 0),

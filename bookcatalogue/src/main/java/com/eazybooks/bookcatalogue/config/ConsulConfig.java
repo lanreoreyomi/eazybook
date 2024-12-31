@@ -1,9 +1,8 @@
-package com.eazybooks.bookcatalogue.Config;
+package com.eazybooks.bookcatalogue.config;
 
 import com.ecwid.consul.v1.agent.model.NewService;
 import org.springframework.cloud.consul.serviceregistry.ConsulRegistrationCustomizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 
 public class ConsulConfig {

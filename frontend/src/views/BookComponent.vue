@@ -52,7 +52,6 @@ export default defineComponent({
 <style scoped lang="scss">
 @use '/src/assets/scss/colors.scss';
 
-
   .book_card {
     width: 100%;
     font-size: 20px;
@@ -84,7 +83,6 @@ export default defineComponent({
     font-size: 16px;
     list-style: none;
     padding: 10px;
-
     .book_card_links {
       font-weight: bold;
     }
@@ -103,8 +101,6 @@ export default defineComponent({
       box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-
-
     #checkout_book {
       color: colors.$white-color;
       background-color: colors.$text-color;
@@ -112,13 +108,12 @@ export default defineComponent({
       &:hover {
         background-color: colors.$white-color;
         color: colors.$text-color;
-        border: 2px solid colors.$text-color;
+        border: 1px solid colors.$text-color;
       }
     }
 
     #save_book {
       background-color: colors.$white-color;
-      border: 1px solid colors.$text-color;
       color: colors.$text-color;
     }
 

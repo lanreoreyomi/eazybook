@@ -1,15 +1,11 @@
 package com.eazybooks.bookcatalogue.model;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import java.awt.print.Book;
-import java.util.List;
 
 @Entity
 @Table(name="book_catalogue")
@@ -18,7 +14,7 @@ public class BookCatalogue {
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(nullable = false)
-  private Long id;
+  private Long bookId;
   private String title;
 
   private String author;
@@ -30,8 +26,8 @@ public class BookCatalogue {
 
   //I need to build the user Entity and so proper mapping. and then update the service and controller classes.
 
-  public void setId(Long id) {
-    this.id = id;
+  public void setBookId(Long bookId) {
+    this.bookId = bookId;
   }
 
   public String getTitle() {
@@ -93,7 +89,7 @@ public class BookCatalogue {
   @Override
   public String toString() {
     return "BookCatalogue{" +
-        "id=" + id +
+        "bookId=" + bookId +
         ", title='" + title + '\'' +
         ", author='" + author + '\'' +
         ", isbn='" + isbn + '\'' +

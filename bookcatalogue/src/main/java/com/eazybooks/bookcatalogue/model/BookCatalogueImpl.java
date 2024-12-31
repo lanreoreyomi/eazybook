@@ -10,4 +10,5 @@ public interface BookCatalogueImpl {
   BookCatalogue addBookToCatalogue(BookCatalogue book);
   BookCatalogue updateBook(BookCatalogue book);
    void deleteBookById(Long id);
+   BookCatalogue getBookById(Long id);
  }

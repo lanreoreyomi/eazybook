@@ -34,6 +34,7 @@ public class JwtService {
   private Claims extractAllClaims(String token) {
 
     try {
+
       return Jwts.parser()
           .verifyWith(getSignInKey())
           .build()
@@ -61,7 +62,7 @@ public class JwtService {
     try {
       return extractClaim(token, Claims::getSubject);
     } catch (Exception e) {
-      log.error("Error getting username from token {}", e.getMessage());
+      log.error("Error getting username from token");
     }
   return null;
   }

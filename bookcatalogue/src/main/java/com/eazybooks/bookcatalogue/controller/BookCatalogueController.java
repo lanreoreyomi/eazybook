@@ -4,7 +4,6 @@ package com.eazybooks.bookcatalogue.controller;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.VerifyToken;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
-import com.ecwid.consul.v1.ConsulClient;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
@@ -21,8 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 
@@ -84,4 +82,15 @@ public class BookCatalogueController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
   }
+
+  @GetMapping("/book/{bookId}")
+  public ResponseEntity<BookCatalogue> getBookCatalogueById(HttpServletRequest request, @PathVariable Long bookId) {
+
+    final BookCatalogue bookById = bookCatalogueService.getBookById(bookId);
+
+    log.info("request {}", bookById.toString());
+
+    return ResponseEntity.ok(bookById);
+  }
+
 }

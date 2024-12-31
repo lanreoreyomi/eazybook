@@ -68,11 +68,11 @@ export default defineComponent({
     flex-direction: row;
     position: sticky;
     top: 0;
-    padding: 18px;
+    padding: 10px;
     font-size: 16px;
     color: colors.$white-color;
     text-align: center;
-    width: 30%;
+    width: 20%;
     background-color: colors.$text-color;
     border-radius: 0.5rem;
     align-content: center;
@@ -85,8 +85,7 @@ export default defineComponent({
       cursor: pointer;
        outline: none;
       border: none;
-  border-radius: 2.0rem;
-      img {
+       img {
        padding-top: 5px;
 
       }
@@ -94,6 +93,7 @@ export default defineComponent({
 
     #addedToWishlist {
       width: 90%;
+      padding-top: 10px;
     }
   }
 

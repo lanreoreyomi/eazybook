@@ -13,6 +13,7 @@ public interface BookCatalogueRepository extends JpaRepository<BookCatalogue, Lo
   List<BookCatalogue> findByPublicationYear(String publicationYear);
   List<BookCatalogue> findByAuthor(String authorName);
   BookCatalogue findByTitle(String title);
+  BookCatalogue findByBookId(Long bookId);
 
 
 }

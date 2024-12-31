@@ -52,6 +52,14 @@ public class User implements UserDetails {
     return true;
   }
 
+  public Long getUserId() {
+    return userId;
+  }
+
+  public void setUserId(Long userId) {
+    this.userId = userId;
+  }
+
   @Override
   public boolean isEnabled() {
     return true;

@@ -76,11 +76,18 @@ public class AuthenticatorService implements AuthenticatorImpl {
 
     user = authenticatorRepository.save(user);
 
-    String token = jwtService.generateToken(user);
+    String jwtToken = jwtService.generateToken(user);
 
     log.info("User registered successfully with username: {}", user.getUsername());
 
-    return new AuthenticationResponse(token);
+
+    Token token = new Token();
+    token.setToken(jwtToken);
+    token.setLoggedOut(false);
+    token.setUsername(user.getUsername());
+
+    tokenRepository.save(token);
+    return new AuthenticationResponse(jwtToken, user.getUserId());
   }
 
   public String authenticate(LoginRequest request) {
@@ -119,8 +126,11 @@ public class AuthenticatorService implements AuthenticatorImpl {
 
     try{
       final String username = jwtService.extractUsername(token);
-      final UserDetails userDetails = userDetailService.loadUserByUsername(username);
-      return jwtService.isTokenValid(token, userDetails);
+
+      if (username != null) {
+        final UserDetails userDetails = userDetailService.loadUserByUsername(username);
+        return jwtService.isTokenValid(token, userDetails);
+      }
     } catch (Exception e) {
       log.error("Error while checking if token is valid", e);
     }

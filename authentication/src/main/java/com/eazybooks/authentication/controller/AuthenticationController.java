@@ -58,15 +58,13 @@ public class AuthenticationController {
       logger.warn("Email '{}' is already taken", createAccountRequest.getEmail());
       return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
     }
-    logger.info("Inside try block");
-    final AuthenticationResponse authenticationResponse = authenticatorService.createUserAccount(
-        createAccountRequest);
+
+    final AuthenticationResponse authenticationResponse = authenticatorService.createUserAccount(createAccountRequest);
     try {
 
       logger.info("AuthenticationResponse: {}", authenticationResponse);
 
       List<ServiceInstance> instances = discoveryClient.getInstances("user");
-      logger.info("instances in try block: {}", instances);
 
       if (instances.isEmpty()) {
         logger.info("Authentication service not found");
@@ -76,22 +74,21 @@ public class AuthenticationController {
 
       ServiceInstance instance = instances.get(0);
 
-      logger.info("instance  '{}'", instance);
-
       String authUrl = instance.getUri() + "/user/create-account";
 
-      logger.info("Auth url: {}", authUrl);
-
+      logger.info("authenticationResponse.getToken(): {}", authenticationResponse.getToken());
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", "Bearer " + authenticationResponse.getToken());
       headers.setContentType(MediaType.APPLICATION_JSON);
 
-      CreateAccountRequest creatUserRequest = new CreateAccountRequest(
+      //TODO: Need to find a better way. This is not the best approach
+      logger.info("AuthUserId: {}", authenticationResponse.getUserId());
+      CreateAccountRequest createUserRequest = new CreateAccountRequest(
+          authenticationResponse.getUserId(),
           createAccountRequest.getUsername(), null,
           createAccountRequest.getFirstname(), createAccountRequest.getLastname(),
           createAccountRequest.getEmail());
-
-      HttpEntity<CreateAccountRequest> requestEntity = new HttpEntity<>(creatUserRequest, headers);
+      HttpEntity<CreateAccountRequest> requestEntity = new HttpEntity<>(createUserRequest, headers);
       ResponseEntity<String> authResponse = restTemplate.exchange(
           authUrl, HttpMethod.POST, requestEntity, String.class);
 
@@ -134,23 +131,25 @@ public class AuthenticationController {
   @PostMapping("/validate-token")
   public ResponseEntity<Boolean> validateToken(@RequestBody VerifyToken verifyToken) {
 
+    logger.info("Inside Verify token {}", verifyToken.getToken());
     if (verifyToken.getToken() == null || verifyToken.getToken().isBlank()) {
       logger.warn("Token is missing or blank");
-      return ResponseEntity.badRequest().build();
+      return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
     }
 
     try {
+
       boolean isValid = authenticatorService.isTokenValid(verifyToken.getToken());
-      if (isValid) {
-        logger.info("Token validated successfully");
-        return ResponseEntity.ok(true);
-      } else {
+      logger.info("isValid {}", isValid);
+      if (! isValid) {
         logger.warn("Token validation failed");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
       }
+      logger.info("Token validated successfully");
+      return new ResponseEntity<>(true, HttpStatus.OK);
     } catch (Exception e) {
       logger.error("Error during token validation: {}", e.getMessage(), e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+      return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

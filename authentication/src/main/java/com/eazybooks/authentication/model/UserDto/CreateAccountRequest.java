@@ -3,19 +3,29 @@ package com.eazybooks.authentication.model.UserDto;
 import java.util.Objects;
 
 public class CreateAccountRequest {
+  private Long userId;
   private String username;
   private String password;
   private  String firstname;
   private String lastname;
   private String email;
 
-  public CreateAccountRequest(String username, String password, String firstname, String lastname,
+  public CreateAccountRequest(Long userId, String username, String password, String firstname, String lastname,
       String email) {
+    this.userId = userId;
     this.username = username;
     this.password = password;
     this.firstname = firstname;
     this.lastname = lastname;
     this.email = email;
+  }
+
+  public Long getUserId() {
+    return userId;
+  }
+
+  public void setUserId(Long userId) {
+    this.userId = userId;
   }
 
   public String getUsername() {
