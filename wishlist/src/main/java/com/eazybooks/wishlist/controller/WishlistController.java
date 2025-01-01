@@ -45,30 +45,30 @@ public class WishlistController {
   public ResponseEntity<String> addBookToWishlist(@PathVariable String username,
       @RequestBody CreateWishListRequest wishListRequest, HttpServletRequest request) {
 
-    ResponseEntity<Boolean> booleanResponseEntity = null;
+    ResponseEntity<Boolean> tokenValidation = null;
     //verifies token
     try {
-      booleanResponseEntity = verifyToken(request);
+      tokenValidation = verifyToken(request);
 
     } catch (Exception e) {
       logger.error(e.getMessage());
     }
 
-    if (!Boolean.TRUE.equals(booleanResponseEntity.getBody())) {
+    if (!Boolean.TRUE.equals(tokenValidation.getBody())) {
       logger.error("Error validating token");
       return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
     }
 
     //verifies user
-    final ResponseEntity<String> stringResponseEntity;
+    final ResponseEntity<String> userValidation;
     try {
       logger.info("Validating user");
-      stringResponseEntity = validateUser(request, username);
+      userValidation = validateUser(request, username);
     } catch (Exception e) {
       return new ResponseEntity<>("Error validating user", HttpStatus.BAD_REQUEST);
     }
 
-    if (stringResponseEntity.getStatusCode() == HttpStatus.NOT_FOUND) {
+    if (userValidation.getStatusCode() == HttpStatus.NOT_FOUND) {
       logger.info("User validation failed");
       return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
     }
