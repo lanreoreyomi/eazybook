@@ -75,19 +75,29 @@ public class UserController {
   }
 
   @GetMapping("/username/{username}")
-  public ResponseEntity<String> getUserByUsername(@PathVariable String username) {
+  public ResponseEntity<String> getUserByUsername(@PathVariable String username, HttpServletRequest request) {
     logger.info("Received request to get user with username: {}", username);
 
-    //TODO: remove Ids from the loggers
+    if (username == null) {
+      logger.warn(" Username is empty is null");
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    final ResponseEntity<Boolean> verified = verifyToken(request);
+
+    if (!Boolean.TRUE.equals(verified.getBody())) {
+      logger.error("Error validating token");
+      return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
+    }
     try {
       final User userByUsername = userService.findByUsername(username);
 
       if (userByUsername != null && userByUsername.getUsername().equals(username)) {
-        logger.info("Successfully retrieved user with username: {}", username);
-        return ResponseEntity.ok("User found"); // Or return the actual user data
+        logger.info("User {} found", username);
+        return new ResponseEntity<>(userByUsername.getUsername(), HttpStatus.OK); // Or return the actual user data
       } else {
         logger.warn("User with username: {} not found", username);
-        return ResponseEntity.notFound().build();
+        return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
       }
 
     } catch (Exception e) {
@@ -97,15 +107,16 @@ public class UserController {
   }
 
   @GetMapping("/{username}")
-  public ResponseEntity<Long> getUserIdUsingUsername(@PathVariable String username) {
+  public ResponseEntity<Long> getUserIdUsingUsername(@PathVariable String username, HttpServletRequest request) {
     logger.info("Received request to get user with username: {}", username);
 
-    //TODO: remove Ids from the loggers
     try {
       final User userByUsername = userService.findByUsername(username);
 
       if (userByUsername != null && userByUsername.getUsername().equals(username)) {
+
         logger.info("Successfully retrieved user with username: {}", username);
+
         logger.info("User found {}", userByUsername.getUserId());
         return ResponseEntity.ok(userByUsername.getUserId()); // Or return the actual user data
       } else {
@@ -159,11 +170,20 @@ public class UserController {
   }
 
   @PutMapping("/username/{username}")
-  public ResponseEntity<UsersDto> updateUserByUsername(@PathVariable String username,
-      @RequestBody UsersDto usersDto) {
+  public ResponseEntity<String> updateUserByUsername(@PathVariable String username,
+      @RequestBody UsersDto usersDto, HttpServletRequest request) {
     logger.info("Received request to get user with username: {}", username);
 
+
+    final ResponseEntity<Boolean> verified = verifyToken(request);
+
+    if (!Boolean.TRUE.equals(verified.getBody())) {
+      logger.error("Error validating token");
+      return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
+    }
+
      try {
+
       final User userByUsername = userService.findByUsername(username);
 
       if (userByUsername == null || !userByUsername.getUsername().equals(username)) {
@@ -186,7 +206,7 @@ public class UserController {
       updatedUsersDto.setLastname(updatedUser.getLastname());
       updatedUsersDto.setEmail(updatedUser.getEmail());
 
-      return ResponseEntity.ok(updatedUsersDto);  // Or return the actual user data
+      return new ResponseEntity<>("User successfully updated", HttpStatus.OK);  // Or return the actual user data
 
 
     } catch (Exception e) {
@@ -205,6 +225,14 @@ public class UserController {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+    final ResponseEntity<Boolean> verified = verifyToken(request);
+
+    if (!Boolean.TRUE.equals(verified.getBody())) {
+      logger.error("Error validating token");
+      return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
+    }
+
+
     if (userService.findByUsername(createAccountRequest.getUsername()) != null) {
       logger.warn("Username '{}' is already taken", createAccountRequest.getUsername());
       return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
@@ -215,9 +243,7 @@ public class UserController {
       return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
     }
 
-    final ResponseEntity<String> verified = verifyRequestToken(request);
 
-    logger.info("verified {}", verified);
     try {
 
       User user = new User();
@@ -233,10 +259,10 @@ public class UserController {
     }
   }
 
-  private ResponseEntity<String> verifyRequestToken(HttpServletRequest request) {
-    String authHeader = request.getHeader("Authorization");
+  private ResponseEntity<Boolean> verifyToken(HttpServletRequest request) {
 
-    logger.info("Received request to verify Authorization {}", request.getHeader("Authorization"));
+    logger.info("request {}", request.toString());
+    String authHeader = request.getHeader("Authorization");
 
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
       logger.warn("Authorization header missing or invalid");
@@ -244,8 +270,7 @@ public class UserController {
     }
 
     String token = authHeader.substring(7);
-
-    logger.info("Received request to verify token {}", token);
+    ResponseEntity<Boolean> authResponse;
 
     try {
       List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
@@ -253,28 +278,30 @@ public class UserController {
         logger.error("Authentication service not found");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
       }
+
       ServiceInstance instance = instances.get(0);
-
       String authUrl = instance.getUri() + "/auth/validate-token";
-
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", authHeader);
       headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
 
       HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token), headers);
-      ResponseEntity<Boolean> authResponse = restTemplate.exchange(
+      authResponse = restTemplate.exchange(
           authUrl, HttpMethod.POST, requestEntity, Boolean.class);
+      logger.info("authResponse getBody{}", authResponse.getBody());
 
       if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
           authResponse.getBody())) {
         logger.warn("Token validation failed");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
+        return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
       }
+      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
+
     }
-    return null;
+
   }
+
 
 }

@@ -29,9 +29,9 @@ import org.springframework.web.client.RestTemplate;
 public class WishlistController {
 
   private static final Logger logger = LoggerFactory.getLogger(WishlistController.class);
-  private WishlistService wishlistService;
+  private final WishlistService wishlistService;
 
-  private DiscoveryClient discoveryClient;
+  private final DiscoveryClient discoveryClient;
   RestTemplate restTemplate = new RestTemplate();
 
   public WishlistController(WishlistService wishlistService,
@@ -44,26 +44,40 @@ public class WishlistController {
   @PostMapping("/{username}/addwishlist")
   public ResponseEntity<String> addBookToWishlist(@PathVariable String username,
       @RequestBody CreateWishListRequest wishListRequest, HttpServletRequest request) {
-     ResponseEntity<Boolean> booleanResponseEntity = null;
 
-     try {
-        booleanResponseEntity = verifyToken(request);
+    ResponseEntity<Boolean> booleanResponseEntity = null;
+    //verifies token
+    try {
+      booleanResponseEntity = verifyToken(request);
+
     } catch (Exception e) {
       logger.error(e.getMessage());
-
     }
 
-     if (Boolean.TRUE.equals(booleanResponseEntity.getBody()) != true) {
-       logger.error("Error validating token");
-       return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
-     }
+    if (!Boolean.TRUE.equals(booleanResponseEntity.getBody())) {
+      logger.error("Error validating token");
+      return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
+    }
 
-     try {
-       Wishlist byBookIsbn = wishlistService.findByBookIsbn(wishListRequest.getBookIsbn());
+    //verifies user
+    final ResponseEntity<String> stringResponseEntity;
+    try {
+      logger.info("Validating user");
+      stringResponseEntity = validateUser(request, username);
+    } catch (Exception e) {
+      return new ResponseEntity<>("Error validating user", HttpStatus.BAD_REQUEST);
+    }
 
-       if (byBookIsbn != null) {
-         return new ResponseEntity<>("Book already added to wishlist", HttpStatus.CONFLICT);
-       }
+    if (stringResponseEntity.getStatusCode() == HttpStatus.NOT_FOUND) {
+      logger.info("User validation failed");
+      return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+    }
+    //TODO: Verify book by isbn
+    try {
+      Wishlist byBookIsbn = wishlistService.findByBookIsbn(wishListRequest.getBookIsbn());
+      if (byBookIsbn != null) {
+        return new ResponseEntity<>("Book already added to wishlist", HttpStatus.CONFLICT);
+      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -79,12 +93,12 @@ public class WishlistController {
 
     final Wishlist createdWishList = wishlistService.save(wishlist);
 
-    return new ResponseEntity<>(String.format("Added %s to wishlist ", createdWishList.getBookTitle()), HttpStatus.CREATED);
+    return new ResponseEntity<>(
+        String.format("Added %s to wishlist ", createdWishList.getBookTitle()), HttpStatus.CREATED);
   }
 
   private ResponseEntity<Boolean> verifyToken(HttpServletRequest request) {
 
-    logger.info("request {}", request.toString());
     String authHeader = request.getHeader("Authorization");
 
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -93,7 +107,8 @@ public class WishlistController {
     }
 
     String token = authHeader.substring(7);
-    ResponseEntity<Boolean> authResponse = null;
+    ResponseEntity<Boolean> authResponse;
+
     try {
       List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
       if (instances.isEmpty()) {
@@ -106,11 +121,10 @@ public class WishlistController {
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", authHeader);
       headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
+
       HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token), headers);
       authResponse = restTemplate.exchange(
           authUrl, HttpMethod.POST, requestEntity, Boolean.class);
-      logger.info("authResponse getBody{}", authResponse.getBody());
-
       if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
           authResponse.getBody())) {
         logger.warn("Token validation failed");
@@ -123,4 +137,96 @@ public class WishlistController {
     }
 
   }
+
+
+  private ResponseEntity<String> validateUser
+      (HttpServletRequest request, String username) {
+
+    String authHeader = request.getHeader("Authorization");
+
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      logger.warn("Authorization header missing or invalid");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    String token = authHeader.substring(7);
+    ResponseEntity<String> authResponse = null;
+
+    try {
+      List<ServiceInstance> instances = discoveryClient.getInstances("user");
+      if (instances.isEmpty()) {
+        logger.error("User service not found");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+      }
+
+      ServiceInstance userInstance = instances.get(0);
+      String userUrl = userInstance.getUri() + "/user/username/" + username;
+      HttpHeaders headers = new HttpHeaders();
+      headers.set("Authorization", authHeader);
+      headers.setContentType(MediaType.APPLICATION_JSON);
+
+      HttpEntity<String> requestEntity = new HttpEntity<>(username, headers);
+
+      authResponse = restTemplate.exchange(
+          userUrl, HttpMethod.GET, requestEntity, String.class);
+
+      if (authResponse.getStatusCode() != HttpStatus.OK &&
+          !authResponse.getBody().equals(username)) {
+        return new ResponseEntity<>("User validation failed", HttpStatus.NOT_FOUND);
+      }
+
+      logger.info("User validation successfull");
+      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>("User validation failed", HttpStatus.NOT_FOUND);
+
+    }
+
+  }
+
+//
+//  private ResponseEntity<String> validateBookIsbn(HttpServletRequest request, String bookIsbn) {}
+//      (HttpServletRequest request, String username) {
+//
+//    String authHeader = request.getHeader("Authorization");
+//
+//    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+//      logger.warn("Authorization header missing or invalid");
+//      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//    }
+//
+//    String token = authHeader.substring(7);
+//    ResponseEntity<String> authResponse = null;
+//
+//    try {
+//      List<ServiceInstance> instances = discoveryClient.getInstances("user");
+//      if (instances.isEmpty()) {
+//        logger.error("User service not found");
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//      }
+//
+//      ServiceInstance userInstance = instances.get(0);
+//      String userUrl = userInstance.getUri() + "/user/username/"+username;
+//      HttpHeaders headers = new HttpHeaders();
+//      headers.set("Authorization", authHeader);
+//      headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//      HttpEntity<String> requestEntity = new HttpEntity<>(username, headers);
+//
+//      authResponse = restTemplate.exchange(
+//          userUrl, HttpMethod.GET, requestEntity, String.class);
+//
+//      if (authResponse.getStatusCode() != HttpStatus.OK &&
+//          !authResponse.getBody().equals(username)) {
+//        return new ResponseEntity<>("User validation failed", HttpStatus.NOT_FOUND);
+//      }
+//
+//      logger.info("User validation successfull");
+//      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
+//    } catch (Exception e) {
+//      return new ResponseEntity<>("User validation failed", HttpStatus.NOT_FOUND);
+//
+//    }
+//
+//  }
 }
