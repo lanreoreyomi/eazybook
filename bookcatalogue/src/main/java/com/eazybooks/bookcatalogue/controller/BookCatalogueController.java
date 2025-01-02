@@ -28,7 +28,7 @@ import org.springframework.web.client.RestTemplate;
 @RequestMapping("/bookcatalogue")
 public class BookCatalogueController {
 
-  Logger log = LoggerFactory.getLogger(BookCatalogueController.class);
+  Logger logger = LoggerFactory.getLogger(BookCatalogueController.class);
 
   private final BookCatalogueService bookCatalogueService;
   private DiscoveryClient discoveryClient;
@@ -43,18 +43,18 @@ public class BookCatalogueController {
   @GetMapping()
   public ResponseEntity<List<BookCatalogue>> getAllBookCatalogues(HttpServletRequest request) {
 
-    log.info("request {}", request.toString());
+    logger.info("request {}", request.toString());
     String authHeader = request.getHeader("Authorization");
 
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      log.warn("Authorization header missing or invalid");
+      logger.warn("Authorization header missing or invalid");
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     String token = authHeader.substring(7);
     try {
       List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
       if (instances.isEmpty()) {
-        log.error("Authentication service not found");
+        logger.error("Authentication service not found");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
       }
       ServiceInstance instance = instances.get(0);
@@ -71,26 +71,96 @@ public class BookCatalogueController {
 
       if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
           authResponse.getBody())) {
-        log.warn("Token validation failed");
+        logger.warn("Token validation failed");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
       }
       List<BookCatalogue> books = bookCatalogueService.getAllCatalogue();
       return ResponseEntity.ok(books);
     } catch (Exception e) {
-      log.error("Error validating user token");
+      logger.error("Error validating user token");
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
   }
 
+  @GetMapping("/isbn/{isbn}")
+  public ResponseEntity<String> getBookByIsbn(@PathVariable Long isbn, HttpServletRequest request) {
+
+    logger.info("request {}", request.toString());
+
+    try {
+      final ResponseEntity<Boolean> verifyTokenResponse = verifyToken(request);
+
+      if (verifyTokenResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
+          verifyTokenResponse.getBody())) {
+        logger.warn("Token validation failed");
+        return new ResponseEntity<>("Token verification failed", HttpStatus.UNAUTHORIZED);
+      }
+    } catch (Exception e) {
+      logger.error("Error validating user token");
+      return new ResponseEntity<>("Token verification failed", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    BookCatalogue bookByIsbn = null;
+
+    try {
+      bookByIsbn = bookCatalogueService.getBookByIsbn(isbn);
+      logger.info("bookByIsbn {}", bookByIsbn);
+    } catch (Exception e) {
+      logger.error("Error validating user token");
+    }
+    if (bookByIsbn ==null) {
+      return new ResponseEntity<>("Book not found", HttpStatus.NOT_FOUND);
+    }
+    return new ResponseEntity<>(String.valueOf(bookByIsbn.getIsbn()), HttpStatus.OK);
+  }
+
   @GetMapping("/book/{bookId}")
-  public ResponseEntity<BookCatalogue> getBookCatalogueById(HttpServletRequest request, @PathVariable Long bookId) {
-
+  public ResponseEntity<BookCatalogue> getBookCatalogueById(HttpServletRequest request,
+      @PathVariable Long bookId) {
     final BookCatalogue bookById = bookCatalogueService.getBookById(bookId);
-
-    log.info("request {}", bookById.toString());
-
+    logger.info("request {}", bookById.toString());
     return ResponseEntity.ok(bookById);
+  }
+
+  private ResponseEntity<Boolean> verifyToken(HttpServletRequest request) {
+
+    String authHeader = request.getHeader("Authorization");
+
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      logger.warn("Authorization header missing or invalid");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    String token = authHeader.substring(7);
+    ResponseEntity<Boolean> authResponse;
+
+    try {
+      List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
+      if (instances.isEmpty()) {
+        logger.error("Authentication service not found");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+      }
+
+      ServiceInstance instance = instances.get(0);
+      String authUrl = instance.getUri() + "/auth/validate-token";
+      HttpHeaders headers = new HttpHeaders();
+      headers.set("Authorization", authHeader);
+      headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
+
+      HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token), headers);
+      authResponse = restTemplate.exchange(
+          authUrl, HttpMethod.POST, requestEntity, Boolean.class);
+      if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
+          authResponse.getBody())) {
+        logger.warn("Token validation failed");
+        return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
+      }
+      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
+
+    }
+
   }
 
 }

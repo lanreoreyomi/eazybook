@@ -4,6 +4,7 @@ import com.eazybooks.wishlist.model.CreateWishListRequest;
 import com.eazybooks.wishlist.model.VerifyToken;
 import com.eazybooks.wishlist.model.Wishlist;
 import com.eazybooks.wishlist.service.WishlistService;
+import com.eazybooks.wishlist.utils.SERVICES;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
@@ -58,12 +59,11 @@ public class WishlistController {
       logger.error("Error validating token");
       return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
     }
-
     //verifies user
     final ResponseEntity<String> userValidation;
     try {
       logger.info("Validating user");
-      userValidation = validateUser(request, username);
+      userValidation = verifyUser(request, username);
     } catch (Exception e) {
       return new ResponseEntity<>("Error validating user", HttpStatus.BAD_REQUEST);
     }
@@ -73,6 +73,21 @@ public class WishlistController {
       return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
     }
     //TODO: Verify book by isbn
+    final ResponseEntity<String> bookValidation;
+
+    try {
+      logger.info("Validating book isbn");
+      bookValidation = verifyBookIsbn(request, wishListRequest.getBookIsbn());
+    } catch (Exception e) {
+      return new ResponseEntity<>("Error validating book isbn", HttpStatus.BAD_REQUEST);
+    }
+
+    if (bookValidation.getStatusCode() == HttpStatus.NOT_FOUND) {
+      logger.info("Book not found for Isbn {}", wishListRequest.getBookIsbn());
+      return new ResponseEntity<>("Book not found for Isbn", HttpStatus.NOT_FOUND);
+    }
+
+    //Find if book already added to wishlist
     try {
       Wishlist byBookIsbn = wishlistService.findByBookIsbn(wishListRequest.getBookIsbn());
       if (byBookIsbn != null) {
@@ -110,7 +125,7 @@ public class WishlistController {
     ResponseEntity<Boolean> authResponse;
 
     try {
-      List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
+      List<ServiceInstance> instances = discoveryClient.getInstances(SERVICES.AUTHENTICATION.toString());
       if (instances.isEmpty()) {
         logger.error("Authentication service not found");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -139,7 +154,7 @@ public class WishlistController {
   }
 
 
-  private ResponseEntity<String> validateUser
+  private ResponseEntity<String> verifyUser
       (HttpServletRequest request, String username) {
 
     String authHeader = request.getHeader("Authorization");
@@ -153,7 +168,7 @@ public class WishlistController {
     ResponseEntity<String> authResponse = null;
 
     try {
-      List<ServiceInstance> instances = discoveryClient.getInstances("user");
+      List<ServiceInstance> instances = discoveryClient.getInstances(SERVICES.USER.toString());
       if (instances.isEmpty()) {
         logger.error("User service not found");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -184,49 +199,48 @@ public class WishlistController {
 
   }
 
-//
-//  private ResponseEntity<String> validateBookIsbn(HttpServletRequest request, String bookIsbn) {}
-//      (HttpServletRequest request, String username) {
-//
-//    String authHeader = request.getHeader("Authorization");
-//
-//    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-//      logger.warn("Authorization header missing or invalid");
-//      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-//    }
-//
-//    String token = authHeader.substring(7);
-//    ResponseEntity<String> authResponse = null;
-//
-//    try {
-//      List<ServiceInstance> instances = discoveryClient.getInstances("user");
-//      if (instances.isEmpty()) {
-//        logger.error("User service not found");
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//      }
-//
-//      ServiceInstance userInstance = instances.get(0);
-//      String userUrl = userInstance.getUri() + "/user/username/"+username;
-//      HttpHeaders headers = new HttpHeaders();
-//      headers.set("Authorization", authHeader);
-//      headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//      HttpEntity<String> requestEntity = new HttpEntity<>(username, headers);
-//
-//      authResponse = restTemplate.exchange(
-//          userUrl, HttpMethod.GET, requestEntity, String.class);
-//
-//      if (authResponse.getStatusCode() != HttpStatus.OK &&
-//          !authResponse.getBody().equals(username)) {
-//        return new ResponseEntity<>("User validation failed", HttpStatus.NOT_FOUND);
-//      }
-//
-//      logger.info("User validation successfull");
-//      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
-//    } catch (Exception e) {
-//      return new ResponseEntity<>("User validation failed", HttpStatus.NOT_FOUND);
-//
-//    }
-//
-//  }
+
+  private ResponseEntity<String> verifyBookIsbn(HttpServletRequest request, Long bookIsbn) {
+
+    String authHeader = request.getHeader("Authorization");
+
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      logger.warn("Authorization header missing or invalid");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    String token = authHeader.substring(7);
+    ResponseEntity<String> authResponse = null;
+
+    try {
+      List<ServiceInstance> instances = discoveryClient.getInstances(SERVICES.BOOKCATALOGUE.toString());
+      if (instances.isEmpty()) {
+        logger.error("Book Catalogue not found");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+      }
+
+      ServiceInstance bookInstance = instances.get(0);
+      String userUrl = bookInstance.getUri() + "/bookcatalogue/isbn/"+bookIsbn;
+      HttpHeaders headers = new HttpHeaders();
+      headers.set("Authorization", authHeader);
+      headers.setContentType(MediaType.APPLICATION_JSON);
+
+      HttpEntity<String> requestEntity = new HttpEntity<>(String.valueOf(bookIsbn), headers);
+
+      authResponse = restTemplate.exchange(
+          userUrl, HttpMethod.GET, requestEntity, String.class);
+
+      if (authResponse.getStatusCode() != HttpStatus.OK &&
+          !authResponse.getBody().equals(String.valueOf(bookIsbn))) {
+        return new ResponseEntity<>("Book not found for Isbn", HttpStatus.NOT_FOUND);
+      }
+
+      logger.info("Book found for Isbn");
+      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>("Error getting book by Isbn", HttpStatus.NOT_FOUND);
+
+    }
+
+  }
 }

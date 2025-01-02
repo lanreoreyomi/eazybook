@@ -15,36 +15,6 @@ import org.springframework.web.client.RestTemplate;
 
 public class RestUtils {
 
-  public static ResponseEntity<String> validateRequestToken(String authHeader, String token,
-      DiscoveryClient discoveryClient, RestTemplate restTemplate) {
-    try {
-      List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
-      if (instances.isEmpty()) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
-      ServiceInstance instance = instances.get(0);
 
-      String authUrl = instance.getUri() + "/auth/validate-token";
-
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Authorization", authHeader);
-      headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
-
-      HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token), headers);
-      ResponseEntity<Boolean> authResponse = restTemplate.exchange(
-          authUrl, HttpMethod.POST, requestEntity, Boolean.class);
-
-      if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
-          authResponse.getBody())) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-      }
-
-    }
-    catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-    return null;
-  }
 
 }

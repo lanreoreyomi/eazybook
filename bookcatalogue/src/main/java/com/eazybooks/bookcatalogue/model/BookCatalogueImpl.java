@@ -9,6 +9,7 @@ public interface BookCatalogueImpl {
   List<BookCatalogue> getBookByAuthor(String author);
   BookCatalogue addBookToCatalogue(BookCatalogue book);
   BookCatalogue updateBook(BookCatalogue book);
-   void deleteBookById(Long id);
-   BookCatalogue getBookById(Long id);
+  void deleteBookById(Long id);
+  BookCatalogue getBookById(Long id);
+  BookCatalogue getBookByIsbn(Long isbn);
  }

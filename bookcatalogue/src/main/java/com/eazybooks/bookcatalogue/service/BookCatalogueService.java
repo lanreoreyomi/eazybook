@@ -44,6 +44,11 @@ public class BookCatalogueService implements BookCatalogueImpl {
   }
 
   @Override
+  public BookCatalogue getBookByIsbn(Long isbn) {
+    return bookCatalogueRepository.findByBookByIsbn(isbn);
+  }
+
+  @Override
   public BookCatalogue updateBook(BookCatalogue book) {
     return bookCatalogueRepository.save(book);
   }
