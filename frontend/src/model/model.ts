@@ -8,3 +8,11 @@ export interface BookCatalogue {
   quantityForRent: number
 
 }
+
+export interface WishList {
+  localDate: string,
+  "username": string,
+  "bookTitle": string,
+  "bookIsbn": number
+
+}

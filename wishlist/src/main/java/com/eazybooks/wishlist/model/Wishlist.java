@@ -19,11 +19,14 @@ public class Wishlist {
   @Column(name = "created_date")
   private LocalDate localDate;
 
-  @Column(name = "user_id")
-  private Long userId;
+  @Column(name = "username")
+  private String username;
 
-  @Column(name = "book_catalogue_id")
-  private Long bookCatalogueId;
+  @Column(name = "book_title")
+  private String bookTitle;
+
+  @Column(name = "book_isbn")
+  private Long bookIsbn;
 
   public String getUsername() {
     return username;
@@ -32,9 +35,6 @@ public class Wishlist {
   public void setUsername(String username) {
     this.username = username;
   }
-
-  @Column(name = "username")
-  private String username;
 
   public String getBookTitle() {
     return bookTitle;
@@ -52,18 +52,11 @@ public class Wishlist {
     this.bookIsbn = bookIsbn;
   }
 
-  @Column(name = "book_title")
-  private String bookTitle;
-
-  @Column(name = "book_isbn")
-  private Long bookIsbn;
-
   public Wishlist(Long id) {
     this.id = id;
   }
 
   public Wishlist() {
-
   }
 
   public LocalDate getLocalDate() {
@@ -74,19 +67,14 @@ public class Wishlist {
     this.localDate = localDate;
   }
 
-  public Long getUserId() {
-    return userId;
-  }
-
-  public void setUserId(Long userId) {
-    this.userId = userId;
-  }
-
-  public Long getBookCatalogueId() {
-    return bookCatalogueId;
-  }
-
-  public void setBookCatalogueId(Long bookCatalogueId) {
-    this.bookCatalogueId = bookCatalogueId;
+  @Override
+  public String toString() {
+    return "Wishlist{" +
+        "id=" + id +
+        ", localDate=" + localDate +
+        ", username='" + username + '\'' +
+        ", bookTitle='" + bookTitle + '\'' +
+        ", bookIsbn=" + bookIsbn +
+        '}';
   }
 }

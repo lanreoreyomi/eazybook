@@ -21,8 +21,7 @@ export const useBookCatalogueStore = defineStore('bookCatalogue', {
   }),
   actions: {
     async getAllBookCatalogues() {
-      this.loading = true
-      try {
+       try {
         const response = await axios.get<BookCatalogue[]>(GETALLBOOKCATALOGUE, {
           headers: {
             Authorization: accessToken

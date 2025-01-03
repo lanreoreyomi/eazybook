@@ -84,7 +84,7 @@ public class BookCatalogueController {
   }
 
   @GetMapping("/isbn/{isbn}")
-  public ResponseEntity<String> getBookByIsbn(@PathVariable Long isbn, HttpServletRequest request) {
+  public ResponseEntity<BookCatalogue> getBookByIsbn(@PathVariable Long isbn, HttpServletRequest request) {
 
     logger.info("request {}", request.toString());
 
@@ -94,11 +94,11 @@ public class BookCatalogueController {
       if (verifyTokenResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
           verifyTokenResponse.getBody())) {
         logger.warn("Token validation failed");
-        return new ResponseEntity<>("Token verification failed", HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
       }
     } catch (Exception e) {
       logger.error("Error validating user token");
-      return new ResponseEntity<>("Token verification failed", HttpStatus.INTERNAL_SERVER_ERROR);
+      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     BookCatalogue bookByIsbn = null;
 
@@ -109,9 +109,9 @@ public class BookCatalogueController {
       logger.error("Error validating user token");
     }
     if (bookByIsbn ==null) {
-      return new ResponseEntity<>("Book not found", HttpStatus.NOT_FOUND);
+      return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
-    return new ResponseEntity<>(String.valueOf(bookByIsbn.getIsbn()), HttpStatus.OK);
+    return new ResponseEntity<>(bookByIsbn, HttpStatus.OK);
   }
 
   @GetMapping("/book/{bookId}")

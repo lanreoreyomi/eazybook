@@ -22,42 +22,16 @@
 </template>
 <script lang="ts">
  import { useLogInStore } from '@/stores/useLogInStore.js'
- import { computed, watch } from 'vue'
- import router from '@/router'
+ import { computed } from 'vue'
 
 export default {
   setup() {
     const logInStore = useLogInStore()
-    // Example using a watcher
-    const isSuccessful = computed(() =>{
-      if(logInStore.statusCode === 200){
-        router.push('/catalogue')
-        return true
-
-      }else {
-        return false
-      }
-
-    }
-
-    );
-
-    watch(isSuccessful, async (newVal) => {
-      if (newVal) {
-
-        router.push('/catalogue').catch(error => {
-
-          console.error('Error navigating to /catalogue:', error);
-          // Handle the error, e.g., display an error message
-
-        });
-      }
-    });
+    const isSuccessful = computed(() => logInStore.statusCode === 200);
 
     const statusText = computed(() => logInStore.statusText)
     return {
       user: logInStore.userLogIn,
-      isLoading: logInStore.loading,
       logIn: logInStore.LogIn,
       isSuccessful,
       statusText
@@ -96,9 +70,9 @@ body,
       }
       input {
         width: 100%;
-        padding: 10px;
+        padding: 15px;
         border: 1px solid colors.$text-color;
-        border-radius: 1rem;
+        border-radius: 0.5rem;
         margin: 10px 0;
         font-size: 20px;
       }

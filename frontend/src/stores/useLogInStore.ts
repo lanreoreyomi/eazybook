@@ -2,12 +2,13 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { LOGIN } from '@/api/apis.ts'
 
-export let IS_LOGGED_IN = false;
-interface LogInState {
+
+ interface LogInState {
   username: string
   password: string
 }
 
+export let currentUsername: string;
 export const useLogInStore = defineStore('login', {
   state: () => ({
     userLogIn: {
@@ -15,28 +16,28 @@ export const useLogInStore = defineStore('login', {
       password: '',
     } as LogInState,
   //Define type for user object
-    loading: false,
     statusCode: 0,
     statusText: '',
     isLoggedIn: false,
+    loggedInUser : '',
   }),
   actions: {
     async LogIn() {
-      this.loading = true
       try {
         const response = await axios.post<LogInState>(LOGIN, this.userLogIn)
         // Handle successful log in
           localStorage.setItem('accessToken', response.headers["authorization"]);
           localStorage.setItem('refreshToken', response.headers["authorization"]);
+          localStorage.setItem('username', this.userLogIn.username);
 
-          IS_LOGGED_IN = response.status===200;
           this.$patch({
           statusCode: response.status,
           statusText: String(response.data),
-          isLoggedIn: response.status===200,
-         })
-        console.log(`isLoggedIn: ${this.isLoggedIn}`)
-      } catch (error) {
+            isLoggedIn: response.status===200,
+
+          })
+        this.setCurrentUser(this.userLogIn.username)
+       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           console.log(JSON.stringify(error.response.data))
            this.$patch({
@@ -49,6 +50,15 @@ export const useLogInStore = defineStore('login', {
         }
       }
     },
+    setCurrentUser(username: string) {
+       this.loggedInUser = username;
+
+    },
+    checkAuth() {
+      const token = localStorage.getItem('accessToken');
+      this.isLoggedIn = token ? true : false;// You might need more complex validation here
+      return this.isLoggedIn
+    }
   },
 })
 

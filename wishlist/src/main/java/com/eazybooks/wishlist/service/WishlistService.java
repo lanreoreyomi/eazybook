@@ -28,32 +28,28 @@ public class WishlistService  implements WishlistRepositoryImpl {
   }
 
   @Override
-  public Wishlist findByUserId(Long userId) {
-    return null;
-  }
-
-  @Override
-  public List<Wishlist> findByBookCatalogueId(Long catalogueId) {
-    return wishlistRepository.findByBookCatalogueId(catalogueId);
-  }
-
-  @Override
   public Wishlist findByBookIsbn(Long bookIsbn) {
     return wishlistRepository.findByBookIsbn(bookIsbn).orElse(null);
   }
+  @Override
+  public Wishlist findByBookIsbnAndUsername(Long bookIsbn, String username) {
+    return wishlistRepository.findByBookIsbnAndUsername(bookIsbn, username).orElse(null);
+  }
+
 
   @Override
   public void deleteById(Long id) {
-
   }
 
   @Override
-  public void deleteByUserId(Long userId) {
-
+  public void removeByBookIsbn(Long bookIsbn) {
+    wishlistRepository.deleteByBookIsbn(bookIsbn);
   }
 
   @Override
-  public void deleteByBookIsbn(Long bookIsbn) {
-
+  public List<Wishlist> findByUserName(String username) {
+   return wishlistRepository.findByUsername(username).orElse(null);
   }
+
+
 }

@@ -50,7 +50,7 @@ export default defineComponent({
 })
 </script>
 <style scoped lang="scss">
-@use '/src/assets/scss/colors.scss';
+@use '/src/assets/scss/colors';
 
   .book_card {
     width: 100%;
@@ -76,7 +76,6 @@ export default defineComponent({
     padding: 0;
     width: 100%;
     border: 0.5rem;
-
   }
 
   .book_card_menu {

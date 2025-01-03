@@ -14,9 +14,9 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, onBeforeMount, ref } from 'vue'
-import { useBookCatalogueStore } from '@/stores/BookCatalogue.ts'
+import { useBookCatalogueStore } from '@/stores/useBookCatalogueStore.ts'
 import type { BookCatalogue } from '@/model/model.ts'
-import BookComponent from '@/views/BookComponent.vue'
+import BookComponent from '@/components/BookComponent.vue'
 export default defineComponent({
   name: 'CatalogueView',
   components: { BookComponent },

@@ -32,6 +32,10 @@ export default defineConfig({
       '/bookcatalogue': {
         target: 'http://eazybooks.com:9089',
         changeOrigin: true
+      },
+      '/wishlist/': {
+        target: 'http://eazybooks.com:8017',
+        changeOrigin: true
       }
     }
   }
