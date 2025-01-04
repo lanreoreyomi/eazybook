@@ -15,14 +15,15 @@
         <li v-if="checkAuthenticated()">
           <router-link to="/catalogue">Catalogue</router-link>
         </li>
-        <li v-if="checkAuthenticated()">
-          <router-link to="/borrowhistory">Borrow History</router-link>
-        </li>
+
         <li id="profile" v-if="checkAuthenticated()">
           <router-link to="/profile">Profile</router-link>
         </li>
         <li id="wishList" v-if="checkAuthenticated()">
           <router-link to="/wishlist">WishList</router-link>
+        </li>
+        <li v-if="checkAuthenticated()">
+          <router-link to="/borrowhistory"> History</router-link>
         </li>
         <li id="logout" v-if="checkAuthenticated()">
           <button @click="logOut">Log Out</button>
