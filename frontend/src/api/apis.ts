@@ -7,9 +7,9 @@ export const WISHLIST = '/wishlist/'
 export const getWishListForUser = (username: string| null): string => {
   return `${WISHLIST+username}/all `
 }
-export const addBookToWishlistWithUsername = (username: string): string => {
-  return `${WISHLIST}/${username}/add`
+export const addBookToWishlistWithUsername = (username: string | null): string => {
+  return `${WISHLIST+username}/add`
 }
-export const removeBookFromWishlistWithUsername = (username: string): string => {
-  return `${WISHLIST}/${username}/remove`
+export const removeBookFromWishlistWithUsername = (username: string | null): string => {
+  return `${WISHLIST+username}/remove`
 }

@@ -1,5 +1,5 @@
 <template>
-   <div class="book_card" v-for="(book, index) in books" :key="index">
+   <div class="book_card" v-for="(book, index) in books" :key="index+1">
     <img class="book_card-img" :src="`/src/assets/images/${index + 1}-min.jpg`" alt="lib_img" />
      <div class="book_card-body">
       <h5 class="book_card-title">{{ book.title }}</h5>
@@ -27,8 +27,7 @@ export default defineComponent({
     props: {
     books: {
       type: Array as PropType<BookCatalogue[]>,  // Specify that 'book' should be a Book object
-      // type: Array as PropType<BookCatalogue[]>,  // Specify that 'book' should be a Book object
-      required: true // Make the prop required
+       required: true // Make the prop required
     }
   },
   emits: ['getBookDetails'],
@@ -41,9 +40,7 @@ export default defineComponent({
     return {
       getCurrentBook,
       open,
-      close,
       emit,
-
 
     }
   },
@@ -88,15 +85,18 @@ export default defineComponent({
   }
 
   .book_card_button {
+    text-align: center;
+    justify-content: center;
     button {
       font-size: 16px;
-      margin: 20px;
+      margin: 10px auto;
       padding: 10px;
       border-radius: 0.5rem;
       border: none;
       outline: none;
-      width: 150px;
+      width: 250px;
       cursor: pointer;
+
       box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1);
     }
 

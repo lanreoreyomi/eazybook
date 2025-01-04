@@ -1,13 +1,12 @@
 // stores/BookCatalogueState.ts
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { GETALLBOOKCATALOGUE } from '@/api/apis.ts'
+import { GETALLBOOKCATALOGUE, } from '@/api/apis.ts'
 import { accessToken } from '@/Utils/AppUtils.ts'
 import type { BookCatalogue } from '@/model/model.ts'
 
 interface BookCatalogueState {
   bookCatalogue: BookCatalogue[]; // Array of BookCatalogue
-  loading: boolean;
   statusCode: number;
   statusText: string;
 }
@@ -15,8 +14,7 @@ interface BookCatalogueState {
 export const useBookCatalogueStore = defineStore('bookCatalogue', {
   state: (): BookCatalogueState => ({
     bookCatalogue: [],
-    loading: false,
-    statusCode: 0,
+     statusCode: 0,
     statusText: '',
   }),
   actions: {
@@ -42,6 +40,8 @@ export const useBookCatalogueStore = defineStore('bookCatalogue', {
           console.log('An unexpected error occurred:', error)
         }
       }
-    }
+    },
+
   }
+
 })

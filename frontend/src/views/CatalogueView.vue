@@ -1,11 +1,10 @@
 <template>
   <div v-if="isCatalogueLoaded" id="catalogue_component">
-    <div id="wishlist_control" v-if="confirmation">
-      <p id="addedToWishlist">{{ confirmation }}</p>
-      <p id="cancel_img">
-        <img src="https://img.icons8.com/?size=30&id=7703&format=png&color=FFFFFF" alt="lib_img" @click="toggleConfirmation" />
-
-      </p>
+    <div id="wishlist_control" v-if="statusText">
+      <p id="addedToWishlist">{{ statusText }}</p>
+<!--      <p id="cancel_img">-->
+<!--        <img src="https://img.icons8.com/?size=30&id=7703&format=png&color=FFFFFF" alt="lib_img"  />-->
+<!--      </p>-->
     </div>
     <div class="book_detail">
       <BookComponent :books="books" @getBookDetails="displayBook" />
@@ -17,6 +16,7 @@ import { computed, defineComponent, onBeforeMount, ref } from 'vue'
 import { useBookCatalogueStore } from '@/stores/useBookCatalogueStore.ts'
 import type { BookCatalogue } from '@/model/model.ts'
 import BookComponent from '@/components/BookComponent.vue'
+import { useWishlistStore } from '@/stores/useWishlistStore.ts'
 export default defineComponent({
   name: 'CatalogueView',
   components: { BookComponent },
@@ -24,20 +24,23 @@ export default defineComponent({
     const confirmation = ref('')
     const bookCatalogueStore = useBookCatalogueStore()
     const books = ref<BookCatalogue[]>([])
-    const waitList: BookCatalogue[] = []
+    const wishlistStore= useWishlistStore();
 
-    const displayBook = (book: BookCatalogue): void => {addBookToWaitList(book)}
+    const displayBook = (book: BookCatalogue): void => {addBookToWishList(book)}
     const isCatalogueLoaded = computed(() => bookCatalogueStore.statusCode === 200)
-    const addBookToWaitList = (book: BookCatalogue): void => {
-       const existingBook = waitList.find((el: BookCatalogue) => el.isbn === book.isbn)
-      if (existingBook) {
-        confirmation.value = `${book.title} already added to wishlist`
-      } else {
-        waitList.push(book)
-        confirmation.value = `Added ${book.title} to wishlist`
-      }
+
+    const addBookToWishList = (book: BookCatalogue): void => {
+      wishlistStore.addBookToWishlist(book);
     }
-    const toggleConfirmation = function () {confirmation.value = ''}
+    const statusText =  computed(()=> {
+      const text = wishlistStore.statusText;
+
+      // eslint-disable-next-line vue/no-async-in-computed-properties
+      setTimeout(() => {
+        wishlistStore.$patch({ statusText: '' }); // Directly update the store
+      }, 5000);
+      return text;
+    })
 
     onBeforeMount(async () => {
        await bookCatalogueStore.getAllBookCatalogues()
@@ -49,7 +52,8 @@ export default defineComponent({
       books,
       displayBook,
       confirmation,
-      toggleConfirmation,
+      // toggleConfirmation,
+      statusText
       }
   },
 })

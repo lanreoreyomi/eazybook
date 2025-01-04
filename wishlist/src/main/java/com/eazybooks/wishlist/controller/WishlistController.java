@@ -79,20 +79,20 @@ public class WishlistController {
 
     try {
       logger.info("Validating book isbn");
-      bookValidation = verifyBookIsbn(request, wishListRequest.getBookIsbn());
+      bookValidation = verifyBookIsbn(request, wishListRequest.getIsbn());
     } catch (Exception e) {
       return new ResponseEntity<>("Error validating book isbn", HttpStatus.BAD_REQUEST);
     }
 
     if (bookValidation.getStatusCode() == HttpStatus.NOT_FOUND) {
-      logger.info("Book not found for Isbn {}", wishListRequest.getBookIsbn());
+      logger.info("Book not found for Isbn {}", wishListRequest.getIsbn());
       return new ResponseEntity<>("Book not found for Isbn", HttpStatus.NOT_FOUND);
     }
     //Find if book already added to wishlist
     try {
-      Wishlist byBookIsbn = wishlistService.findByBookIsbnAndUsername(wishListRequest.getBookIsbn(),
+      Wishlist byBookIsbn = wishlistService.findByBookIsbnAndUsername(wishListRequest.getIsbn(),
           username);
-      logger.info("Book found for Isbn {}", wishListRequest.getBookIsbn());
+      logger.info("Book found for Isbn {}", wishListRequest.getIsbn());
       if (byBookIsbn != null) {
         return new ResponseEntity<>("Book already added to wishlist", HttpStatus.CONFLICT);
       }
@@ -102,7 +102,7 @@ public class WishlistController {
 
     LocalDate localDate = LocalDate.now();
     Wishlist wishlist = new Wishlist();
-    wishlist.setBookIsbn(wishListRequest.getBookIsbn());
+    wishlist.setIsbn(wishListRequest.getIsbn());
     wishlist.setBookTitle(bookValidation.getBody().getTitle());
     wishlist.setUsername(username);
     wishlist.setLocalDate(localDate);
@@ -147,16 +147,16 @@ public class WishlistController {
 
     Wishlist byBookIsbn;
     try {
-      byBookIsbn = wishlistService.findByBookIsbnAndUsername(removeRequest.getBookIsbn(), username);
+      byBookIsbn = wishlistService.findByBookIsbnAndUsername(removeRequest.getIsbn(), username);
       if (byBookIsbn == null) {
         return new ResponseEntity<>("Book not in wishlist", HttpStatus.BAD_REQUEST);
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    wishlistService.removeByBookIsbn(removeRequest.getBookIsbn());
+    wishlistService.removeByBookIsbn(removeRequest.getIsbn());
     return new ResponseEntity<>(
-        String.format("Removed %s from wishlist ", byBookIsbn.getBookTitle()), HttpStatus.CREATED);
+        String.format("Removed %s from wishlist ", byBookIsbn.getBookTitle()), HttpStatus.OK);
   }
 
   @GetMapping("/{username}/all")

@@ -2,24 +2,24 @@ package com.eazybooks.wishlist.model;
 
 public class RemoveBookFromWishListRequest
 {
-  private Long bookIsbn;
+  private Long isbn;
 
   public RemoveBookFromWishListRequest() {
   }
-  public Long getBookIsbn() {
-    return bookIsbn;
+  public Long getIsbn() {
+    return isbn;
   }
-  public void setBookIsbn(Long bookIsbn) {
-    this.bookIsbn = bookIsbn;
+  public void setIsbn(Long isbn) {
+    this.isbn = isbn;
   }
 
-  public RemoveBookFromWishListRequest( Long bookIsbn) {
-    this.bookIsbn = bookIsbn;
+  public RemoveBookFromWishListRequest( Long isbn) {
+    this.isbn = isbn;
   }
   @Override
   public String toString() {
     return "RemoveBookFromWishListRequest{" +
-        "bookIsbn=" + bookIsbn + '\'' +
+        "isbn=" + isbn + '\'' +
         '}';
   }
 }

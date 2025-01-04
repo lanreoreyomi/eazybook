@@ -29,11 +29,11 @@ public class WishlistService  implements WishlistRepositoryImpl {
 
   @Override
   public Wishlist findByBookIsbn(Long bookIsbn) {
-    return wishlistRepository.findByBookIsbn(bookIsbn).orElse(null);
+    return wishlistRepository.findByIsbn(bookIsbn).orElse(null);
   }
   @Override
   public Wishlist findByBookIsbnAndUsername(Long bookIsbn, String username) {
-    return wishlistRepository.findByBookIsbnAndUsername(bookIsbn, username).orElse(null);
+    return wishlistRepository.findByIsbnAndUsername(bookIsbn, username).orElse(null);
   }
 
 
@@ -43,7 +43,7 @@ public class WishlistService  implements WishlistRepositoryImpl {
 
   @Override
   public void removeByBookIsbn(Long bookIsbn) {
-    wishlistRepository.deleteByBookIsbn(bookIsbn);
+    wishlistRepository.deleteByIsbn(bookIsbn);
   }
 
   @Override

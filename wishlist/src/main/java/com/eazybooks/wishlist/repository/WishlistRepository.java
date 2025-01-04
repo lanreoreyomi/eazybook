@@ -15,13 +15,13 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
   @Query("SELECT i FROM Wishlist i WHERE i.username = :username")
   Optional<List<Wishlist>> findByUsername(String username);
 
-  @Query("SELECT i FROM Wishlist i WHERE i.bookIsbn = :bookIsbn")
-  Optional<Wishlist> findByBookIsbn(Long bookIsbn);
+  @Query("SELECT i FROM Wishlist i WHERE i.isbn = :isbn")
+  Optional<Wishlist> findByIsbn(Long isbn);
 
-  @Query("SELECT i FROM Wishlist i WHERE i.bookIsbn = :bookIsbn and i.username = :username")
-  Optional<Wishlist> findByBookIsbnAndUsername(Long bookIsbn, String username);
+  @Query("SELECT i FROM Wishlist i WHERE i.isbn = :isbn and i.username = :username")
+  Optional<Wishlist> findByIsbnAndUsername(Long isbn, String username);
 
   void deleteById(Long id);
-  void deleteByBookIsbn(Long bookIsbn);
+  void deleteByIsbn(Long isbn);
 
 }

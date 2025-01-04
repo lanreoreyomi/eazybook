@@ -37,9 +37,6 @@ export const useLogOutStore = defineStore('logout', {
           console.error('An unexpected error occurred:', error);
         }
 
-         // Even if logout fails, you might still want to clear tokens and set isLoggedIn to false
-        // to prevent the user from accessing protected resources.
-
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
       }

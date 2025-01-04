@@ -11,8 +11,8 @@ export interface BookCatalogue {
 
 export interface WishList {
   localDate: string,
-  "username": string,
-  "bookTitle": string,
-  "bookIsbn": number
+  username: string,
+  bookTitle: string,
+  isbn: number
 
 }

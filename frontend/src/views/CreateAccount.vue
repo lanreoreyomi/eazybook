@@ -1,7 +1,6 @@
 <template>
   <div id="create-account-form">
 
-    <p>Hey</p>
     <form @submit.prevent="createUser">
       <div>
         <h2>Create Account</h2>
@@ -36,6 +35,7 @@
 <script lang="ts">
 import { useUserStore } from '@/stores/useUserStore.ts'
 import { computed } from 'vue'
+import router from '@/router'
 
 export default {
   setup() {
@@ -43,7 +43,7 @@ export default {
     const isSuccessful = computed(
       () =>{
         if (userStore.statusCode === 201) {
-        window.location.href="/login";
+        router.push("/login");
           return true
         }else {
           return false
@@ -97,9 +97,9 @@ body,
       justify-items: start;
       input {
         width: 100%;
-        padding: 10px;
+        padding: 15px;
          border: 1px solid colors.$text-color;
-        border-radius: 1rem;
+        border-radius: 0.5rem;
         margin: 10px 0;
         font-size: 20px;
       }
@@ -113,15 +113,15 @@ body,
     button {
       width: 100%;
       margin: 20px 0;
-      padding: 20px;
+      padding: 15px;
       text-align: center;
       justify-items: center;
       background-color: colors.$text-color;
       border: none;
       color: colors.$white-color;
-      font-weight: 600;
+      font-weight: 400;
       border-radius: 0.5rem;
-      font-size: 20px;
+      font-size: 16px;
     }
     #user_created {
       color: colors.$text-color;

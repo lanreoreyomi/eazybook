@@ -25,8 +25,8 @@ public class Wishlist {
   @Column(name = "book_title")
   private String bookTitle;
 
-  @Column(name = "book_isbn")
-  private Long bookIsbn;
+  @Column(name = "isbn")
+  private Long isbn;
 
   public String getUsername() {
     return username;
@@ -44,12 +44,12 @@ public class Wishlist {
     this.bookTitle = bookTitle;
   }
 
-  public Long getBookIsbn() {
-    return bookIsbn;
+  public Long getIsbn() {
+    return isbn;
   }
 
-  public void setBookIsbn(Long bookIsbn) {
-    this.bookIsbn = bookIsbn;
+  public void setIsbn(Long isbn) {
+    this.isbn = isbn;
   }
 
   public Wishlist(Long id) {
@@ -74,7 +74,7 @@ public class Wishlist {
         ", localDate=" + localDate +
         ", username='" + username + '\'' +
         ", bookTitle='" + bookTitle + '\'' +
-        ", bookIsbn=" + bookIsbn +
+        ", isbn=" + isbn +
         '}';
   }
 }

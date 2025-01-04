@@ -5,7 +5,7 @@ import java.time.LocalDate;
 public class CreateWishListRequest
 {
 
-  private Long bookIsbn;
+  private Long isbn;
   private LocalDate localDate;
 
   public CreateWishListRequest() {
@@ -19,24 +19,28 @@ public class CreateWishListRequest
     this.localDate = localDate;
   }
 
-  public Long getBookIsbn() {
-    return bookIsbn;
+  public Long getIsbn() {
+    return isbn;
   }
 
-  public void setBookIsbn(Long bookIsbn) {
-    this.bookIsbn = bookIsbn;
+  public void setIsbn(Long isbn) {
+    this.isbn = isbn;
   }
 
-  public CreateWishListRequest(Long bookIsbn, String userName,
+  public CreateWishListRequest(Long isbn,
       LocalDate localDate) {
-    this.bookIsbn = bookIsbn;
+    this.isbn = isbn;
     this.localDate = localDate;
+  }
+
+  public CreateWishListRequest(Long isbn) {
+    this.isbn = isbn;
   }
 
   @Override
   public String toString() {
     return "CreateWishListRequest{" +
-        ", bookIsbn=" + bookIsbn +
+        ", isbn=" + isbn +
         ", localDate=" + localDate +
         '}';
   }
