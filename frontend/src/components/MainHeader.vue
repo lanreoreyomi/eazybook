@@ -60,11 +60,17 @@
       </div>
       <div>
         <label for="description">Description:</label>
-        <input type="text" id="description" v-model="book.description" required />
+        <textarea type="text" id="description" v-model="book.description"
+                  required  placeholder="Enter Book Description"></textarea>"/>
       </div>
       <div>
-        <label for="available">Available:</label>
-        <input type="text" id="available" v-model="book.available" required />
+        <label for="available">Available for Rent</label>
+<!--        <input type="text" id="available" v-model="book.available" required />-->
+        <select id="available" name="available" required>
+          <option value="" disabled selected>Select</option>
+          <option value="true">True</option>
+          <option value="false">False</option>
+        </select>
       </div>
       <div>
         <label for="quantity">Quantity:</label>
@@ -233,6 +239,7 @@ header {
   }
 
   #add_new_book {
+    z-index: 999;
     position: fixed;
     //box-shadow: 1px 4px 6px rgba(0, 0, 0, 0.1);
     box-shadow: 0 0 50px #ccc;
@@ -257,13 +264,24 @@ header {
         color: colors.$color-primary;
         text-align: start;
         justify-items: start;
-        input {
+        input, select {
           width: 100%;
           padding: 10px;
           border: 1px solid colors.$text-color;
           border-radius: 0.5rem;
           margin: 5px 0;
           font-size: 16px;
+
+        }
+        textarea{
+          border-radius: 0.5rem;
+          margin: 5px 0 0;
+          font-size: 16px;
+          width: 100%;
+          padding: 10px;
+          height: 200px;
+          resize: none;
+          font: unset;
         }
         label {
           color: colors.$text-color;
