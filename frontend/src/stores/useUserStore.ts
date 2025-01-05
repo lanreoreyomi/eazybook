@@ -20,7 +20,6 @@ export const useUserStore = defineStore('user', {
       lastname: '',
       email: '',
     } as UserState, // Define type for user object
-    loading: false,
     statusCode: 0,
     statusText: '',
     errorResponse: {
@@ -30,7 +29,6 @@ export const useUserStore = defineStore('user', {
   }),
   actions: {
     async createUser() {
-      this.loading = true
       try {
         const response = await axios.post<UserState>(CREATEACCOUUNT, this.user)
         // Handle successful user creation

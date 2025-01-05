@@ -89,12 +89,12 @@ export default defineComponent({
     justify-content: center;
     button {
       font-size: 16px;
-      margin: 10px auto;
+      margin: 10px 15px 20px auto ;
       padding: 10px;
       border-radius: 0.5rem;
       border: none;
       outline: none;
-      width: 250px;
+      width: 150px;
       cursor: pointer;
 
       box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1);

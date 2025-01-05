@@ -5,7 +5,6 @@ import com.eazybooks.bookcatalogue.model.BookCatalogueImpl;
 import com.eazybooks.bookcatalogue.repository.BookCatalogueRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,7 +39,7 @@ public class BookCatalogueService implements BookCatalogueImpl {
 
   @Override
   public BookCatalogue getBookById(Long id) {
-    return bookCatalogueRepository.findByBookId(id);
+    return bookCatalogueRepository.findById(id).orElse(null);
   }
 
   @Override

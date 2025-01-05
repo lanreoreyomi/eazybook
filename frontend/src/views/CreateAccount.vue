@@ -1,6 +1,5 @@
 <template>
   <div id="create-account-form">
-
     <form @submit.prevent="createUser">
       <div>
         <h2>Create Account</h2>
@@ -54,7 +53,6 @@ export default {
     const statusText = computed(() => userStore.statusText)
     return {
       user: userStore.user,
-      isLoading: userStore.loading,
       createUser: userStore.createUser,
       isSuccessful,
       statusText,

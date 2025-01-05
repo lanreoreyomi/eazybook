@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
  import type { BookCatalogue, WishList } from '@/model/model.ts'
-import { accessToken } from '@/Utils/AppUtils.ts'
+import { accessToken, username } from '@/Utils/AppUtils.ts'
 import { addBookToWishlistWithUsername, getWishListForUser, removeBookFromWishlistWithUsername } from '@/api/apis.ts'
 
 interface WishlistState {
@@ -26,7 +26,6 @@ export const useWishlistStore = defineStore('wishlist', {
 
   actions: {
     async getUserWishList() {
-       const username = localStorage.getItem('username')
       // Access loggedInUser *after* ensuring the user is logged in
       try {
         const response =

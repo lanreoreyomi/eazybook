@@ -53,7 +53,6 @@ public class WishlistController {
     //verifies token
     try {
       tokenValidation = verifyToken(request);
-
     } catch (Exception e) {
       logger.error(e.getMessage());
     }
@@ -233,7 +232,6 @@ public class WishlistController {
     }
   }
 
-
   private ResponseEntity<String> verifyUser
       (HttpServletRequest request, String username) {
 
@@ -278,7 +276,6 @@ public class WishlistController {
     }
 
   }
-
 
   private ResponseEntity<BookCatalogue> verifyBookIsbn(HttpServletRequest request, Long bookIsbn) {
 

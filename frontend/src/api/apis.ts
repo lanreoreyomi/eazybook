@@ -1,7 +1,7 @@
 export const CREATEACCOUUNT = '/auth/create-account'
 export const LOGIN = '/auth/login'
 export const LOGOUT = '/auth/logout'
-export const GETALLBOOKCATALOGUE = '/bookcatalogue'
+export const BOOKCATALOGUE = '/bookcatalogue'
 export const WISHLIST = '/wishlist/'
 
 export const getWishListForUser = (username: string| null): string => {
@@ -12,4 +12,7 @@ export const addBookToWishlistWithUsername = (username: string | null): string =
 }
 export const removeBookFromWishlistWithUsername = (username: string | null): string => {
   return `${WISHLIST+username}/remove`
+}
+export const addBookToCatalogueWithUsername = (username: string | null): string => {
+  return `${BOOKCATALOGUE}/${username}/addbook`
 }

@@ -23,7 +23,6 @@ public class User implements UserDetails {
   @Column(nullable = false)
   private  Long userId;
   private String username;
-  private  String salt;
   private String password;
   private  String firstname;
   private String lastname;
@@ -69,15 +68,6 @@ public class User implements UserDetails {
     this.username = username;
   }
 
-  public String getSalt() {
-    return salt;
-  }
-
-  public void setSalt(String salt) {
-    this.salt = salt;
-  }
-
-
   //will return all roles of the user
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -122,10 +112,9 @@ public class User implements UserDetails {
     this.role = role;
   }
 
-  public User(Long userId,String email, String username, String salt, String password, String firstname,
+  public User(Long userId,String email, String username,String password, String firstname,
       String lastname) {
     this.username = username;
-    this.salt = salt;
     this.password = password;
     this.firstname = firstname;
     this.lastname = lastname;
@@ -139,8 +128,7 @@ public class User implements UserDetails {
   public String toString() {
     return "User{" +
          ", username='" + username + '\'' +
-        ", salt='" + salt + '\'' +
-        ", password='" + password + '\'' +
+         ", password='" + password + '\'' +
         ", firstname='" + firstname + '\'' +
         ", lastname='" + lastname + '\'' +
         ", email='" + email + '\'' +

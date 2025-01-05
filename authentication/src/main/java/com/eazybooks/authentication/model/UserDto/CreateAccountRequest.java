@@ -1,5 +1,6 @@
 package com.eazybooks.authentication.model.UserDto;
 
+import com.eazybooks.authentication.model.Role;
 import java.util.Objects;
 
 public class CreateAccountRequest {
@@ -9,6 +10,7 @@ public class CreateAccountRequest {
   private  String firstname;
   private String lastname;
   private String email;
+  private Role role;
 
   public CreateAccountRequest(Long userId, String username, String password, String firstname, String lastname,
       String email) {
@@ -18,6 +20,14 @@ public class CreateAccountRequest {
     this.firstname = firstname;
     this.lastname = lastname;
     this.email = email;
+  }
+
+  public Role getRole() {
+    return role;
+  }
+
+  public void setRole(Role role) {
+    this.role = role;
   }
 
   public Long getUserId() {

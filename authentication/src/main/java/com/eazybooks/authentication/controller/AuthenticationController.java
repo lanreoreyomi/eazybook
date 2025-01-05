@@ -5,6 +5,8 @@ import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
 import com.eazybooks.authentication.model.UserDto.CreateAccountRequest;
 import com.eazybooks.authentication.model.VerifyToken;
 import com.eazybooks.authentication.service.AuthenticatorService;
+import com.eazybooks.authentication.service.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,15 +30,16 @@ import org.springframework.web.client.RestTemplate;
 public class AuthenticationController {
 
   private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
+  private final JwtService jwtService;
   AuthenticatorService authenticatorService;
   private DiscoveryClient discoveryClient;
   RestTemplate restTemplate = new RestTemplate();
 
-
   public AuthenticationController(AuthenticatorService authenticatorService,
-      DiscoveryClient discoveryClient) {
+      DiscoveryClient discoveryClient, JwtService jwtService) {
     this.authenticatorService = authenticatorService;
     this.discoveryClient = discoveryClient;
+    this.jwtService = jwtService;
   }
 
   @PostMapping("/create-account")
@@ -61,19 +65,14 @@ public class AuthenticationController {
 
     final AuthenticationResponse authenticationResponse = authenticatorService.createUserAccount(createAccountRequest);
     try {
-
       logger.info("AuthenticationResponse: {}", authenticationResponse);
-
       List<ServiceInstance> instances = discoveryClient.getInstances("user");
-
       if (instances.isEmpty()) {
         logger.info("Authentication service not found");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
       }
       logger.info("instances is not empty try block: {}", instances);
-
       ServiceInstance instance = instances.get(0);
-
       String authUrl = instance.getUri() + "/user/create-account";
 
       logger.info("authenticationResponse.getToken(): {}", authenticationResponse.getToken());
@@ -98,6 +97,37 @@ public class AuthenticationController {
     }
     return new ResponseEntity<>("User successfully created", HttpStatus.CREATED);
   }
+  @PostMapping("/{username}/role")
+  public ResponseEntity<String> findUserRole(@PathVariable String username, HttpServletRequest request) {
+
+     if (username == null) {
+      logger.warn("Username is null");
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+    String authHeader = request.getHeader("Authorization");
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      logger.warn("Authorization header missing or invalid");
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    String token = authHeader.substring(7);
+
+    try {
+      boolean isValid = authenticatorService.isTokenValid(token);
+      if (!isValid) {
+      return new ResponseEntity<>("User token not valid", HttpStatus.UNAUTHORIZED);
+      }
+    } catch (Exception e) {
+      logger.error("Error during token validation: {}", e.getMessage(), e);
+      return new ResponseEntity<>("", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    try{
+      final String userByRole = authenticatorService.findUserByRole(username);
+      return new ResponseEntity<>(userByRole, HttpStatus.OK);
+    } catch (Exception e) {
+     return new ResponseEntity<>("Error getting role for user ", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+  }
 
   @PostMapping("/login")
   public ResponseEntity<String> logIn(@RequestBody LoginRequest loginRequest) {
@@ -109,17 +139,13 @@ public class AuthenticationController {
     }
 
     try {
-
       final String token = authenticatorService.authenticate(loginRequest);
-
       if (token != null && !token.isEmpty()) {
         logger.info("User {} successfully logged in", loginRequest.getUsername());
-
         return ResponseEntity.ok()
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
             .body("Login successful");
       }
-
     } catch (Exception e) {
       logger.warn("Log in failed", e);
       return new ResponseEntity<String>("User log in Failed", HttpStatus.UNAUTHORIZED);
@@ -131,17 +157,14 @@ public class AuthenticationController {
   @PostMapping("/validate-token")
   public ResponseEntity<Boolean> validateToken(@RequestBody VerifyToken verifyToken) {
 
-    logger.info("Inside Verify token {}", verifyToken.getToken());
     if (verifyToken.getToken() == null || verifyToken.getToken().isBlank()) {
       logger.warn("Token is missing or blank");
       return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
     }
 
     try {
-
       boolean isValid = authenticatorService.isTokenValid(verifyToken.getToken());
-      logger.info("isValid {}", isValid);
-      if (! isValid) {
+      if (!isValid) {
         logger.warn("Token validation failed");
         return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
       }

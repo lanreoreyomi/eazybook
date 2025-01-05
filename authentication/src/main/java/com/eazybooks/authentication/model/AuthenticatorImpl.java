@@ -11,4 +11,5 @@ public interface AuthenticatorImpl {
   Boolean findByUsername(String username);
   Boolean findByEmail(String username);
   Boolean isTokenValid(String token);
+  String findUserByRole(String username);
 }

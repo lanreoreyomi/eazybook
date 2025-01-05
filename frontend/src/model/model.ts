@@ -1,8 +1,9 @@
+
 export interface BookCatalogue {
   title: string
   author: string
-  isbn: string
-  publicationYear: string
+  isbn: number
+  publicationYear: number
   description: string
   available: boolean
   quantityForRent: number

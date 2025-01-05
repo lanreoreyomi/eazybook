@@ -1,10 +1,10 @@
 package com.eazybooks.bookcatalogue.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
@@ -12,23 +12,17 @@ import jakarta.persistence.Table;
 public class BookCatalogue {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  @Column(nullable = false)
-  private Long bookId;
-  private String title;
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_catalogue_seq_generator")
+  @SequenceGenerator(name = "book_catalogue_seq_generator", sequenceName = "book_catalogue_seq", allocationSize = 1, initialValue = 21)
+  private Long id;
 
+  private String title;
   private String author;
-  private String isbn;
-  private String publicationYear;
+  private Long isbn;
+  private int publicationYear;
   private String description;
   private boolean available;
   private int quantityForRent;
-
-  //I need to build the user Entity and so proper mapping. and then update the service and controller classes.
-
-  public void setBookId(Long bookId) {
-    this.bookId = bookId;
-  }
 
   public String getTitle() {
     return title;
@@ -46,19 +40,19 @@ public class BookCatalogue {
     this.author = author;
   }
 
-  public String getIsbn() {
+  public Long getIsbn() {
     return isbn;
   }
 
-  public void setIsbn(String isbn) {
+  public void setIsbn(Long isbn) {
     this.isbn = isbn;
   }
 
-  public String getPublicationYear() {
+  public int getPublicationYear() {
     return publicationYear;
   }
 
-  public void setPublicationYear(String publicationYear) {
+  public void setPublicationYear(int publicationYear) {
     this.publicationYear = publicationYear;
   }
 
@@ -86,10 +80,14 @@ public class BookCatalogue {
     this.quantityForRent = quantityForRent;
   }
 
+  public void setId(Long id) {
+    this.id = id;
+  }
+
   @Override
   public String toString() {
     return "BookCatalogue{" +
-        "bookId=" + bookId +
+        "Id=" + id +
         ", title='" + title + '\'' +
         ", author='" + author + '\'' +
         ", isbn='" + isbn + '\'' +

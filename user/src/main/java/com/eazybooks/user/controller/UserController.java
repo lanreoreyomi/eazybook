@@ -288,7 +288,6 @@ public class UserController {
       HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token), headers);
       authResponse = restTemplate.exchange(
           authUrl, HttpMethod.POST, requestEntity, Boolean.class);
-      logger.info("authResponse getBody{}", authResponse.getBody());
 
       if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
           authResponse.getBody())) {
