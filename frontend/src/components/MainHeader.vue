@@ -24,9 +24,6 @@
         <li v-if="checkAuthenticated()">
           <router-link to="/checkout"> Checkout</router-link>
         </li>
-        <li id="profile" v-if="checkAuthenticated()">
-          <router-link to="/profile">Profile</router-link>
-        </li>
         <li id="add_book" v-if="checkAuthenticated()">
           <button @click="toggleFormModal">Add Book</button>
         </li>
@@ -64,12 +61,10 @@
                   required  placeholder="Enter Book Description"></textarea>"/>
       </div>
       <div>
-        <label for="available">Available for Rent</label>
-<!--        <input type="text" id="available" v-model="book.available" required />-->
-        <select id="available" name="available" required>
-          <option value="" disabled selected>Select</option>
-          <option value="true">True</option>
-          <option value="false">False</option>
+        <label for="available">Available for Rent:</label>
+         <select id="available" name="available" required  v-model="book.available">
+          <option value="True" selected>True</option>
+          <option value="False">False</option>
         </select>
       </div>
       <div>
@@ -95,7 +90,7 @@ export default {
 
   setup() {
     const isModalOpen = ref(false)
-     const catalogueStore = useAddBookCatalogueStore()
+    const catalogueStore = useAddBookCatalogueStore()
     const logoutStore = useLogOutStore()
     const logInStore = useLogInStore()
     const userProfile = ref('')
@@ -105,7 +100,6 @@ export default {
       router.go(0)
     }
     const getStatusText =computed(()=>catalogueStore.statusText);
-
     const toggleFormModal = () =>
       isModalOpen.value === true ? (isModalOpen.value = false) : (isModalOpen.value = true)
 
@@ -121,7 +115,9 @@ export default {
     onMounted(() => {
       if (!checkAuthenticated()) {
         router.push('/')
+        return;
       }
+      router.push('/catalogue')
     })
     return {
       book: catalogueStore.addBookCatalogue,
@@ -151,8 +147,11 @@ body,
 }
 
 header {
+
   box-shadow: 1px 4px 6px rgba(0, 0, 0, 0.1);
-  position: relative;
+  width: 100%;
+  background-color: white;
+  z-index: 99999;
   nav {
     width: 100%;
     margin-top: 1rem;
@@ -271,7 +270,6 @@ header {
           border-radius: 0.5rem;
           margin: 5px 0;
           font-size: 16px;
-
         }
         textarea{
           border-radius: 0.5rem;
@@ -279,7 +277,7 @@ header {
           font-size: 16px;
           width: 100%;
           padding: 10px;
-          height: 200px;
+          height: 100px;
           resize: none;
           font: unset;
         }

@@ -21,7 +21,7 @@
 </template>
 <script lang="ts" scoped>
 import type { BookCatalogue } from '@/model/model.ts'
-import { defineComponent, type PropType, ref } from 'vue'
+import { defineComponent, type PropType, } from 'vue'
 
 export default defineComponent({
   inheritAttrs: false,
@@ -52,7 +52,7 @@ export default defineComponent({
     width: 100%;
     font-size: 20px;
     box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 0.5rem;
+    border-radius: 1rem;
     background-color: #ecf0f1;
     .book_card-body {
       .book_card-title {
@@ -63,12 +63,14 @@ export default defineComponent({
     }
 
     .book_card-text {
-      padding: 10px;
       font-size: 16px;
+      padding: 0 10px 10px;
     }
   }
 
   .book_card-img {
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
     padding: 0;
     width: 100%;
     border: 0.5rem;
@@ -78,6 +80,7 @@ export default defineComponent({
     font-size: 16px;
     list-style: none;
     padding: 10px;
+    border: 0.5rem;
     .book_card_links {
       font-weight: bold;
     }
@@ -128,7 +131,7 @@ export default defineComponent({
 
     }
     .disabled_btn{
-        opacity: 0.6;
+        opacity: 0.2;
         cursor: not-allowed;
     }
     p{

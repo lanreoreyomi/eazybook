@@ -32,7 +32,7 @@ public class BookCatalogueController {
   Logger logger = LoggerFactory.getLogger(BookCatalogueController.class);
 
   private final BookCatalogueService bookCatalogueService;
-  private DiscoveryClient discoveryClient;
+  private final DiscoveryClient discoveryClient;
   RestTemplate restTemplate = new RestTemplate();
 
   public BookCatalogueController(BookCatalogueService bookCatalogueService,
@@ -54,6 +54,7 @@ public class BookCatalogueController {
       logger.error(e.getMessage());
     }
 
+    assert tokenValidation != null;
     if (!Boolean.TRUE.equals(tokenValidation.getBody())) {
       logger.error("Error validating token");
       return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
@@ -91,8 +92,7 @@ public class BookCatalogueController {
   @GetMapping()
   public ResponseEntity<List<BookCatalogue>> getAllBookCatalogues(HttpServletRequest request) {
 
-    logger.info("request {}", request.toString());
-    String authHeader = request.getHeader("Authorization");
+     String authHeader = request.getHeader("Authorization");
 
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
       logger.warn("Authorization header missing or invalid");
@@ -239,11 +239,9 @@ public class BookCatalogueController {
       HttpEntity<String> requestEntity = new HttpEntity<>(token, headers);
       authResponse = restTemplate.exchange(
           authUrl, HttpMethod.POST, requestEntity, String.class);
-
-      if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
-          authResponse.getBody())) {
-        logger.warn("Token validation failed");
+      if (authResponse.getStatusCode() != HttpStatus.OK) {
         return new ResponseEntity<>("User not admin", HttpStatus.UNAUTHORIZED);
+
       }
       return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
     } catch (Exception e) {

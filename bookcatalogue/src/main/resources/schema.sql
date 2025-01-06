@@ -15,3 +15,17 @@ create sequence if not exists book_catalogue_seq
 alter sequence book_catalogue_seq owner to eazybook_dbuser;
 
 alter sequence book_catalogue_seq owned by book_catalogue.id;
+
+CREATE TABLE IF NOT EXISTS check_out (
+                         id SERIAL PRIMARY KEY,
+                         book_id BIGINT,
+                         isbn bigint UNIQUE,  -- ISBNs should be unique
+                         user_name VARCHAR(255) NOT NULL,
+                         date_of_checkout INT NOT NULL ,
+                         date_of_return INT NOT NULL ,
+                         is_returned BOOLEAN DEFAULT TRUE,
+                         is_checked_out BOOLEAN DEFAULT FALSE,
+                         check_out_times INT
+                                              -- Ensure quantity is not negative
+);
+

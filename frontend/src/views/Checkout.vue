@@ -7,9 +7,23 @@ export default defineComponent({
 </script>
 
 <template>
-<h2>Borrow </h2>
+  <div class="wish-list-items">
+    <div>
+      <div class="wishes">
+        <div class="wish-list-title"></div>
+        <div class="remove-list"><button>Remove from cart</button></div>
+        <div class="wish-list-checkout"><button>Checkout</button></div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped lang="scss">
-
+@use '/src/assets/scss/colors.scss';
+html, body {
+  padding: 0;
+  margin: 0;
+}
 </style>
+
+

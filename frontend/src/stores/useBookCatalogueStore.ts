@@ -79,6 +79,8 @@ export const useAddBookCatalogueStore = defineStore('addBookCatalogue', {
           }
         })
         // Handle successful user creation
+
+        console.log(response.status)
         this.$patch({
           statusCode: response.status,
           statusText : String(response.data)
