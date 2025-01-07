@@ -4,23 +4,21 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
+@Table(name = "checkout")
 public class Checkout {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  @Column(nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  private Long bookId;
   private Long isbn;
-  private String userName;
+  private String checkedOutBy;
   private LocalDate dateOfCheckout;
   private LocalDate dateOfReturn;
-  private Long checkoutTimes;
 
   public Boolean getReturned() {
     return isReturned;
@@ -30,16 +28,7 @@ public class Checkout {
     isReturned = returned;
   }
 
-  public Boolean getCheckedOut() {
-    return isCheckedOut;
-  }
-
-  public void setCheckedOut(Boolean checkedOut) {
-    isCheckedOut = checkedOut;
-  }
-
   private Boolean isReturned;
-  private Boolean isCheckedOut;
 
   public Long getIsbn() {
     return isbn;
@@ -49,12 +38,12 @@ public class Checkout {
     this.isbn = isbn;
   }
 
-  public String getUserName() {
-    return userName;
+  public String getCheckedOutBy() {
+    return checkedOutBy;
   }
 
-  public void setUserName(String userName) {
-    this.userName = userName;
+  public void setCheckedOutBy(String checkedOutBy) {
+    this.checkedOutBy = checkedOutBy;
   }
 
   public LocalDate getDateOfCheckout() {
@@ -73,19 +62,23 @@ public class Checkout {
     this.dateOfReturn = dateOfReturn;
   }
 
-  public Long getCheckoutTimes() {
-    return checkoutTimes;
-  }
-
-  public void setCheckoutTimes(Long checkoutTimes) {
-    this.checkoutTimes = checkoutTimes;
-  }
-
   public Long getId() {
     return id;
   }
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  @Override
+  public String toString() {
+    return "Checkout{" +
+        "id=" + id +
+        ", isbn=" + isbn +
+        ", checkedOutBy='" + checkedOutBy + '\'' +
+        ", dateOfCheckout=" + dateOfCheckout +
+        ", dateOfReturn=" + dateOfReturn +
+         ", isReturned=" + isReturned +
+        '}';
   }
 }

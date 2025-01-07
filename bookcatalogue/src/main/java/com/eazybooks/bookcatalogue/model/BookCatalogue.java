@@ -15,7 +15,6 @@ public class BookCatalogue {
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_catalogue_seq_generator")
   @SequenceGenerator(name = "book_catalogue_seq_generator", sequenceName = "book_catalogue_seq", allocationSize = 1, initialValue = 21)
   private Long id;
-
   private String title;
   private String author;
   private Long isbn;
@@ -23,6 +22,10 @@ public class BookCatalogue {
   private String description;
   private boolean available;
   private int quantityForRent;
+
+  public Long getId() {
+    return id;
+  }
 
   public String getTitle() {
     return title;

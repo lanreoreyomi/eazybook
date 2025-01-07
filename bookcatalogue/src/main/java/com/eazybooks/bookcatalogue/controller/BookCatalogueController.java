@@ -1,6 +1,8 @@
 package com.eazybooks.bookcatalogue.controller;
 
 
+import static com.eazybooks.bookcatalogue.utils.RestUtils.verfiyToken;
+
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.VerifyToken;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
@@ -172,44 +174,11 @@ public class BookCatalogueController {
 
   private ResponseEntity<Boolean> verifyToken(HttpServletRequest request) {
 
-    String authHeader = request.getHeader("Authorization");
-
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      logger.warn("Authorization header missing or invalid");
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    String token = authHeader.substring(7);
-    ResponseEntity<Boolean> authResponse;
-
-    try {
-      List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
-      if (instances.isEmpty()) {
-        logger.error("Authentication service not found");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
-
-      ServiceInstance instance = instances.get(0);
-      String authUrl = instance.getUri() + "/auth/validate-token";
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Authorization", authHeader);
-      headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
-
-      HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token), headers);
-      authResponse = restTemplate.exchange(
-          authUrl, HttpMethod.POST, requestEntity, Boolean.class);
-      if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
-          authResponse.getBody())) {
-        logger.warn("Token validation failed");
-        return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
-      }
-      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
-    } catch (Exception e) {
-      return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
-
-    }
+    return verfiyToken(request, logger, discoveryClient, restTemplate);
 
   }
+
+
 
   private ResponseEntity<String> getUserRole(String username, HttpServletRequest request) {
 
