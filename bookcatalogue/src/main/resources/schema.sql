@@ -46,3 +46,20 @@ CREATE SEQUENCE IF NOT EXISTS checkout_stats_seq
     CACHE 1;
  alter sequence checkout_stats_seq owner to eazybook_dbuser;
 alter sequence checkout_stats_seq owned by checkout_stats.id;
+
+CREATE TABLE IF NOT EXISTS checkout_items (
+                                              id SERIAL PRIMARY KEY,
+                                              book_isbn BIGINT NOT NULL,
+                                              username VARCHAR(255) NOT NULL
+
+
+);
+
+CREATE SEQUENCE IF NOT EXISTS checkout_items_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+alter sequence checkout_items_seq owner to eazybook_dbuser;
+alter sequence checkout_items_seq owned by checkout_items.id;

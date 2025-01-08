@@ -1,5 +1,6 @@
 package com.eazybooks.bookcatalogue.utils;
 
+import com.eazybooks.bookcatalogue.model.SERVICES;
 import com.eazybooks.bookcatalogue.model.VerifyToken;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -15,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 public class RestUtils {
-  public static ResponseEntity<Boolean> verfiyToken(HttpServletRequest request, Logger logger,
+  private static ResponseEntity<Boolean> verfiyToken(HttpServletRequest request, String username, Logger logger,
       DiscoveryClient discoveryClient, RestTemplate restTemplate) {
     String authHeader = request.getHeader("Authorization");
 
@@ -40,7 +41,8 @@ public class RestUtils {
       headers.set("Authorization", authHeader);
       headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
 
-      HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token), headers);
+      final String s = username != null ? username : null;
+      HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token,s ), headers);
       authResponse = restTemplate.exchange(
           authUrl, HttpMethod.POST, requestEntity, Boolean.class);
       if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
@@ -53,6 +55,12 @@ public class RestUtils {
       return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
 
     }
+  }
+
+  public static ResponseEntity<Boolean> isTokenValid(HttpServletRequest request, String username,
+      Logger logger, DiscoveryClient discoveryClient, RestTemplate restTemplate) {
+    return verfiyToken(request, username, logger, discoveryClient, restTemplate);
+
   }
 
 }

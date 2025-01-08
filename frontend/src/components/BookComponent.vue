@@ -13,9 +13,8 @@
     </ul>
     <div class="book_card_button" >
       <p v-if="book.quantityForRent<1"><img src="https://img.icons8.com/?size=14&id=3156&format=png&color=000000" alt="icon"> Not available for checkout</p>
-
       <button class="book_card-link" id="save_book" @click="getCurrentBook(book)">Add to Wishlist</button>
-      <button class="book_card-link" id="checkout_book" :class="{disabled_btn : book.quantityForRent<1}" >Checkout</button>
+      <button class="book_card-link" id="checkout_book" :class="{disabled_btn : book.quantityForRent<=1}" @click="processCheckout(book)">Add to checkout</button>
     </div>
   </div>
 </template>
@@ -32,16 +31,23 @@ export default defineComponent({
        required: true // Make the prop required
     }
   },
-  emits: ['getBookDetails'],
+  emits: ['getBookDetails', 'addToCheckout'],
   setup(props, {emit} ) {
      const getCurrentBook = (book: BookCatalogue) => {
        emit('getBookDetails', book);
     };
+     const processCheckout = (book: BookCatalogue) => {
+       emit('addToCheckout', book);
+    };
+
     return {
       getCurrentBook,
       open,
       emit,
+      processCheckout
+
     }
+
   },
 })
 </script>
@@ -61,7 +67,6 @@ export default defineComponent({
         font-weight: bold;
       }
     }
-
     .book_card-text {
       font-size: 16px;
       padding: 0 10px 10px;

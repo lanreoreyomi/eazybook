@@ -4,7 +4,7 @@
     <div v-for="(wishList, index) in wishListItems" :key="index" class="wish-list">
       <div class="wishes">
       <div class="wish-list-title">{{wishList.bookTitle}}</div>
-      <div class="remove-list" @click="removeBookToWishlist(index)"><button>Remove from cart</button></div>
+      <div class="remove-list" @click="removeBookFromWishlist(index)"><button>Remove from cart</button></div>
         <div class="wish-list-checkout"><button>Checkout</button></div>
       </div>
     </div>
@@ -20,7 +20,6 @@ import router from '@/router'
   name: 'WishList',
 
   setup() {
-    const wishlistStore = useWishlistStore()
     const wishListItems = ref<WishList[]>([])
     const wishListInfo = ref(" ")
 
@@ -32,13 +31,12 @@ import router from '@/router'
       return wishListStore.getUserWishList();
     });
 
-    const removeBookToWishlist = (index: number): void => {
+    const removeBookFromWishlist = (index: number): void => {
       const wishlist = wishListItems.value.at(index);
       if (wishlist) {
-      wishlistStore.removeBookToWishlist(wishlist);
-         router.go(0)
+        wishListStore.removeBookToWishlist(wishlist);
+        router.go(0)
       }
-
     }
     onBeforeMount(async () => {
       await wishListStore.getUserWishList()
@@ -52,7 +50,7 @@ import router from '@/router'
       userWishList,
       wishListInfo,
       wishListItems,
-      removeBookToWishlist,
+      removeBookFromWishlist,
      };
   }
 })
@@ -70,7 +68,10 @@ html, body {
     padding: 10px;
     font-size: 40px;
     text-align: center;
-    color: colors.$text-color;
+    color: colors.$accent-color;
+
+    width: 60%;
+    border-radius:0.5rem;
   }
 
   .wish-list-items{

@@ -25,7 +25,7 @@ public class Wishlist {
   @Column(name = "book_title")
   private String bookTitle;
 
-  @Column(name = "isbn")
+  @Column(name = "book_isbn")
   private Long isbn;
 
   public String getUsername() {

@@ -191,7 +191,7 @@ public class WishlistController {
     final List<Wishlist> wishlists = wishlistService.findByUserName(username);
 
     wishlists.forEach(wishlist -> {
-      logger.info("Found wishlist {}", wishlist.getBookTitle());
+      logger.info("Found wishlist {}", wishlist.toString());
     });
 
     return new ResponseEntity<>(wishlists, HttpStatus.OK);

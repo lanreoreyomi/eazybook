@@ -117,7 +117,6 @@ export default {
         router.push('/')
         return;
       }
-      router.push('/catalogue')
     })
     return {
       book: catalogueStore.addBookCatalogue,
@@ -147,7 +146,6 @@ body,
 }
 
 header {
-
   box-shadow: 1px 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
   background-color: white;

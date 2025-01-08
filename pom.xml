@@ -25,7 +25,6 @@
   <modules>
     <module>user</module>
     <module>bookcatalogue</module>
-    <module>borrowhistory</module>
     <module>authentication</module>
   </modules>
   <scm>

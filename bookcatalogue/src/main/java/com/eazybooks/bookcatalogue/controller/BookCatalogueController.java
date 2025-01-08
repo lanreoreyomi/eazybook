@@ -1,8 +1,7 @@
 package com.eazybooks.bookcatalogue.controller;
 
 
-import static com.eazybooks.bookcatalogue.utils.RestUtils.verfiyToken;
-
+import static com.eazybooks.bookcatalogue.utils.RestUtils.isTokenValid;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.VerifyToken;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
@@ -51,7 +50,7 @@ public class BookCatalogueController {
 
     //verifies token
     try {
-      tokenValidation = verifyToken(request);
+      tokenValidation = isTokenValid(request, username, logger, discoveryClient, restTemplate);
     } catch (Exception e) {
       logger.error(e.getMessage());
     }
@@ -64,14 +63,12 @@ public class BookCatalogueController {
     // Check if User is Admin
     try {
       final ResponseEntity<String> userRole = getUserRole(username, request);
-
       if (!Objects.equals(userRole.getBody(), "ADMIN")) {
         return new ResponseEntity<>("Only admin can add new book", HttpStatus.FORBIDDEN);
       }
     } catch (Exception e) {
       return new ResponseEntity<>("Error getting user role", HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
     try {
       BookCatalogue bookByIsbn = bookCatalogueService.getBookByIsbn(book.getIsbn());
 
@@ -83,7 +80,6 @@ public class BookCatalogueController {
     } catch (Exception e) {
       logger.error(e.getMessage());
       return new ResponseEntity<>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
-
     }
     final BookCatalogue addedBook = bookCatalogueService.addBookToCatalogue(book);
     return new ResponseEntity<>(addedBook.getTitle() + " added successfully", HttpStatus.CREATED);
@@ -115,7 +111,7 @@ public class BookCatalogueController {
       headers.set("Authorization", authHeader);
       headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
 
-      HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token), headers);
+      HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token,null ), headers);
       ResponseEntity<Boolean> authResponse = restTemplate.exchange(
           authUrl, HttpMethod.POST, requestEntity, Boolean.class);
 
@@ -140,7 +136,7 @@ public class BookCatalogueController {
     logger.info("request {}", request.toString());
 
     try {
-      final ResponseEntity<Boolean> verifyTokenResponse = verifyToken(request);
+      final ResponseEntity<Boolean> verifyTokenResponse = isTokenValid(request, null, logger, discoveryClient, restTemplate);
 
       if (verifyTokenResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
           verifyTokenResponse.getBody())) {
@@ -172,11 +168,6 @@ public class BookCatalogueController {
     return ResponseEntity.ok(bookById);
   }
 
-  private ResponseEntity<Boolean> verifyToken(HttpServletRequest request) {
-
-    return verfiyToken(request, logger, discoveryClient, restTemplate);
-
-  }
 
 
 

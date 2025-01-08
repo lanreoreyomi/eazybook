@@ -17,3 +17,8 @@ export interface WishList {
   isbn: number
 
 }
+
+export interface Checkout {
+  id: string,
+  username: string,
+}

@@ -3,6 +3,7 @@ export const LOGIN = '/auth/login'
 export const LOGOUT = '/auth/logout'
 export const BOOKCATALOGUE = '/bookcatalogue'
 export const WISHLIST = '/wishlist/'
+export const CATALOGUEITEM = '/checkoutitems'
 
 export const getWishListForUser = (username: string| null): string => {
   return `${WISHLIST+username}/all `
@@ -15,4 +16,13 @@ export const removeBookFromWishlistWithUsername = (username: string | null): str
 }
 export const addBookToCatalogueWithUsername = (username: string | null): string => {
   return `${BOOKCATALOGUE}/${username}/addbook`
+}
+export const addBookToCatalogueItem = (username: string | null, isbn: number): string => {
+  return `${CATALOGUEITEM}/${username}/${isbn}/add`
+}
+export const removeBookFromCatalogueItem = (username: string | null, isbn: number): string => {
+  return `${CATALOGUEITEM}/${username}/${isbn}/remove`
+}
+export const getCatalogueItemsforUser = (username: string | null): string => {
+  return `${CATALOGUEITEM}/${username}/all`
 }

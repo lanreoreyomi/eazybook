@@ -164,10 +164,20 @@ public class AuthenticationController {
 
     try {
       boolean isValid = authenticatorService.isTokenValid(verifyToken.getToken());
+
       if (!isValid) {
         logger.warn("Token validation failed");
         return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
       }
+    //some request doesnt send a username
+      if (verifyToken.getUsername() != null) {
+        final String usernameFromToken = jwtService.extractUsername(verifyToken.getToken());
+        if(!verifyToken.getUsername().equals(usernameFromToken)) {
+          logger.warn("Token validation failed username in request doesnt match token");
+          return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
+        }
+      }
+
       logger.info("Token validated successfully");
       return new ResponseEntity<>(true, HttpStatus.OK);
     } catch (Exception e) {

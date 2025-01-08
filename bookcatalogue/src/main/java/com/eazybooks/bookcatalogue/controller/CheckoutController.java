@@ -1,7 +1,6 @@
 package com.eazybooks.bookcatalogue.controller;
 
-import static com.eazybooks.bookcatalogue.utils.RestUtils.verfiyToken;
-
+import static com.eazybooks.bookcatalogue.utils.RestUtils.isTokenValid;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.Checkout;
 import com.eazybooks.bookcatalogue.model.CheckoutStats;
@@ -34,7 +33,7 @@ import org.springframework.web.client.RestTemplate;
 @RequestMapping("/checkout")
 public class CheckoutController {
 
-  Logger logger = LoggerFactory.getLogger(BookCatalogueController.class);
+  Logger logger = LoggerFactory.getLogger(CheckoutController.class);
   private final CheckoutService checkoutService;
   private final BookCatalogueService bookCatalogueService;
   CheckoutStatsService checkoutStatsService;
@@ -56,7 +55,7 @@ public class CheckoutController {
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValid = isTokenValid(request);
+      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, discoveryClient, restTemplate);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -65,9 +64,6 @@ public class CheckoutController {
       logger.error(e.getMessage());
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    //Start here
-    //Update available quantity by subtracting checkout
-    // from getQuantityForRent and setting the new value in the database
 
     CheckoutStats checkoutStats = null;
     BookCatalogue book = null;
@@ -108,7 +104,6 @@ public class CheckoutController {
         .orElse(null);// Or provide a default value
 
     if (alreadyCheckedOut != null) {
-      logger.info("alreadyCheckedOut {}", alreadyCheckedOut);
       return new ResponseEntity<>("Book already checked out", HttpStatus.FORBIDDEN);
     }
 
@@ -163,7 +158,7 @@ public class CheckoutController {
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValid = isTokenValid(request);
+      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, discoveryClient, restTemplate);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -215,64 +210,5 @@ public class CheckoutController {
 
     return null;
   }
-
-
-
-private ResponseEntity<Boolean> isTokenValid(HttpServletRequest request) {
-
-  return verifyToken(request, logger, discoveryClient, restTemplate);
-
-}
-
-private ResponseEntity<Boolean> verifyToken(HttpServletRequest request,
-    Logger logger, DiscoveryClient discoveryClient, RestTemplate restTemplate) {
-  return verfiyToken(request, logger, discoveryClient, restTemplate);
-}
-
-
-private ResponseEntity<String> verifyUser
-    (HttpServletRequest request, String username) {
-
-  String authHeader = request.getHeader("Authorization");
-
-  if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-    logger.warn("Authorization header missing or invalid");
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-  }
-
-  String token = authHeader.substring(7);
-  ResponseEntity<String> authResponse = null;
-
-  try {
-    List<ServiceInstance> instances = discoveryClient.getInstances(SERVICES.USER.toString());
-    if (instances.isEmpty()) {
-      logger.error("User service not found");
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-
-    ServiceInstance userInstance = instances.get(0);
-    String userUrl = userInstance.getUri() + "/user/username/" + username;
-    HttpHeaders headers = new HttpHeaders();
-    headers.set("Authorization", authHeader);
-    headers.setContentType(MediaType.APPLICATION_JSON);
-
-    HttpEntity<String> requestEntity = new HttpEntity<>(username, headers);
-
-    authResponse = restTemplate.exchange(
-        userUrl, HttpMethod.GET, requestEntity, String.class);
-
-    if (authResponse.getStatusCode() != HttpStatus.OK &&
-        !authResponse.getBody().equals(username)) {
-      return new ResponseEntity<>("User validation failed", HttpStatus.NOT_FOUND);
-    }
-
-    logger.info("User validation successfull");
-    return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
-  } catch (Exception e) {
-    return new ResponseEntity<>("User validation failed", HttpStatus.NOT_FOUND);
-
-  }
-
-}
 
 }
