@@ -42,7 +42,7 @@ export default {
 
   setup() {
     const checkoutStore = useCheckoutStore();
-    
+
    const removeBookFromCheckout = (book: BookCatalogue): void => {
       if (book !=null) {
         checkoutStore.removeBookFromCheckoutItem(book.isbn);

@@ -82,7 +82,7 @@ public class CheckoutItemsController {
 
     try{
       checkoutItemsService.save(new CheckoutItems(username, bookisbn));
-      return new ResponseEntity<>(bookByIsbn.getTitle()+ "  added to checkout", HttpStatus.CREATED);
+      return new ResponseEntity<>("Added" + bookByIsbn.getTitle()+ " to checkout", HttpStatus.CREATED);
     } catch (Exception e) {
       logger.error(e.getMessage());
       return new ResponseEntity<>("Something went wrong adding book to checkout", HttpStatus.INTERNAL_SERVER_ERROR);
