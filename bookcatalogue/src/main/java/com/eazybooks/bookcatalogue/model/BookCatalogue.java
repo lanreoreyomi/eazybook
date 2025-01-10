@@ -1,5 +1,6 @@
 package com.eazybooks.bookcatalogue.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,9 +13,10 @@ import jakarta.persistence.Table;
 public class BookCatalogue {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_catalogue_seq_generator")
-  @SequenceGenerator(name = "book_catalogue_seq_generator", sequenceName = "book_catalogue_seq", allocationSize = 1, initialValue = 21)
-  private Long id;
+  @Column(nullable = false, unique = true)
+  @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
+  @SequenceGenerator(name = "book_catalogue_seq_generator", sequenceName = "book_catalogue_seq")
+  private String id;
   private String title;
   private String author;
   private Long isbn;
@@ -23,7 +25,7 @@ public class BookCatalogue {
   private boolean available;
   private int quantityForRent;
 
-  public Long getId() {
+  public String getId() {
     return id;
   }
 
@@ -83,7 +85,7 @@ public class BookCatalogue {
     this.quantityForRent = quantityForRent;
   }
 
-  public void setId(Long id) {
+  public void setId(String id) {
     this.id = id;
   }
 

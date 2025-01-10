@@ -1,5 +1,6 @@
 package com.eazybooks.bookcatalogue.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,9 +13,11 @@ import org.springframework.boot.context.properties.bind.Name;
 @Table(name = "checkout_items")
 public class CheckoutItems {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+
+  @Id
+  @Column(nullable = false, unique = true)
+  @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
     @Name("book_isbn")
     private Long bookIsbn;
     @Name("username")
@@ -25,7 +28,7 @@ public class CheckoutItems {
     this.bookIsbn = bookIsbn;
   }
 
-  public void setBookId(Long id) {
+  public void setBookId(String id) {
     this.id = id;
   }
 
@@ -45,7 +48,7 @@ public class CheckoutItems {
     this.username = username;
   }
 
-  public Long getId() {
+  public String getId() {
     return id;
   }
 

@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS book_catalogue (
-                       id SERIAL PRIMARY KEY,
+                       id UUID PRIMARY KEY,
                        title VARCHAR(255) NOT NULL,
                        author VARCHAR(255) NOT NULL,
                        isbn bigint UNIQUE,  -- ISBNs should be unique
@@ -16,7 +16,7 @@ alter sequence book_catalogue_seq owner to eazybook_dbuser;
 alter sequence book_catalogue_seq owned by book_catalogue.id;
 
 CREATE TABLE IF NOT EXISTS checkout (
-                         id SERIAL PRIMARY KEY,
+                         id UUID PRIMARY KEY,
                          isbn bigint,
                          checked_out_by VARCHAR(255) NOT NULL,
                          date_of_checkout DATE NOT NULL ,
@@ -32,7 +32,7 @@ alter sequence checkout_seq owner to eazybook_dbuser;
 alter sequence checkout_seq owned by checkout.id;
 
 CREATE TABLE IF NOT EXISTS checkout_stats (
-                                id SERIAL PRIMARY KEY,
+                                id UUID PRIMARY KEY,
                                 total_checkout BIGINT NOT NULL,
                                 book_isbn BIGINT UNIQUE NOT NULL
 
@@ -48,7 +48,7 @@ CREATE SEQUENCE IF NOT EXISTS checkout_stats_seq
 alter sequence checkout_stats_seq owned by checkout_stats.id;
 
 CREATE TABLE IF NOT EXISTS checkout_items (
-                                              id SERIAL PRIMARY KEY,
+                                              id UUID PRIMARY KEY,
                                               book_isbn BIGINT NOT NULL,
                                               username VARCHAR(255) NOT NULL
 

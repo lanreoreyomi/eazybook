@@ -3,13 +3,13 @@ package com.eazybooks.user.model;
 import java.util.Objects;
 
 public class CreateAccountRequest {
-  private Long userId;
+  private String userId;
   private String username;
   private  String firstname;
   private String lastname;
   private String email;
 
-  public CreateAccountRequest(Long userId, String username, String password, String firstname, String lastname,
+  public CreateAccountRequest(String userId, String username, String password, String firstname, String lastname,
       String email) {
     this.userId = userId;
     this.username = username;
@@ -18,11 +18,11 @@ public class CreateAccountRequest {
     this.email = email;
   }
 
-  public Long getUserId() {
+  public String getUserId() {
     return userId;
   }
 
-  public void setUserId(Long userId) {
+  public void setUserId(String userId) {
     this.userId = userId;
   }
 

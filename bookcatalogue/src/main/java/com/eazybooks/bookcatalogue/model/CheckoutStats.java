@@ -12,10 +12,11 @@ import org.springframework.boot.context.properties.bind.Name;
 @Entity
 @Table(name = "checkout_stats")
 public class CheckoutStats {
+
   @Id
-  @Column(nullable = false)
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-   private Long id;
+  @Column(nullable = false, unique = true)
+  @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
+   private String id;
   @Column(nullable = false)
   @Name("total_checkout")
    private Long totalCheckout;
@@ -27,7 +28,7 @@ public class CheckoutStats {
     this.bookIsbn = bookIsbn;
   }
 
-  public Long getId() {
+  public String getId() {
     return id;
   }
 
@@ -47,7 +48,7 @@ public class CheckoutStats {
     this.bookIsbn = bookIsbn;
   }
 
-  public void setId(Long id) {
+  public void setId(String id) {
     this.id = id;
   }
 

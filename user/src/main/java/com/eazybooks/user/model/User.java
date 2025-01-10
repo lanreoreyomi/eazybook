@@ -17,20 +17,19 @@ public class User {
 
 
   @Id
-  //TODO: Once create account is seperated from authentication microservice, uncomment GeneraredValue
-//  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+ //  @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Column(nullable = false)
-  private  Long userId;
+  private  String userId;
   private String username;
   private  String firstname;
   private String lastname;
   private String email;
 
-  public Long getUserId() {
+  public String getUserId() {
     return userId;
   }
 
-  public void setUserId(Long userId) {
+  public void setUserId(String userId) {
     this.userId = userId;
   }
 

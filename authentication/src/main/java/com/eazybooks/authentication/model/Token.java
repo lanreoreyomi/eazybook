@@ -12,11 +12,12 @@ import jakarta.persistence.Table;
 public class Token {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  @Column(nullable = false)
-  private Long id;
+  @Column(nullable = false, unique = true)
+  @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
-  public void setId(Long id) {
+
+  public void setId(String id) {
     this.id = id;
   }
 

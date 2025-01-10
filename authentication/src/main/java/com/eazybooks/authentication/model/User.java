@@ -15,13 +15,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
-@Table(name = "authusers")
+@Table(name = "authentication")
 public class User implements UserDetails {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  @Column(nullable = false)
-  private  Long userId;
+  @Column(nullable = false, unique = true)
+  @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
+  private String userId;
   private String username;
   private String password;
   private  String firstname;
@@ -51,11 +51,11 @@ public class User implements UserDetails {
     return true;
   }
 
-  public Long getUserId() {
+  public String getUserId() {
     return userId;
   }
 
-  public void setUserId(Long userId) {
+  public void setUserId(String userId) {
     this.userId = userId;
   }
 

@@ -3,9 +3,9 @@ package com.eazybooks.authentication.model.UserDto;
 public class AuthenticationResponse {
 
   private String token;
-  private Long userId;
+  private String userId;
 
-  public AuthenticationResponse(String token, Long userId) {
+  public AuthenticationResponse(String token, String userId) {
     this.token = token;
     this.userId = userId;
   }
@@ -18,11 +18,11 @@ public class AuthenticationResponse {
     this.token = token;
   }
 
-  public Long getUserId() {
+  public String getUserId() {
     return userId;
   }
 
-  public void setUserId(Long userId) {
+  public void setUserId(String userId) {
     this.userId = userId;
   }
 }

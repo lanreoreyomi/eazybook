@@ -107,7 +107,7 @@ public class UserController {
   }
 
   @GetMapping("/{username}")
-  public ResponseEntity<Long> getUserIdUsingUsername(@PathVariable String username, HttpServletRequest request) {
+  public ResponseEntity<String> getUserIdUsingUsername(@PathVariable String username, HttpServletRequest request) {
     logger.info("Received request to get user with username: {}", username);
 
     try {
@@ -126,7 +126,7 @@ public class UserController {
 
     } catch (Exception e) {
       logger.error("Error while fetching user with username: {}", username, e);
-      return (ResponseEntity<Long>) ResponseEntity.internalServerError();
+      return (ResponseEntity<String>) ResponseEntity.internalServerError();
     }
   }
 

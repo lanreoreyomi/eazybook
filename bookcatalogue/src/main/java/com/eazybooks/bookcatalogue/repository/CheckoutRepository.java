@@ -13,7 +13,7 @@ public interface CheckoutRepository extends JpaRepository<Checkout, Long> {
  Checkout save(Checkout checkout);
 // @Query("select c from Checkout c where c.checkedOutBy =:username")
  List<Checkout> findCheckoutsByCheckedOutBy(String username);
- Checkout findCheckoutById(Long id);
+ Checkout findCheckoutById(String id);
 
 
 }

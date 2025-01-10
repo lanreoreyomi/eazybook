@@ -4,7 +4,7 @@ import com.eazybooks.authentication.model.Role;
 import java.util.Objects;
 
 public class CreateAccountRequest {
-  private Long userId;
+  private String userId;
   private String username;
   private String password;
   private  String firstname;
@@ -12,7 +12,7 @@ public class CreateAccountRequest {
   private String email;
   private Role role;
 
-  public CreateAccountRequest(Long userId, String username, String password, String firstname, String lastname,
+  public CreateAccountRequest(String userId, String username, String password, String firstname, String lastname,
       String email) {
     this.userId = userId;
     this.username = username;
@@ -30,11 +30,11 @@ public class CreateAccountRequest {
     this.role = role;
   }
 
-  public Long getUserId() {
+  public String getUserId() {
     return userId;
   }
 
-  public void setUserId(Long userId) {
+  public void setUserId(String userId) {
     this.userId = userId;
   }
 

@@ -13,8 +13,9 @@ import java.time.LocalDate;
 public class Wishlist {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @Column(nullable = false, unique = true)
+  @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
   @Column(name = "created_date")
   private LocalDate localDate;
@@ -52,7 +53,7 @@ public class Wishlist {
     this.isbn = isbn;
   }
 
-  public Wishlist(Long id) {
+  public Wishlist(String id) {
     this.id = id;
   }
 

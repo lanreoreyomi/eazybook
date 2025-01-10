@@ -16,7 +16,7 @@ public interface BookCatalogueRepository extends JpaRepository<BookCatalogue, Lo
   List<BookCatalogue> findByPublicationYear(int publicationYear);
   List<BookCatalogue> findByAuthor(String authorName);
   BookCatalogue findByTitle(String title);
-  Optional<BookCatalogue> findById(Long id);
+  Optional<BookCatalogue> findById(String id);
 
   @Query("SELECT i FROM BookCatalogue i WHERE i.isbn = :isbn")
   BookCatalogue findByBookByIsbn(Long isbn);

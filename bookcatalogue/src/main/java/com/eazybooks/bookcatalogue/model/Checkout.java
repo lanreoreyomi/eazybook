@@ -1,4 +1,5 @@
 package com.eazybooks.bookcatalogue.model;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,9 +11,11 @@ import java.time.LocalDate;
 @Table(name = "checkout")
 public class Checkout {
 
+
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @Column(nullable = false, unique = true)
+  @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
   private Long isbn;
   private String checkedOutBy;
   private LocalDate dateOfCheckout;
@@ -60,11 +63,11 @@ public class Checkout {
     this.expectedReturnDate = expectedReturnDate;
   }
 
-  public Long getId() {
+  public String getId() {
     return id;
   }
 
-  public void setId(Long id) {
+  public void setId(String id) {
     this.id = id;
   }
 
