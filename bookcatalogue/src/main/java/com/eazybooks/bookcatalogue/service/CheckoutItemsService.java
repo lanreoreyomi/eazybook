@@ -33,7 +33,7 @@ public class CheckoutItemsService  implements CheckoutItemsImpl {
   }
 
   @Override
-  public void deleteCheckoutItemsById(Long id) {
-  checkoutItemsRepository.deleteCheckoutItemsById(id);
+  public void deleteCheckoutItemsByBookIsbn(Long bookIsbn) {
+  checkoutItemsRepository.deleteCheckoutItemsByBookIsbn(bookIsbn);
   }
 }

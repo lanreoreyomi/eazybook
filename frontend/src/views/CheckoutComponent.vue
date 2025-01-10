@@ -16,7 +16,7 @@
         </ul>
         <div class="checkout_button">
           <button class="checkout_remove-list" @click="removeBookFromCheckout(book)">Remove from cart</button>
-          <button class="checkout-checkout">Complete checkout</button>
+          <button class="checkout-checkout" @click="checkBookout(book)">Complete checkout</button>
         </div>
       </div>
     </div>
@@ -27,21 +27,21 @@
 
 import { computed, type PropType } from 'vue'
 import type { BookCatalogue } from '@/model/model.ts'
-import { useCheckoutStore } from '@/stores/useCheckoutStore.ts'
+import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
 import router from '@/router'
 
 export default {
   name: 'CheckoutComponent',
-
   props: {
     books: {
       type: Array as PropType<BookCatalogue[]>,  // Specify that 'book' should be a Book object
       required: true // Make the prop required
     }
   },
+  emits: ['completeCheckout'],
 
-  setup() {
-    const checkoutStore = useCheckoutStore();
+  setup(props, {emit}) {
+    const checkoutStore = useCheckoutItemStore();
 
    const removeBookFromCheckout = (book: BookCatalogue): void => {
       if (book !=null) {
@@ -49,13 +49,17 @@ export default {
         router.go(0)
       }
     }
+    const checkBookout = (book: BookCatalogue) => {
+      emit('completeCheckout', book);
+    };
     const confirmationText  = computed(() => {
       return checkoutStore.statusText
     });
 
     return{
       removeBookFromCheckout,
-      confirmationText
+      confirmationText,
+      checkBookout
     }
   }
 }
@@ -155,64 +159,6 @@ body {
     }
   }
 
-  //.checkout_history {
-  //  background: colors.$accent-faint;
-  //  height: 50vh;
-  //  border-radius: 10px;
-  //
-  //  h2 {
-  //    text-align: center;
-  //    padding: 20px;
-  //    color: colors.$text-color;
-  //  }
-  //
-  //  .checkout_history_info {
-  //    color: colors.$text-color;
-  //
-  //    .checkout_history_table {
-  //      text-align: center;
-  //      padding: 80px;
-  //
-  //      thead {
-  //        width: 100%;
-  //
-  //        tr {
-  //          th,
-  //          td {
-  //            background-color: colors.$accent-faint;
-  //            border-radius: 0.5rem;
-  //            text-align: center;
-  //            width: 10%;
-  //            padding: 15px;
-  //          }
-  //        }
-  //      }
-  //
-  //      tbody {
-  //        width: 100%;
-  //
-  //        th,
-  //        td {
-  //          width: 10%;
-  //          padding: 15px;
-  //        }
-  //
-  //        td {
-  //          button {
-  //            font-size: 14px;
-  //            padding: 15px;
-  //            border-radius: 0.5rem;
-  //            border: none;
-  //            outline: none;
-  //            cursor: pointer;
-  //            margin: 10px;
-  //            background: colors.$text-color;
-  //            color: colors.$white-color;
-  //          }
-  //        }
-  //      }
-  //    }
-  //  }
-  //}
+
 }
 </style>

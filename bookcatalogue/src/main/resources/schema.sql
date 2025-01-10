@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS checkout (
                          isbn bigint,
                          checked_out_by VARCHAR(255) NOT NULL,
                          date_of_checkout DATE NOT NULL ,
-                         date_of_return DATE ,
+                         expected_return_date DATE NOT NULL ,
                          is_returned BOOLEAN DEFAULT FALSE
  );
 

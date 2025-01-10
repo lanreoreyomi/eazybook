@@ -4,4 +4,5 @@ public enum SERVICES {
     USER,
     BOOKCATALOGUE,
     AUTHENTICATION,
+    WISHLIST,
   }

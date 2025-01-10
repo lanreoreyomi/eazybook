@@ -7,5 +7,5 @@ public interface CheckoutItemsImpl {
   CheckoutItems save(CheckoutItems checkoutItems);
   List<CheckoutItems>  findCheckoutItemsByBookIsbn(Long bookId);
   List<CheckoutItems> findCheckoutItemsByUsername(String username);
-  void deleteCheckoutItemsById(Long bookId);
+  void deleteCheckoutItemsByBookIsbn(Long bookIsbn);
 }

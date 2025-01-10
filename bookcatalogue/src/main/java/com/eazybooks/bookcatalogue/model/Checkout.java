@@ -1,10 +1,8 @@
 package com.eazybooks.bookcatalogue.model;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 
@@ -18,7 +16,7 @@ public class Checkout {
   private Long isbn;
   private String checkedOutBy;
   private LocalDate dateOfCheckout;
-  private LocalDate dateOfReturn;
+  private LocalDate expectedReturnDate;
 
   public Boolean getReturned() {
     return isReturned;
@@ -54,12 +52,12 @@ public class Checkout {
     this.dateOfCheckout = dateOfCheckout;
   }
 
-  public LocalDate getDateOfReturn() {
-    return dateOfReturn;
+  public LocalDate getExpectedReturnDate() {
+    return expectedReturnDate;
   }
 
-  public void setDateOfReturn(LocalDate dateOfReturn) {
-    this.dateOfReturn = dateOfReturn;
+  public void setExpectedReturnDate(LocalDate expectedReturnDate) {
+    this.expectedReturnDate = expectedReturnDate;
   }
 
   public Long getId() {
@@ -77,7 +75,7 @@ public class Checkout {
         ", isbn=" + isbn +
         ", checkedOutBy='" + checkedOutBy + '\'' +
         ", dateOfCheckout=" + dateOfCheckout +
-        ", dateOfReturn=" + dateOfReturn +
+        ", dateOfReturn=" + expectedReturnDate +
          ", isReturned=" + isReturned +
         '}';
   }

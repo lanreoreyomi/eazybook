@@ -1,42 +1,33 @@
-// stores/user.ts
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import type { BookCatalogue, WishList } from '@/model/model.ts'
+import type { BookCatalogue, } from '@/model/model.ts'
 import { accessToken, username } from '@/Utils/AppUtils.ts'
-import { addBookToWishlistWithUsername, getWishListForUser, removeBookFromWishlistWithUsername } from '@/api/apis.ts'
+import { addBookToCatalogueItem, getCatalogueItemsforUser, removeBookFromCatalogueItem } from '@/api/apis.ts'
 
-interface WishlistState {
-  username: string;
-  wishList: WishList[];
-  statusCode: number,
-  statusText: string,
-}
+
+//for getting all catalgues
 interface BookCatalogueState {
-  bookCatalogue: BookCatalogue[]; // Array of BookCatalogue
+  checkoutItems: BookCatalogue[]; // Array of BookCatalogue
   statusCode: number;
   statusText: string;
 }
-export const useWishlistStore = defineStore('wishlist', {
-  state: (): WishlistState => ({
-      username: '',
-      wishList: [],
-     statusCode: 0,
+export const useCheckoutItemStore = defineStore('checkoutItem', {
+  state: (): BookCatalogueState => ({
+    checkoutItems: [],
+    statusCode: 0,
     statusText: '',
   }),
-
   actions: {
-    async getUserWishList() {
-      // Access loggedInUser *after* ensuring the user is logged in
+    async getCatalogueItemsforUser() {
       try {
-        const response =
-          await axios.get<WishList[]>(getWishListForUser(username), {
-            headers: {
-              Authorization: accessToken
-            }
-          })
+        const response = await axios.get<BookCatalogue[]>(getCatalogueItemsforUser(username), {
+              headers: {
+               Authorization: accessToken
+              }
+        })
         this.$patch({
           statusCode: response.status,
-          wishList: response.data, // Ensure statusText is a string
+          checkoutItems: response.data, // Ensure statusText is a string
         })
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
@@ -49,23 +40,18 @@ export const useWishlistStore = defineStore('wishlist', {
         }
       }
     },
-    setCurrentUser(username: string) {
-       this.username = username;
-     },
-    async addBookToWishlist(book: BookCatalogue) {
+    async addBookToCheckoutItem(bookIsbn: number) {
 
-       try {
+      const username = localStorage.getItem('username')
+      try {
 
-        const response = await axios.post<BookCatalogueState>
-        (addBookToWishlistWithUsername(username), book.isbn, {
+        const response = await axios.post<string>
+        (addBookToCatalogueItem(username, bookIsbn), bookIsbn, {
           headers: {
             Authorization: accessToken,
             'Content-Type': 'application/json'
           }
         })
-        // console.log(`Response data: ${JSON.stringify(response)}`);
-
-
         this.$patch({
           statusCode: response.status,
           statusText: String(response.data),
@@ -78,26 +64,27 @@ export const useWishlistStore = defineStore('wishlist', {
             statusCode: error.response.status,
             statusText: String(error.response.data),
           })
+          console.log("this.statusCode", this.statusCode)
+          console.log("response.statusText", this.statusText)
         } else {
           console.log('An unexpected error occurred:', error)
         }
       }
     },
-    async removeBookToWishlist(wishList: WishList) {
-
+    async removeBookFromCheckoutItem(bookIsbn: number) {
       const username = localStorage.getItem('username')
       try {
-        const response = await axios.post<BookCatalogueState>
-        (removeBookFromWishlistWithUsername(username), wishList.isbn, {
+
+        const response = await axios.post<string>
+        (removeBookFromCatalogueItem(username, bookIsbn), bookIsbn, {
           headers: {
             Authorization: accessToken,
             'Content-Type': 'application/json'
           }
         })
-
         this.$patch({
           statusCode: response.status,
-          statusText: String(response.statusText),
+          statusText: String(response.data),
         })
 
       } catch (error) {
@@ -107,6 +94,8 @@ export const useWishlistStore = defineStore('wishlist', {
             statusCode: error.response.status,
             statusText: String(error.response.data),
           })
+          console.log("this.statusCode", this.statusCode)
+          console.log("response.statusText", this.statusText)
         } else {
           console.log('An unexpected error occurred:', error)
         }
@@ -114,7 +103,4 @@ export const useWishlistStore = defineStore('wishlist', {
     },
   },
 
-  getters: {
-      getCurrentUser: (state) => state.username
-  },
 })

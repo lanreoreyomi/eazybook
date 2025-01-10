@@ -18,7 +18,7 @@ import { useBookCatalogueStore } from '@/stores/useBookCatalogueStore.ts'
 import type { BookCatalogue } from '@/model/model.ts'
 import BookComponent from '@/components/BookComponent.vue'
 import { useWishlistStore } from '@/stores/useWishlistStore.ts'
-import { useCheckoutStore } from '@/stores/useCheckoutStore.ts'
+import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
 export default defineComponent({
   name: 'CatalogueView',
   components: { BookComponent },
@@ -26,7 +26,7 @@ export default defineComponent({
   setup() {
     const confirmation = ref('')
     const bookCatalogueStore = useBookCatalogueStore()
-    const checkoutStore = useCheckoutStore()
+    const checkoutStore = useCheckoutItemStore()
     const books = ref<BookCatalogue[]>([])
     const wishlistStore= useWishlistStore();
 
@@ -116,7 +116,7 @@ export default defineComponent({
     font-size: 16px;
     color: colors.$white-color;
     text-align: center;
-    width: 20%;
+    width: 50%;
     background-color: colors.$text-color;
     border-radius: 0.5rem;
     align-content: center;

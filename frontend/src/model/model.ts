@@ -17,6 +17,13 @@ export interface WishList {
   isbn: number
 
 }
+export interface CheckedOutHistory {
+  nameOfBook: string;
+  bookIsbn: number;
+  checkoutDate: string;
+  returnStatus: boolean;
+  expectedReturnDate: string;
+}
 
 export interface Checkout {
   id: string,

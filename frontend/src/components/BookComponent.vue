@@ -12,9 +12,9 @@
       <li class="book_card_links">Quantity for rent: {{ book.quantityForRent }}</li>
     </ul>
     <div class="book_card_button" >
-      <p v-if="book.quantityForRent<1"><img src="https://img.icons8.com/?size=14&id=3156&format=png&color=000000" alt="icon"> Not available for checkout</p>
+      <p v-if="book.quantityForRent==0"><img src="https://img.icons8.com/?size=14&id=3156&format=png&color=000000" alt="icon"> Not available for checkout</p>
       <button class="book_card-link" id="save_book" @click="getCurrentBook(book)">Add to Wishlist</button>
-      <button class="book_card-link" id="checkout_book" :class="{disabled_btn : book.quantityForRent<=1}" @click="processCheckout(book)">Add to checkout</button>
+      <button class="book_card-link" id="checkout_book" :class="{disabled_btn : book.quantityForRent===0}" @click="processCheckout(book)">Add to checkout</button>
     </div>
   </div>
 </template>

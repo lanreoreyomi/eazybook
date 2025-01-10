@@ -10,6 +10,6 @@ public interface CheckoutStatsRepository extends JpaRepository<CheckoutStats, Lo
 
  CheckoutStats save(CheckoutStats checkoutStats);
 
- @Query("SELECT c FROM CheckoutStats c WHERE c.bookIsbn = :bookIsbn")
+ @Query("SELECT c FROM Checkout c WHERE c.checkedOutBy = :bookIsbn")
  CheckoutStats findByBookIsbn(Long bookIsbn);
 }

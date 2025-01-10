@@ -40,6 +40,10 @@ export default defineConfig({
       '/checkoutitems/': {
         target: 'http://eazybooks.com:9089',
         changeOrigin: true
+      },
+      '/checkout/': {
+        target: 'http://eazybooks.com:9089',
+        changeOrigin: true
       }
     }
   }

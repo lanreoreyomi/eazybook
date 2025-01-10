@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 public class RestUtils {
+
   private static ResponseEntity<Boolean> verfiyToken(HttpServletRequest request, String username, Logger logger,
       DiscoveryClient discoveryClient, RestTemplate restTemplate) {
     String authHeader = request.getHeader("Authorization");

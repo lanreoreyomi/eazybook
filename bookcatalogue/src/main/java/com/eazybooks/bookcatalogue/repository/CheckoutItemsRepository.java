@@ -12,6 +12,6 @@ public interface CheckoutItemsRepository extends JpaRepository<CheckoutItems, Lo
   CheckoutItems save(CheckoutItems checkoutItems);
   Optional<List<CheckoutItems>> findCheckoutItemsByBookIsbn(Long bookIsbn);
   Optional<List<CheckoutItems>> findCheckoutItemsByUsername(String username);
-  void deleteCheckoutItemsById(Long id);
+  void deleteCheckoutItemsByBookIsbn(Long bookIsbn);
 
 }

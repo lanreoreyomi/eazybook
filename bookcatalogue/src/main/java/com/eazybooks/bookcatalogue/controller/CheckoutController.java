@@ -1,18 +1,23 @@
 package com.eazybooks.bookcatalogue.controller;
 
+import static com.eazybooks.bookcatalogue.model.SERVICES.WISHLIST;
 import static com.eazybooks.bookcatalogue.utils.RestUtils.isTokenValid;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.Checkout;
+import com.eazybooks.bookcatalogue.model.CheckoutInfo;
 import com.eazybooks.bookcatalogue.model.CheckoutStats;
 import com.eazybooks.bookcatalogue.model.SERVICES;
+import com.eazybooks.bookcatalogue.model.VerifyBook;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
+import com.eazybooks.bookcatalogue.service.CheckoutItemsService;
 import com.eazybooks.bookcatalogue.service.CheckoutService;
 import com.eazybooks.bookcatalogue.service.CheckoutStatsService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.ServiceInstance;
@@ -24,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,17 +42,19 @@ public class CheckoutController {
   Logger logger = LoggerFactory.getLogger(CheckoutController.class);
   private final CheckoutService checkoutService;
   private final BookCatalogueService bookCatalogueService;
-  CheckoutStatsService checkoutStatsService;
+  final CheckoutStatsService checkoutStatsService;
+  final CheckoutItemsService checkoutItemsService;
   private final DiscoveryClient discoveryClient;
   RestTemplate restTemplate = new RestTemplate();
 
   public CheckoutController(CheckoutService checkoutService,
       BookCatalogueService bookCatalogueService, DiscoveryClient discoveryClient,
-      CheckoutStatsService checkoutStatsService) {
+      CheckoutStatsService checkoutStatsService, CheckoutItemsService checkoutItemsService) {
     this.checkoutService = checkoutService;
     this.bookCatalogueService = bookCatalogueService;
     this.discoveryClient = discoveryClient;
     this.checkoutStatsService = checkoutStatsService;
+    this.checkoutItemsService = checkoutItemsService;
   }
 
   @PostMapping("/{username}/{bookIsbn}")
@@ -83,7 +91,6 @@ public class CheckoutController {
       }
 
       if (book != null && checkoutStats != null) {
-
         if (book.getQuantityForRent() <= 0) {
           logger.info("Max Checkchout reached for book " + bookIsbn);
           return new ResponseEntity<>("Max Checkchout reached for book ", HttpStatus.FORBIDDEN);
@@ -109,16 +116,18 @@ public class CheckoutController {
 
     Checkout checkout = new Checkout();
     LocalDate checkoutDate = LocalDate.now();
+    LocalDate expectedReturnDate = LocalDate.now().plusWeeks(2);
 
     int checkout_counter = 1;
+
     try {
       checkoutStats = checkoutStatsService.findByIsbn(bookIsbn);
       logger.info("Checkout found for isbn " + checkout_counter);
+
       if (checkoutStats != null) {
         final Long totalCheckouts = checkoutStats.getTotalCheckouts();
         checkout_counter = Math.toIntExact(totalCheckouts) + 1;
         checkoutStats.setTotalCheckout((long) checkout_counter);
-
       } else {
         checkoutStats = new CheckoutStats();
         checkoutStats.setTotalCheckout((long) 1);
@@ -127,6 +136,7 @@ public class CheckoutController {
 
       checkout.setCheckedOutBy(username);
       checkout.setDateOfCheckout(checkoutDate);
+      checkout.setExpectedReturnDate(expectedReturnDate);
       checkout.setReturned(false);
       checkout.setIsbn(bookIsbn);
       checkoutService.save(checkout);
@@ -143,6 +153,8 @@ public class CheckoutController {
         return new ResponseEntity<>("Error Updating  book quantity for rent",
             HttpStatus.INTERNAL_SERVER_ERROR);
       }
+      //removes book from checkoutItem
+      checkoutItemsService.deleteCheckoutItemsByBookIsbn(bookIsbn);
 
       return new ResponseEntity<>("Book successfully checked out", HttpStatus.CREATED);
     } catch (Exception e) {
@@ -150,7 +162,6 @@ public class CheckoutController {
     }
 
   }
-
 
   @PostMapping("/{username}/{bookIsbn}/return")
   private ResponseEntity<String> returnBook(@PathVariable String username,
@@ -189,18 +200,18 @@ public class CheckoutController {
         return new ResponseEntity<>("Book mut be checked out to be returned", HttpStatus.FORBIDDEN);
       }
       if (checkedOutBook.getReturned()==true){
-        return new ResponseEntity<>("Book has already been  returned on "+ checkedOutBook.getDateOfReturn(), HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>("Book has already been  returned on "+ checkedOutBook.getExpectedReturnDate(), HttpStatus.FORBIDDEN);
       }
       if (book != null) {
         checkedOutBook.setReturned(true);
-        checkedOutBook.setDateOfReturn(LocalDate.now());
+        checkedOutBook.setExpectedReturnDate(LocalDate.now());
         checkoutService.updateCheckout(checkedOutBook);
 
         //update number
         book.setQuantityForRent(book.getQuantityForRent() + 1);
         bookCatalogueService.updateBook(book);
-        logger.info("Book successfully checked out {}", checkedOutBook.getDateOfReturn());
-        return new ResponseEntity<>("Book successfully checked out", HttpStatus.OK);
+        logger.info("Book successfully checked out {}", checkedOutBook.getExpectedReturnDate());
+        return new ResponseEntity<>("Book successfully returned", HttpStatus.OK);
       }
     } catch (Exception e) {
       logger.error(e.getMessage());
@@ -211,4 +222,51 @@ public class CheckoutController {
     return null;
   }
 
-}
+
+  @GetMapping("/{username}/all")
+  private ResponseEntity<List<CheckoutInfo>> getCheckoutHistory(@PathVariable String username, HttpServletRequest request) {
+
+    //verifies token
+    try {
+      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, discoveryClient, restTemplate);
+      if (!Boolean.TRUE.equals(tokenValid.getBody())) {
+        logger.error("Error validating token");
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      }
+    } catch (Exception e) {
+      logger.error(e.getMessage());
+      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+     List<Checkout> checkoutsByUsername=null;
+
+    try {
+      //Check if the user that checked out the book is returning it
+      checkoutsByUsername  = checkoutService.findCheckoutsByCheckedOutBy(username);
+      logger.info("Checkout found for isbn " + checkoutsByUsername.get(0).getIsbn());
+    } catch (Exception e) {
+      logger.info("Checkout not found for username " + username);
+      return new ResponseEntity<>( HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    if (checkoutsByUsername == null) {
+      logger.info("No checkout history found for user " + username);
+      return new ResponseEntity<>( HttpStatus.NOT_FOUND);
+    }
+    List<CheckoutInfo> checkoutInfo = checkoutsByUsername.stream()
+        .map(item -> {
+          BookCatalogue bookByIsbn = bookCatalogueService.getBookByIsbn(item.getIsbn());
+          return new CheckoutInfo(
+              bookByIsbn.getTitle(),
+              item.getIsbn(),
+              item.getDateOfCheckout(),
+              item.getReturned(),
+              item.getExpectedReturnDate()
+              );
+        })
+        .toList(); // Use toList() in Java 16+ or collect(Collectors.toList())
+
+    return new ResponseEntity<>(checkoutInfo, HttpStatus.OK);
+
+  }
+
+  }

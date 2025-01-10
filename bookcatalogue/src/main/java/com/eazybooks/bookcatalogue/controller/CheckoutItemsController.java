@@ -130,7 +130,7 @@ public class CheckoutItemsController {
     return new ResponseEntity<>(bookByIsbn.getTitle() + "not in checkout", HttpStatus.FORBIDDEN);
     }
     try {
-      checkoutItemsService.deleteCheckoutItemsById(alreadyAdded.getId());
+      checkoutItemsService.deleteCheckoutItemsByBookIsbn(alreadyAdded.getBookIsbn());
       logger.info("Checkout items  deleted");
       return new ResponseEntity<>(bookByIsbn.getTitle() +"removed book from checkout", HttpStatus.OK);
     } catch (Exception e) {

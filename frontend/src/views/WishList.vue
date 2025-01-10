@@ -5,7 +5,7 @@
       <div class="wishes">
       <div class="wish-list-title">{{wishList.bookTitle}}</div>
       <div class="remove-list" @click="removeBookFromWishlist(index)"><button>Remove from cart</button></div>
-        <div class="wish-list-checkout"><button>Checkout</button></div>
+        <div class="wish-list-checkout" @click="addToCheckoutItem(wishList.isbn, index)"><button>Checkout</button></div>
       </div>
     </div>
   </div>
@@ -16,16 +16,22 @@ import { computed, defineComponent, onBeforeMount, ref } from 'vue'
 import { useWishlistStore } from '@/stores/useWishlistStore.ts'
 import type { WishList } from '@/model/model.ts'
 import router from '@/router'
+import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
   export default defineComponent({
   name: 'WishList',
 
   setup() {
     const wishListItems = ref<WishList[]>([])
     const wishListInfo = ref(" ")
+    const checkoutItemStore = useCheckoutItemStore()
 
     // let userWishList;
     const wishListStore = useWishlistStore();
-
+    const addToCheckoutItem = (bookIsbn: number, index: number)=>{
+      checkoutItemStore.addBookToCheckoutItem(bookIsbn);
+      removeBookFromWishlist(index)
+      router.push({ path: '/checkout' })
+    };
     const userWishList = computed(() => {
       console.log(wishListStore.getUserWishList())
       return wishListStore.getUserWishList();
@@ -51,6 +57,7 @@ import router from '@/router'
       wishListInfo,
       wishListItems,
       removeBookFromWishlist,
+      addToCheckoutItem
      };
   }
 })

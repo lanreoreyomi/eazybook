@@ -1,33 +1,45 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import type { BookCatalogue, } from '@/model/model.ts'
 import { accessToken, username } from '@/Utils/AppUtils.ts'
-import { addBookToCatalogueItem, getCatalogueItemsforUser, removeBookFromCatalogueItem } from '@/api/apis.ts'
+import {
+  getAllCheckoutForUser,
+
+  // addBookToCatalogueItem,
+  processCheckout, returnCheckout
+  // removeBookFromCatalogueItem
+} from '@/api/apis.ts'
+import type { CheckedOutHistory } from '@/model/model.ts'
 
 
 //for getting all catalgues
-interface BookCatalogueState {
-  checkoutItems: BookCatalogue[]; // Array of BookCatalogue
+interface CheckoutState {
   statusCode: number;
   statusText: string;
+}//for getting all catalgues
+
+interface CheckoutInfoState {
+  checkedOutHistory: CheckedOutHistory[]
+  statusCode: number,
+  statusText: string,
 }
+
 export const useCheckoutStore = defineStore('checkout', {
-  state: (): BookCatalogueState => ({
-    checkoutItems: [],
+  state: (): CheckoutState => ({
     statusCode: 0,
     statusText: '',
   }),
   actions: {
-    async getCatalogueItemsforUser() {
-      try {
-        const response = await axios.get<BookCatalogue[]>(getCatalogueItemsforUser(username), {
-              headers: {
-               Authorization: accessToken
-              }
+    async checkBookOut(bookIsbn: number) {
+        try {
+        const response =
+          await axios.post<string>(processCheckout(username, bookIsbn), null, {
+          headers: {
+            Authorization: accessToken
+          }
         })
-        this.$patch({
+          this.$patch({
           statusCode: response.status,
-          checkoutItems: response.data, // Ensure statusText is a string
+          statusText: response.data, // Ensure statusText is a string
         })
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
@@ -40,68 +52,70 @@ export const useCheckoutStore = defineStore('checkout', {
         }
       }
     },
-    async addBookToCheckoutItem(bookIsbn: number) {
-
-      const username = localStorage.getItem('username')
+    async returnBook(bookIsbn: number) {
       try {
+        const response =
+          await axios.post<string>(returnCheckout(username, bookIsbn), null, {
+            headers: {
+              Authorization: accessToken
+            }
+          })
 
-        const response = await axios.post<string>
-        (addBookToCatalogueItem(username, bookIsbn), bookIsbn, {
-          headers: {
-            Authorization: accessToken,
-            'Content-Type': 'application/json'
-          }
-        })
+        console.log("response.data", response.data)
+        console.log("response.status", response.status)
+        console.log(response.statusText, response.statusText)
         this.$patch({
           statusCode: response.status,
-          statusText: String(response.data),
+          statusText: response.data, // Ensure statusText is a string
         })
-
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
-          console.log(JSON.stringify(error.response.data))
           this.$patch({
             statusCode: error.response.status,
-            statusText: String(error.response.data),
+            statusText: String(error.response.data), // Ensure statusText is a string
           })
-          console.log("this.statusCode", this.statusCode)
-          console.log("response.statusText", this.statusText)
+          console.log("response.data", error.response.data)
+          console.log("response.status", error.response.status)
+          console.log("response.statusText", error.response.statusText)
         } else {
           console.log('An unexpected error occurred:', error)
         }
       }
     },
-    async removeBookFromCheckoutItem(bookIsbn: number) {
-      const username = localStorage.getItem('username')
-      try {
-
-        const response = await axios.post<string>
-        (removeBookFromCatalogueItem(username, bookIsbn), bookIsbn, {
-          headers: {
-            Authorization: accessToken,
-            'Content-Type': 'application/json'
-          }
-        })
-        this.$patch({
-          statusCode: response.status,
-          statusText: String(response.data),
-        })
-
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          console.log(JSON.stringify(error.response.data))
-          this.$patch({
-            statusCode: error.response.status,
-            statusText: String(error.response.data),
-          })
-          console.log("this.statusCode", this.statusCode)
-          console.log("response.statusText", this.statusText)
-        } else {
-          console.log('An unexpected error occurred:', error)
-        }
-      }
-    },
-
   },
 
+})
+
+export const useCheckedOutHistory = defineStore('CheckedOutHistory', {
+  state: (): CheckoutInfoState  => ({
+    checkedOutHistory: [],
+      statusCode: 0,
+      statusText: ''
+  }),
+actions: {
+  async getAllCheckoutHistoryForUser() {
+    try {
+        const response = await axios.get<CheckedOutHistory[]>(getAllCheckoutForUser(username), {
+        headers: {
+          Authorization: accessToken
+        }
+      })
+    // Handle successful user creation
+      this.$patch({
+        statusCode: response.status,
+        checkedOutHistory: response.data
+        // Ensure statusText is a string
+      })
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        this.$patch({
+          statusCode: error.response.status
+        })
+      } else {
+        console.log('An unexpected error occurred:', error)
+      }
+    }
+  },
+
+}
 })
