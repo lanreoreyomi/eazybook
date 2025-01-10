@@ -71,7 +71,6 @@ public class BookCatalogueController {
     }
     try {
       BookCatalogue bookByIsbn = bookCatalogueService.getBookByIsbn(book.getIsbn());
-
       if (bookByIsbn != null) {
         logger.info(bookByIsbn.toString());
         return new ResponseEntity<>("Book already exist", HttpStatus.CONFLICT);

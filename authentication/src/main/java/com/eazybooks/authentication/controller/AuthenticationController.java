@@ -1,5 +1,6 @@
 package com.eazybooks.authentication.controller;
 
+import com.eazybooks.authentication.config.SERVICES;
 import com.eazybooks.authentication.model.LoginRequest;
 import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
 import com.eazybooks.authentication.model.UserDto.CreateAccountRequest;
@@ -45,15 +46,14 @@ public class AuthenticationController {
   @PostMapping("/create-account")
   public ResponseEntity<String> signUp(
       @RequestBody CreateAccountRequest createAccountRequest) {  // Use @RequestBody
-
     logger.info("Create account request: {}", createAccountRequest);
+
     if (createAccountRequest == null) {
       logger.warn("Invalid signup request: User request is null");
-      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>("Request is empty", HttpStatus.BAD_REQUEST);
     }
 
     if (authenticatorService.findByUsername(createAccountRequest.getUsername())) {
-
       logger.warn("Username '{}' is already taken", createAccountRequest.getUsername());
       return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
     }
@@ -63,24 +63,24 @@ public class AuthenticationController {
       return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
     }
 
-    final AuthenticationResponse authenticationResponse = authenticatorService.createUserAccount(createAccountRequest);
     try {
+      final AuthenticationResponse authenticationResponse =
+          authenticatorService.createUserAccount(createAccountRequest);
       logger.info("AuthenticationResponse: {}", authenticationResponse);
-      List<ServiceInstance> instances = discoveryClient.getInstances("user");
+
+      List<ServiceInstance> instances = discoveryClient.getInstances(SERVICES.USER.name());
       if (instances.isEmpty()) {
-        logger.info("Authentication service not found");
+        logger.info("User service not found");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
       }
-      logger.info("instances is not empty try block: {}", instances);
+
       ServiceInstance instance = instances.get(0);
       String authUrl = instance.getUri() + "/user/create-account";
 
-      logger.info("authenticationResponse.getToken(): {}", authenticationResponse.getToken());
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", "Bearer " + authenticationResponse.getToken());
       headers.setContentType(MediaType.APPLICATION_JSON);
 
-      //TODO: Need to find a better way. This is not the best approach
       logger.info("AuthUserId: {}", authenticationResponse.getUserId());
       CreateAccountRequest createUserRequest = new CreateAccountRequest(
           authenticationResponse.getUserId(),
@@ -88,43 +88,48 @@ public class AuthenticationController {
           createAccountRequest.getFirstname(), createAccountRequest.getLastname(),
           createAccountRequest.getEmail());
       HttpEntity<CreateAccountRequest> requestEntity = new HttpEntity<>(createUserRequest, headers);
-      ResponseEntity<String> authResponse = restTemplate.exchange(
+      ResponseEntity<String> userCreation = restTemplate.exchange(
           authUrl, HttpMethod.POST, requestEntity, String.class);
 
-      logger.info(authResponse.getBody());
+      if (userCreation.getStatusCode() == HttpStatus.CREATED) {
+        return new ResponseEntity<>("User successfully created", HttpStatus.CREATED);
+      } else {
+        logger.error("Failed to create user in the user service: {}", userCreation.getBody());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Failed to create user");
+      }
     } catch (Exception e) {
-      logger.error("Error creating user account", e.getMessage());
+      logger.error("Error creating user account: {}", e.getMessage(), e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create user");
     }
-    return new ResponseEntity<>("User successfully created", HttpStatus.CREATED);
   }
-  @PostMapping("/{username}/role")
-  public ResponseEntity<String> findUserRole(@PathVariable String username, HttpServletRequest request) {
 
-     if (username == null) {
-      logger.warn("Username is null");
+  @PostMapping("/{username}/role")
+  public ResponseEntity<String> findUserRole(@PathVariable String username,
+      HttpServletRequest request) {
+
+    if (username == null || username.isBlank()) {
+      logger.warn("Username is mssing or empty");
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
     String authHeader = request.getHeader("Authorization");
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
       logger.warn("Authorization header missing or invalid");
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
     String token = authHeader.substring(7);
 
     try {
       boolean isValid = authenticatorService.isTokenValid(token);
       if (!isValid) {
-      return new ResponseEntity<>("User token not valid", HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>("User token not valid", HttpStatus.UNAUTHORIZED);
       }
-    } catch (Exception e) {
-      logger.error("Error during token validation: {}", e.getMessage(), e);
-      return new ResponseEntity<>("", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    try{
       final String userByRole = authenticatorService.findUserByRole(username);
       return new ResponseEntity<>(userByRole, HttpStatus.OK);
+
     } catch (Exception e) {
-     return new ResponseEntity<>("Error getting role for user ", HttpStatus.INTERNAL_SERVER_ERROR);
+      logger.error("Error finding role for user {}: {}", username, e.getMessage(), e);
+      return new ResponseEntity<>("Error getting role for user ", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
   }
@@ -137,21 +142,20 @@ public class AuthenticationController {
       logger.warn("Invalid login request: Log in details recieved ");
       return new ResponseEntity<String>("Log In Request is empty", HttpStatus.BAD_REQUEST);
     }
-
+    String token;
     try {
-      final String token = authenticatorService.authenticate(loginRequest);
-      if (token != null && !token.isEmpty()) {
-        logger.info("User {} successfully logged in", loginRequest.getUsername());
-        return ResponseEntity.ok()
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-            .body("Login successful");
+      token = authenticatorService.authenticate(loginRequest);
+      if (token == null && token.isEmpty()) {
+        logger.info("Invalid log in request for {}", loginRequest.getUsername());
+        return new ResponseEntity<>("Invalid login request", HttpStatus.UNAUTHORIZED);
       }
     } catch (Exception e) {
       logger.warn("Log in failed", e);
-      return new ResponseEntity<String>("User log in Failed", HttpStatus.UNAUTHORIZED);
+      return new ResponseEntity<String>("User log in Failed", HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    return null;
-
+    return ResponseEntity.ok()
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+        .body("Login successful");
   }
 
   @PostMapping("/validate-token")
@@ -169,10 +173,10 @@ public class AuthenticationController {
         logger.warn("Token validation failed");
         return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
       }
-    //some request doesnt send a username
+      //some request doesnt send a username
       if (verifyToken.getUsername() != null) {
         final String usernameFromToken = jwtService.extractUsername(verifyToken.getToken());
-        if(!verifyToken.getUsername().equals(usernameFromToken)) {
+        if (!verifyToken.getUsername().equals(usernameFromToken)) {
           logger.warn("Token validation failed username in request doesnt match token");
           return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
         }
