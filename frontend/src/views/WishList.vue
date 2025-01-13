@@ -41,8 +41,9 @@ import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
       const wishlist = wishListItems.value.at(index);
       if (wishlist) {
         wishListStore.removeBookToWishlist(wishlist);
-        router.go(0)
+
       }
+      router.go(0)
     }
     onBeforeMount(async () => {
       await wishListStore.getUserWishList()

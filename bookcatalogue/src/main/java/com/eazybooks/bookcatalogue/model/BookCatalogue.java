@@ -12,10 +12,15 @@ import jakarta.persistence.Table;
 @Table(name="book_catalogue")
 public class BookCatalogue {
 
+//  @Id
+//  @Column(nullable = false, unique = true)
+//  @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
+//
+//  @SequenceGenerator(name = "book_catalogue_seq_generator", sequenceName = "book_catalogue_seq")
+
   @Id
   @Column(nullable = false, unique = true)
   @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
-  @SequenceGenerator(name = "book_catalogue_seq_generator", sequenceName = "book_catalogue_seq")
   private String id;
   private String title;
   private String author;

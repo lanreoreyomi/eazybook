@@ -30,7 +30,7 @@ export default defineConfig({
         changeOrigin: true
       },
       '/bookcatalogue': {
-        target: 'http://eazybooks.com:9089',
+        target: 'http://eazybooks.com:9189',
         changeOrigin: true
       },
       '/wishlist/': {
@@ -38,11 +38,11 @@ export default defineConfig({
         changeOrigin: true
       },
       '/checkoutitems/': {
-        target: 'http://eazybooks.com:9089',
+        target: 'http://eazybooks.com:9189',
         changeOrigin: true
       },
       '/checkout/': {
-        target: 'http://eazybooks.com:9089',
+        target: 'http://eazybooks.com:9189',
         changeOrigin: true
       }
     }

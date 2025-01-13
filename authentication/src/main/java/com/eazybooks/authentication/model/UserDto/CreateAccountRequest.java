@@ -82,8 +82,7 @@ public class CreateAccountRequest {
   public String toString() {
     return "CreateAccountRequest{" +
         "username='" + username + '\'' +
-        ", password='" + password + '\'' +
-        ", firstname='" + firstname + '\'' +
+         ", firstname='" + firstname + '\'' +
         ", lastname='" + lastname + '\'' +
         ", email='" + email + '\'' +
         '}';

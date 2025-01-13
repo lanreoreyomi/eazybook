@@ -17,12 +17,16 @@ public class User {
 
 
   @Id
- //  @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  @Column(nullable = false)
-  private  String userId;
+  @Column(nullable = false, unique = true)
+//  @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
+  private String userId;
+  @Column(name = "username")
   private String username;
+  @Column(name = "first_name")
   private  String firstname;
+  @Column(name = "last_name")
   private String lastname;
+  @Column(name = "email")
   private String email;
 
   public String getUserId() {

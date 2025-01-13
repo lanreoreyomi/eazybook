@@ -5,6 +5,7 @@ import static com.eazybooks.bookcatalogue.utils.RestUtils.isTokenValid;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.VerifyToken;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
+import com.eazybooks.bookcatalogue.utils.RestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
@@ -42,7 +43,7 @@ public class BookCatalogueController {
     this.discoveryClient = discoveryClient;
   }
 
-  @PostMapping("{username}/addbook")
+  @PostMapping("/{username}/addbook")
   public ResponseEntity<String> addBookToCatalogues(@PathVariable String username,
       @RequestBody BookCatalogue book, HttpServletRequest request) {
 
@@ -89,37 +90,10 @@ public class BookCatalogueController {
   @GetMapping()
   public ResponseEntity<List<BookCatalogue>> getAllBookCatalogues(HttpServletRequest request) {
 
-     String authHeader = request.getHeader("Authorization");
-
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      logger.warn("Authorization header missing or invalid");
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-    String token = authHeader.substring(7);
+    //verifies token
     try {
-      List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
-      if (instances.isEmpty()) {
-        logger.error("Authentication service not found");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
-      ServiceInstance instance = instances.get(0);
-
-      String authUrl = instance.getUri() + "/auth/validate-token";
-
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Authorization", authHeader);
-      headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
-
-      HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token,null ), headers);
-      ResponseEntity<Boolean> authResponse = restTemplate.exchange(
-          authUrl, HttpMethod.POST, requestEntity, Boolean.class);
-
-      if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
-          authResponse.getBody())) {
-        logger.warn("Token validation failed");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-      }
+      ResponseEntity<Boolean> tokenValidation = isTokenValid(request, null, logger, discoveryClient,
+          restTemplate);
       List<BookCatalogue> books = bookCatalogueService.getAllCatalogue();
       return ResponseEntity.ok(books);
     } catch (Exception e) {

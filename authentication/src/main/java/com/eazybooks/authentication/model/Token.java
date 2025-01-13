@@ -16,14 +16,17 @@ public class Token {
   @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
+  @Column(name = "token")
+  private String token;
+  @Column(name = "username")
+  private String username;
+  @Column(name = "is_logged_out")
+  private Boolean isLoggedOut;
 
   public void setId(String id) {
     this.id = id;
   }
 
-  private String token;
-  private String username;
-  private Boolean isLoggedOut;
 
   public Token() {
   }

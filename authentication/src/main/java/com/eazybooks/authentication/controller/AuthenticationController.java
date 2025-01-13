@@ -33,7 +33,7 @@ public class AuthenticationController {
   private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
   private final JwtService jwtService;
   AuthenticatorService authenticatorService;
-  private DiscoveryClient discoveryClient;
+  private final DiscoveryClient discoveryClient;
   RestTemplate restTemplate = new RestTemplate();
 
   public AuthenticationController(AuthenticatorService authenticatorService,
@@ -84,22 +84,27 @@ public class AuthenticationController {
       logger.info("AuthUserId: {}", authenticationResponse.getUserId());
       CreateAccountRequest createUserRequest = new CreateAccountRequest(
           authenticationResponse.getUserId(),
-          createAccountRequest.getUsername(), null,
-          createAccountRequest.getFirstname(), createAccountRequest.getLastname(),
+          createAccountRequest.getUsername(),
+          null,
+          createAccountRequest.getFirstname(),
+          createAccountRequest.getLastname(),
           createAccountRequest.getEmail());
       HttpEntity<CreateAccountRequest> requestEntity = new HttpEntity<>(createUserRequest, headers);
       ResponseEntity<String> userCreation = restTemplate.exchange(
           authUrl, HttpMethod.POST, requestEntity, String.class);
 
       if (userCreation.getStatusCode() == HttpStatus.CREATED) {
+
         return new ResponseEntity<>("User successfully created", HttpStatus.CREATED);
       } else {
         logger.error("Failed to create user in the user service: {}", userCreation.getBody());
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body("Failed to create user");
       }
     } catch (Exception e) {
       logger.error("Error creating user account: {}", e.getMessage(), e);
+      authenticatorService.deleteByUsername(createAccountRequest.getUsername());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create user");
     }
   }

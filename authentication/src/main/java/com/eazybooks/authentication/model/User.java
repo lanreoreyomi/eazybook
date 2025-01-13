@@ -22,13 +22,19 @@ public class User implements UserDetails {
   @Column(nullable = false, unique = true)
   @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
   private String userId;
+  @Column(name = "username")
   private String username;
+  @Column(name = "password")
   private String password;
+  @Column(name = "first_name")
   private  String firstname;
+  @Column(name = "last_name")
   private String lastname;
+  @Column(name = "email")
   private String email;
 
   @Enumerated(EnumType.STRING)
+  @Column(name = "role")
   Role  role;
 
   public String getUsername() {

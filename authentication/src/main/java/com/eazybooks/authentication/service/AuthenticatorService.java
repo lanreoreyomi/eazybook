@@ -138,4 +138,9 @@ public class AuthenticatorService implements AuthenticatorImpl {
     return authenticatorRepository.findUserByUsername(username).getRole().toString();
   }
 
+  @Override
+  public void deleteByUsername(String userName) {
+ authenticatorRepository.deleteUserByUsername(userName);
+  }
+
 }
