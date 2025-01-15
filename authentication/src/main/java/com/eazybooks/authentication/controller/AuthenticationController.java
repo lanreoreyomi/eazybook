@@ -1,6 +1,7 @@
 package com.eazybooks.authentication.controller;
 
-import com.eazybooks.authentication.config.SERVICES;
+import static com.eazybooks.authentication.config.RestUtils.RestUtils.get_USER_createUserUrl;
+
 import com.eazybooks.authentication.model.LoginRequest;
 import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
 import com.eazybooks.authentication.model.UserDto.CreateAccountRequest;
@@ -8,10 +9,9 @@ import com.eazybooks.authentication.model.VerifyToken;
 import com.eazybooks.authentication.service.AuthenticatorService;
 import com.eazybooks.authentication.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,29 +19,32 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:5173") // Allow requests from this origin
 public class AuthenticationController {
 
   private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
   private final JwtService jwtService;
   AuthenticatorService authenticatorService;
-  private final DiscoveryClient discoveryClient;
-  RestTemplate restTemplate = new RestTemplate();
 
-  public AuthenticationController(AuthenticatorService authenticatorService,
-      DiscoveryClient discoveryClient, JwtService jwtService) {
+  @Autowired
+  private RestTemplate standardRestTemplate;
+
+  public AuthenticationController(AuthenticatorService authenticatorService, JwtService jwtService) {
     this.authenticatorService = authenticatorService;
-    this.discoveryClient = discoveryClient;
     this.jwtService = jwtService;
-  }
+   }
 
   @PostMapping("/create-account")
   public ResponseEntity<String> signUp(
@@ -68,20 +71,14 @@ public class AuthenticationController {
           authenticatorService.createUserAccount(createAccountRequest);
       logger.info("AuthenticationResponse: {}", authenticationResponse);
 
-      List<ServiceInstance> instances = discoveryClient.getInstances(SERVICES.USER.name());
-      if (instances.isEmpty()) {
-        logger.info("User service not found");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
+       String user_service_url =get_USER_createUserUrl();
 
-      ServiceInstance instance = instances.get(0);
-      String authUrl = instance.getUri() + "/user/create-account";
+       logger.info("User_service_url: {}", user_service_url);
+
 
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", "Bearer " + authenticationResponse.getToken());
       headers.setContentType(MediaType.APPLICATION_JSON);
-
-      logger.info("AuthUserId: {}", authenticationResponse.getUserId());
       CreateAccountRequest createUserRequest = new CreateAccountRequest(
           authenticationResponse.getUserId(),
           createAccountRequest.getUsername(),
@@ -89,19 +86,28 @@ public class AuthenticationController {
           createAccountRequest.getFirstname(),
           createAccountRequest.getLastname(),
           createAccountRequest.getEmail());
+
       HttpEntity<CreateAccountRequest> requestEntity = new HttpEntity<>(createUserRequest, headers);
-      ResponseEntity<String> userCreation = restTemplate.exchange(
-          authUrl, HttpMethod.POST, requestEntity, String.class);
+      ResponseEntity<String> userCreation = standardRestTemplate.exchange(
+          user_service_url, HttpMethod.POST, requestEntity, String.class);
 
       if (userCreation.getStatusCode() == HttpStatus.CREATED) {
-
         return new ResponseEntity<>("User successfully created", HttpStatus.CREATED);
       } else {
         logger.error("Failed to create user in the user service: {}", userCreation.getBody());
-
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body("Failed to create user");
       }
+    } catch (HttpClientErrorException e) {
+      logger.error("Client error creating user account: {}", e.getResponseBodyAsString(), e);
+      authenticatorService.deleteByUsername(createAccountRequest.getUsername());
+      return ResponseEntity.status(e.getStatusCode()).body("Failed to create user: " + e.getResponseBodyAsString());
+
+    } catch (HttpServerErrorException e) {
+      logger.error("Server error creating user account: {}", e.getResponseBodyAsString(), e);
+      authenticatorService.deleteByUsername(createAccountRequest.getUsername());
+      return ResponseEntity.status(e.getStatusCode()).body("Failed to create user: " + e.getResponseBodyAsString());
+
     } catch (Exception e) {
       logger.error("Error creating user account: {}", e.getMessage(), e);
       authenticatorService.deleteByUsername(createAccountRequest.getUsername());
@@ -170,16 +176,13 @@ public class AuthenticationController {
       logger.warn("Token is missing or blank");
       return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
     }
-
     try {
       boolean isValid = authenticatorService.isTokenValid(verifyToken.getToken());
-
       if (!isValid) {
         logger.warn("Token validation failed");
         return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
       }
-      //some request doesnt send a username
-      if (verifyToken.getUsername() != null) {
+       if (verifyToken.getUsername() != null) {
         final String usernameFromToken = jwtService.extractUsername(verifyToken.getToken());
         if (!verifyToken.getUsername().equals(usernameFromToken)) {
           logger.warn("Token validation failed username in request doesnt match token");
@@ -194,4 +197,5 @@ public class AuthenticationController {
       return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
 }

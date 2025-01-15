@@ -7,7 +7,6 @@
       </div>
       <div class="checkout_details">
         <ul>
-
           <li class="book_card_links" style="font-weight: bold"> Title: {{book.title}} </li>
           <li class="book_card_links"> Author: {{book.author}} </li>
           <li class="book_card_links"> Description: {{book.description}} </li>
@@ -43,12 +42,16 @@ export default {
   setup(props, {emit}) {
     const checkoutStore = useCheckoutItemStore();
 
-   const removeBookFromCheckout = (book: BookCatalogue): void => {
-      if (book !=null) {
-        checkoutStore.removeBookFromCheckoutItem(book.isbn);
-        router.go(0)
-      }
-    }
+   const removeBookFromCheckout = async (book: BookCatalogue): Promise<void> => {
+     if (book != null) {
+       try{
+         await checkoutStore.removeBookFromCheckoutItem(book.isbn);
+         router.go(0)
+       }catch (e) {
+         console.log(e);
+       }
+     }
+   }
     const checkBookout = (book: BookCatalogue) => {
       emit('completeCheckout', book);
     };

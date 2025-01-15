@@ -1,18 +1,16 @@
 package com.eazybooks.bookcatalogue.controller;
 
 
+import static com.eazybooks.bookcatalogue.utils.RestUtils.get_AUTH_userRoleTokenUrl;
 import static com.eazybooks.bookcatalogue.utils.RestUtils.isTokenValid;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
-import com.eazybooks.bookcatalogue.model.VerifyToken;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
-import com.eazybooks.bookcatalogue.utils.RestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,19 +28,19 @@ import org.springframework.web.client.RestTemplate;
 
 @Controller
 @RequestMapping("/bookcatalogue")
+@CrossOrigin(origins = "http://localhost:5173") // Allow requests from this origin
 public class BookCatalogueController {
 
   Logger logger = LoggerFactory.getLogger(BookCatalogueController.class);
 
   private final BookCatalogueService bookCatalogueService;
-  private final DiscoveryClient discoveryClient;
-  RestTemplate restTemplate = new RestTemplate();
 
-  public BookCatalogueController(BookCatalogueService bookCatalogueService,
-      DiscoveryClient discoveryClient) {
+  @Autowired
+  RestTemplate standardRestTemplate;
+
+  public BookCatalogueController(BookCatalogueService bookCatalogueService) {
     this.bookCatalogueService = bookCatalogueService;
-    this.discoveryClient = discoveryClient;
-  }
+   }
 
   @PostMapping("/{username}/addbook")
   public ResponseEntity<String> addBookToCatalogues(@PathVariable String username,
@@ -51,7 +50,7 @@ public class BookCatalogueController {
 
     //verifies token
     try {
-      tokenValidation = isTokenValid(request, username, logger, discoveryClient, restTemplate);
+      tokenValidation = isTokenValid(request, username, logger, standardRestTemplate);
     } catch (Exception e) {
       logger.error(e.getMessage());
     }
@@ -92,8 +91,8 @@ public class BookCatalogueController {
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValidation = isTokenValid(request, null, logger, discoveryClient,
-          restTemplate);
+      ResponseEntity<Boolean> tokenValidation = isTokenValid(request, null, logger,
+          standardRestTemplate);
       List<BookCatalogue> books = bookCatalogueService.getAllCatalogue();
       return ResponseEntity.ok(books);
     } catch (Exception e) {
@@ -109,7 +108,7 @@ public class BookCatalogueController {
     logger.info("request {}", request.toString());
 
     try {
-      final ResponseEntity<Boolean> verifyTokenResponse = isTokenValid(request, null, logger, discoveryClient, restTemplate);
+      final ResponseEntity<Boolean> verifyTokenResponse = isTokenValid(request, null, logger,  standardRestTemplate);
 
       if (verifyTokenResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
           verifyTokenResponse.getBody())) {
@@ -142,8 +141,6 @@ public class BookCatalogueController {
   }
 
 
-
-
   private ResponseEntity<String> getUserRole(String username, HttpServletRequest request) {
 
     String authHeader = request.getHeader("Authorization");
@@ -157,20 +154,14 @@ public class BookCatalogueController {
     ResponseEntity<String> authResponse;
 
     try {
-      List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
-      if (instances.isEmpty()) {
-        logger.error("Authentication service not found");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
 
-      ServiceInstance instance = instances.get(0);
-      String authUrl = instance.getUri() + "/auth/" + username + "/role";
+      String authUrl = get_AUTH_userRoleTokenUrl(username);
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", authHeader);
       headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
 
       HttpEntity<String> requestEntity = new HttpEntity<>(token, headers);
-      authResponse = restTemplate.exchange(
+      authResponse = standardRestTemplate.exchange(
           authUrl, HttpMethod.POST, requestEntity, String.class);
       if (authResponse.getStatusCode() != HttpStatus.OK) {
         return new ResponseEntity<>("User not admin", HttpStatus.UNAUTHORIZED);

@@ -37,13 +37,18 @@ import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
       return wishListStore.getUserWishList();
     });
 
-    const removeBookFromWishlist = (index: number): void => {
+    const removeBookFromWishlist = async (index: number): Promise<void> => {
       const wishlist = wishListItems.value.at(index);
       if (wishlist) {
-        wishListStore.removeBookToWishlist(wishlist);
-
+        try {
+          await wishListStore.removeBookToWishlist(wishlist); // Wait for API call to finish
+          wishListItems.value.splice(index, 1);
+          router.go(0)
+        } catch (error) {
+          console.error('Error removing book from wishlist:', error);
+        }
       }
-      router.go(0)
+
     }
     onBeforeMount(async () => {
       await wishListStore.getUserWishList()

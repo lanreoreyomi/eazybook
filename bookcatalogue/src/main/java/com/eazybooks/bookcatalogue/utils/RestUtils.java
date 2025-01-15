@@ -1,12 +1,10 @@
 package com.eazybooks.bookcatalogue.utils;
 
-import com.eazybooks.bookcatalogue.model.SERVICES;
 import com.eazybooks.bookcatalogue.model.VerifyToken;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import org.slf4j.Logger;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,8 +15,15 @@ import org.springframework.web.client.RestTemplate;
 
 public class RestUtils {
 
-  private static ResponseEntity<Boolean> verfiyToken(HttpServletRequest request, String username, Logger logger,
-      DiscoveryClient discoveryClient, RestTemplate restTemplate) {
+  public static String get_AUTH_ValidateTokenUrl() throws UnknownHostException {
+    return "http://"+ InetAddress.getLocalHost().getHostAddress()+":9084/auth/validate-token";
+  }
+
+  public static String get_AUTH_userRoleTokenUrl(String username) throws UnknownHostException {
+     return "http://"+ InetAddress.getLocalHost().getHostAddress()+":9084/auth/"+username + "/role";
+  }
+
+  private static ResponseEntity<Boolean> verfiyToken(HttpServletRequest request, String username, Logger logger, RestTemplate restTemplate) {
     String authHeader = request.getHeader("Authorization");
 
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -30,16 +35,7 @@ public class RestUtils {
     ResponseEntity<Boolean> authResponse;
 
     try {
-      List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
-      logger.info("Found {} instances of authentication service", instances.size());
-
-      if (instances.isEmpty()) {
-        logger.error("Authentication service not found");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
-
-      ServiceInstance instance = instances.get(0);
-      String authUrl = instance.getUri() + "/auth/validate-token";
+      String authUrl = get_AUTH_ValidateTokenUrl();
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", authHeader);
       headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
@@ -62,8 +58,8 @@ public class RestUtils {
   }
 
   public static ResponseEntity<Boolean> isTokenValid(HttpServletRequest request, String username,
-      Logger logger, DiscoveryClient discoveryClient, RestTemplate restTemplate) {
-    return verfiyToken(request, username, logger, discoveryClient, restTemplate);
+      Logger logger, RestTemplate restTemplate) {
+    return verfiyToken(request, username, logger, restTemplate);
 
   }
 

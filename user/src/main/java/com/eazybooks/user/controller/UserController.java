@@ -1,18 +1,16 @@
 package com.eazybooks.user.controller;
 
+import static com.eazybooks.user.Utils.RestUtils.get_AUTH_ValidateTokenUrl;
+
 import com.eazybooks.user.DTO.UsersDto;
 import com.eazybooks.user.model.CreateAccountRequest;
 import com.eazybooks.user.model.User;
 import com.eazybooks.user.model.VerifyToken;
 import com.eazybooks.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -36,21 +34,13 @@ public class UserController {
   private static final Logger logger = LoggerFactory.getLogger(UserController.class);
   UserService userService;
   private DiscoveryClient discoveryClient;
-  RestTemplate restTemplate = new RestTemplate();
+
+  @Autowired
+  RestTemplate standardRestTemplate;
 
   public UserController(UserService userService, DiscoveryClient discoveryClient) {
     this.userService = userService;
     this.discoveryClient = discoveryClient;
-  }
-
-  public URI serviceUrl(String serviceId) {
-    List<ServiceInstance> list = discoveryClient.getInstances(serviceId);
-    if (list != null && list.size() > 0) {
-
-      System.out.println(list.get(0).getUri());
-      return list.get(0).getUri();
-    }
-    return null;
   }
 
   @GetMapping("/userid/{id}")
@@ -174,9 +164,7 @@ public class UserController {
       @RequestBody UsersDto usersDto, HttpServletRequest request) {
     logger.info("Received request to get user with username: {}", username);
 
-
     final ResponseEntity<Boolean> verified = verifyToken(request);
-
     if (!Boolean.TRUE.equals(verified.getBody())) {
       logger.error("Error validating token");
       return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
@@ -190,9 +178,7 @@ public class UserController {
         logger.warn("User with username: {} not found", username);
         return ResponseEntity.notFound().build();
       }
-
       User userToUpdate = userByUsername;
-
       // Update user details (excluding password and salt for now)
       userToUpdate.setEmail(usersDto.getEmail());
       userToUpdate.setLastname(usersDto.getLastname());
@@ -205,9 +191,7 @@ public class UserController {
       updatedUsersDto.setFirstname(updatedUser.getFirstname());
       updatedUsersDto.setLastname(updatedUser.getLastname());
       updatedUsersDto.setEmail(updatedUser.getEmail());
-
       return new ResponseEntity<>("User successfully updated", HttpStatus.OK);  // Or return the actual user data
-
 
     } catch (Exception e) {
       logger.error("Error while updating user with username: {}", username, e);
@@ -232,7 +216,6 @@ public class UserController {
       return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
     }
 
-
     if (userService.findByUsername(createAccountRequest.getUsername()) != null) {
       logger.warn("Username '{}' is already taken", createAccountRequest.getUsername());
       return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
@@ -243,9 +226,7 @@ public class UserController {
       return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
     }
 
-
     try {
-
       User user = new User();
       user.setUserId(createAccountRequest.getUserId());
       user.setUsername(createAccountRequest.getUsername());
@@ -273,21 +254,15 @@ public class UserController {
     ResponseEntity<Boolean> authResponse;
 
     try {
-      List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
-      if (instances.isEmpty()) {
-        logger.error("Authentication service not found");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
+      String auth_service_url = get_AUTH_ValidateTokenUrl();
 
-      ServiceInstance instance = instances.get(0);
-      String authUrl = instance.getUri() + "/auth/validate-token";
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", authHeader);
       headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
 
       HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token), headers);
-      authResponse = restTemplate.exchange(
-          authUrl, HttpMethod.POST, requestEntity, Boolean.class);
+      authResponse = standardRestTemplate.exchange(
+          auth_service_url, HttpMethod.POST, requestEntity, Boolean.class);
 
       if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
           authResponse.getBody())) {

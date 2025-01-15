@@ -1,34 +1,26 @@
 package com.eazybooks.bookcatalogue.controller;
 
-import static com.eazybooks.bookcatalogue.model.SERVICES.WISHLIST;
 import static com.eazybooks.bookcatalogue.utils.RestUtils.isTokenValid;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.Checkout;
 import com.eazybooks.bookcatalogue.model.CheckoutInfo;
 import com.eazybooks.bookcatalogue.model.CheckoutStats;
-import com.eazybooks.bookcatalogue.model.SERVICES;
-import com.eazybooks.bookcatalogue.model.VerifyBook;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
 import com.eazybooks.bookcatalogue.service.CheckoutItemsService;
 import com.eazybooks.bookcatalogue.service.CheckoutService;
 import com.eazybooks.bookcatalogue.service.CheckoutStatsService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Controller
 @RequestMapping("/checkout")
+@CrossOrigin(origins = "http://localhost:5173")
 public class CheckoutController {
 
   Logger logger = LoggerFactory.getLogger(CheckoutController.class);
@@ -44,16 +37,16 @@ public class CheckoutController {
   private final BookCatalogueService bookCatalogueService;
   final CheckoutStatsService checkoutStatsService;
   final CheckoutItemsService checkoutItemsService;
-  private final DiscoveryClient discoveryClient;
-  RestTemplate restTemplate = new RestTemplate();
+
+  @Autowired
+  RestTemplate standardRestTemplate;
 
   public CheckoutController(CheckoutService checkoutService,
       BookCatalogueService bookCatalogueService, DiscoveryClient discoveryClient,
       CheckoutStatsService checkoutStatsService, CheckoutItemsService checkoutItemsService) {
     this.checkoutService = checkoutService;
     this.bookCatalogueService = bookCatalogueService;
-    this.discoveryClient = discoveryClient;
-    this.checkoutStatsService = checkoutStatsService;
+     this.checkoutStatsService = checkoutStatsService;
     this.checkoutItemsService = checkoutItemsService;
   }
 
@@ -63,7 +56,7 @@ public class CheckoutController {
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, discoveryClient, restTemplate);
+      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, standardRestTemplate);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -169,7 +162,7 @@ public class CheckoutController {
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, discoveryClient, restTemplate);
+      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, standardRestTemplate);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -228,7 +221,7 @@ public class CheckoutController {
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, discoveryClient, restTemplate);
+      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, standardRestTemplate);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
