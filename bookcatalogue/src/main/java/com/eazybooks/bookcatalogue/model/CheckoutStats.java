@@ -19,24 +19,24 @@ public class CheckoutStats {
    private String id;
   @Column(nullable = false)
   @Name("total_checkout")
-   private Long totalCheckout;
+   private int totalCheckout;
   @Name("book_isbn")
    private Long bookIsbn;
-
-  public CheckoutStats(Long totalCheckout, Long bookIsbn) {
-    this.totalCheckout = totalCheckout;
-    this.bookIsbn = bookIsbn;
+  @Name("title")
+  private String title;
+  public String getTitle() {
+    return title;
   }
 
-  public String getId() {
-    return id;
+  public void setTitle(String title) {
+    this.title = title;
   }
 
-  public Long getTotalCheckouts() {
+  public int getTotalCheckout() {
     return totalCheckout;
   }
 
-  public void setTotalCheckout(Long totalCheckout) {
+  public void setTotalCheckout(int totalCheckout) {
     this.totalCheckout = totalCheckout;
   }
 

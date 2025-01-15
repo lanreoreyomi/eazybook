@@ -39,15 +39,12 @@ public class WishlistController {
   private static final Logger logger = LoggerFactory.getLogger(WishlistController.class);
   private final WishlistService wishlistService;
 
-  private final DiscoveryClient discoveryClient;
-
   @Autowired
   RestTemplate standardRestTemplate;
 
-  public WishlistController(WishlistService wishlistService,
-      DiscoveryClient discoveryClient) {
+  public WishlistController(WishlistService wishlistService) {
     this.wishlistService = wishlistService;
-    this.discoveryClient = discoveryClient;
+
   }
 
   @PostMapping("/{username}/add")

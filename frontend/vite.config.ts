@@ -33,6 +33,10 @@ export default defineConfig({
         target: 'http://eazybooks.com:9189',
         changeOrigin: true
       },
+      '/stats': {
+        target: 'http://eazybooks.com:9189',
+        changeOrigin: true
+      },
       '/wishlist/': {
         target: 'http://eazybooks.com:8017',
         changeOrigin: true

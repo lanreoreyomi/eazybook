@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -72,9 +71,7 @@ public class AuthenticationController {
       logger.info("AuthenticationResponse: {}", authenticationResponse);
 
        String user_service_url =get_USER_createUserUrl();
-
        logger.info("User_service_url: {}", user_service_url);
-
 
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", "Bearer " + authenticationResponse.getToken());
@@ -166,7 +163,7 @@ public class AuthenticationController {
     }
     return ResponseEntity.ok()
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-        .body("Login successful");
+        .body(token);
   }
 
   @PostMapping("/validate-token")

@@ -24,6 +24,8 @@ import { LOGIN } from '@/api/apis.ts'
      async LogIn() {
        try {
          const response = await axios.post<LogInState>(LOGIN, this.userLogIn)
+
+         console.log(response.data)
          // Handle successful log in
          localStorage.setItem('accessToken', response.headers['authorization'])
          localStorage.setItem('refreshToken', response.headers['authorization'])
@@ -36,15 +38,13 @@ import { LOGIN } from '@/api/apis.ts'
          })
 
        } catch (error) {
-         if (axios.isAxiosError(error) && error.response) {
-           console.log(JSON.stringify(error.response.data))
-           this.$patch({
-             statusCode: error.response.status,
-             statusText: String(error.response.data),
-             isLoggedIn: false,
-           })
+         console.error('Error fetching checkout stats:', error);
+         if (axios.isAxiosError(error)) {
+           this.statusCode = error.response?.status || 500;
+           this.statusText = error.response?.statusText || 'Internal Server Error';
          } else {
-           console.log('An unexpected error occurred:', error)
+           this.statusCode = 500;
+           this.statusText = 'An unexpected error occurred';
          }
        }
      },

@@ -31,16 +31,17 @@ export const useLogOutStore = defineStore('logout', {
         localStorage.removeItem('username');
 
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          console.error(JSON.stringify(error.response.data));
+        console.error('Error fetching checkout stats:', error);
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.statusText || 'Internal Server Error';
         } else {
-          console.error('An unexpected error occurred:', error);
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
         }
-
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
       }
-
     },
 
 },

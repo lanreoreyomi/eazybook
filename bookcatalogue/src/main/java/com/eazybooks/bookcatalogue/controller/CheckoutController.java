@@ -115,16 +115,19 @@ public class CheckoutController {
 
     try {
       checkoutStats = checkoutStatsService.findByIsbn(bookIsbn);
-      logger.info("Checkout found for isbn " + checkout_counter);
-
       if (checkoutStats != null) {
-        final Long totalCheckouts = checkoutStats.getTotalCheckouts();
-        checkout_counter = Math.toIntExact(totalCheckouts) + 1;
-        checkoutStats.setTotalCheckout((long) checkout_counter);
+        logger.info("Checkout stats found for isbn " + checkoutStats.toString());
+        final int totalCheckouts = checkoutStats.getTotalCheckout();
+        checkout_counter = totalCheckouts + 1;
+        checkoutStats.setTotalCheckout(checkout_counter);
+        checkoutStats.setTitle(book.getTitle());
       } else {
+        logger.info("Checkout stats not found for isbn " + bookIsbn);
         checkoutStats = new CheckoutStats();
-        checkoutStats.setTotalCheckout((long) 1);
+        checkoutStats.setTotalCheckout(1);
         checkoutStats.setBookIsbn(bookIsbn);
+        checkoutStats.setTitle(book.getTitle());
+
       }
 
       checkout.setCheckedOutBy(username);
@@ -134,7 +137,6 @@ public class CheckoutController {
       checkout.setIsbn(bookIsbn);
       checkoutService.save(checkout);
       checkoutStatsService.save(checkoutStats);
-
       logger.info("Checkout saved for isbn " + checkout_counter);
       book.setQuantityForRent(book.getQuantityForRent() - 1);
       try {

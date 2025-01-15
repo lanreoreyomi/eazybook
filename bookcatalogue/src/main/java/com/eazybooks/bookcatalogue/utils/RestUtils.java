@@ -40,7 +40,6 @@ public class RestUtils {
       headers.set("Authorization", authHeader);
       headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
 
-      logger.info("Service url: "+ authUrl);
       final String s = username != null ? username : null;
       HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token,s ), headers);
       authResponse = restTemplate.exchange(

@@ -5,6 +5,7 @@ export const BOOKCATALOGUE = '/bookcatalogue'
 export const WISHLIST = '/wishlist/'
 export const CHECKOUTITEM = '/checkoutitems'
 export const CHECKBOOKOUT = '/checkout'
+export const CHECKOUTSTATS = '/stats/all'
 
 export const getWishListForUser = (username: string| null): string => {
   return `${WISHLIST+username}/all `

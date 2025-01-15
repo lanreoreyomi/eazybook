@@ -30,13 +30,13 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
           checkoutItems: response.data, // Ensure statusText is a string
         })
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          this.$patch({
-            statusCode: error.response.status,
-            statusText: String(error.response.data), // Ensure statusText is a string
-          })
+        console.error('Error fetching checkout stats:', error);
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.statusText || 'Internal Server Error';
         } else {
-          console.log('An unexpected error occurred:', error)
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
         }
       }
     },
@@ -88,16 +88,13 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
         })
 
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          console.log(JSON.stringify(error.response.data))
-          this.$patch({
-            statusCode: error.response.status,
-            statusText: String(error.response.data),
-          })
-          console.log("this.statusCode", this.statusCode)
-          console.log("response.statusText", this.statusText)
+        console.error('Error fetching data:', error);
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.statusText || 'Internal Server Error';
         } else {
-          console.log('An unexpected error occurred:', error)
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
         }
       }
     },

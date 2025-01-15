@@ -126,7 +126,6 @@ public class UserController {
       @RequestBody UsersDto usersDto) {
     logger.info("Received request to get user with id: {}", id);
 
-    //TODO: remove Ids from the loggers
     try {
       final User user = userService.findById(id);
 

@@ -1,12 +1,13 @@
 <template>
    <div class="book_card" v-for="(book, index) in books" :key="index+1">
-    <img class="book_card-img" :src="`https://eazybooks-images.s3.us-east-1.amazonaws.com/${index + 1}-min.jpg`" alt="lib_img" />
+    <img class="book_card-img" :src="`https://eazybooks-images.s3.us-east-1.amazonaws.com/${index + 1}-min.jpg`" alt="book_img" />
      <div class="book_card-body">
       <h5 class="book_card-title">{{ book.title }}</h5>
       <p class="book_card-text">Description: {{ book.description }}</p>
     </div>
     <ul class="book_card_menu">
       <li class="book_card_links">Author: {{ book.author }}</li>
+      <li class="book_card_links">Isbn: {{ book.isbn }}</li>
       <li class="book_card_links">Year: {{ book.publicationYear }}</li>
       <li class="book_card_links">Available: {{ book.available }}</li>
       <li class="book_card_links">Quantity for rent: {{ book.quantityForRent }}</li>

@@ -34,7 +34,8 @@ alter sequence checkout_seq owned by checkout.id;
 CREATE TABLE IF NOT EXISTS checkout_stats (
                                 id VARCHAR(255) PRIMARY KEY,
                                 total_checkout BIGINT NOT NULL,
-                                book_isbn BIGINT UNIQUE NOT NULL
+                                title VARCHAR(255) NOT NULL,
+                                book_isbn BIGINT UNIQUE
 
 );
 
