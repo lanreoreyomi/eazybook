@@ -24,8 +24,6 @@ import { LOGIN } from '@/api/apis.ts'
      async LogIn() {
        try {
          const response = await axios.post<LogInState>(LOGIN, this.userLogIn)
-
-         console.log(response.data)
          // Handle successful log in
          localStorage.setItem('accessToken', response.headers['authorization'])
          localStorage.setItem('refreshToken', response.headers['authorization'])
@@ -38,7 +36,6 @@ import { LOGIN } from '@/api/apis.ts'
          })
 
        } catch (error) {
-         console.error('Error fetching checkout stats:', error);
          if (axios.isAxiosError(error)) {
            this.statusCode = error.response?.status || 500;
            this.statusText = error.response?.data || 'Internal Server Error';

@@ -33,7 +33,6 @@ import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
       router.push({ path: '/checkout' })
     };
     const userWishList = computed(() => {
-      console.log(wishListStore.getUserWishList())
       return wishListStore.getUserWishList();
     });
 
@@ -45,7 +44,7 @@ import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
           wishListItems.value.splice(index, 1);
           router.go(0)
         } catch (error) {
-          console.error('Error removing book from wishlist:', error);
+
         }
       }
 

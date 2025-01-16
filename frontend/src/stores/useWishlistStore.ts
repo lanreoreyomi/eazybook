@@ -39,7 +39,6 @@ export const useWishlistStore = defineStore('wishlist', {
           wishList: response.data, // Ensure statusText is a string
         })
       } catch (error) {
-        console.error('Error fetching data:', error);
         if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
           this.statusText = error.response?.statusText || 'Internal Server Error';
@@ -63,16 +62,12 @@ export const useWishlistStore = defineStore('wishlist', {
             'Content-Type': 'application/json'
           }
         })
-        // console.log(`Response data: ${JSON.stringify(response)}`);
-
-
         this.$patch({
           statusCode: response.status,
           statusText: String(response.data),
         })
 
       } catch (error) {
-         console.error('Error fetching data:', error);
          if (axios.isAxiosError(error)) {
            this.statusCode = error.response?.status || 500;
            this.statusText = error.response?.statusText || 'Internal Server Error';
@@ -100,7 +95,6 @@ export const useWishlistStore = defineStore('wishlist', {
         })
 
       } catch (error) {
-        console.error('Error fetching data:', error);
         if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
           this.statusText = error.response?.statusText || 'Internal Server Error';

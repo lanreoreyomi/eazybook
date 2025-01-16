@@ -37,7 +37,6 @@ export const useUserStore = defineStore('user', {
           statusText: String(response.data), // Ensure statusText is a string
         })
       } catch (error) {
-        console.error('Error fetching data:', error);
         if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
           this.statusText = error.response?.data || 'Internal Server Error';

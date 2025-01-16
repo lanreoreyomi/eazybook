@@ -33,7 +33,6 @@ export const useCheckoutStatsStore
           statusCode : response.status
         })
       }catch (error) {
-        console.error('Error fetching data:', error);
          if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
            this.statusText = error.response?.data || 'Internal Server Error';

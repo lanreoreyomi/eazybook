@@ -48,7 +48,7 @@ export default {
          await checkoutStore.removeBookFromCheckoutItem(book.isbn);
          router.go(0)
        }catch (e) {
-         console.log(e);
+
        }
      }
    }

@@ -31,7 +31,6 @@ export const useLogOutStore = defineStore('logout', {
         localStorage.removeItem('username');
 
       } catch (error) {
-        console.error('Error fetching checkout stats:', error);
         if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
           this.statusText = error.response?.data || 'Internal Server Error';

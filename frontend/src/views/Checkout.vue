@@ -78,7 +78,6 @@ export default defineComponent({
         checkoutInfo.value = 'Checkout is empty'
       }
       if (checkoutHistory.checkedOutHistory.length > 0) {
-        console.log(checkoutHistory.checkedOutHistory.at(0))
         checkoutHistoryList.value = checkoutHistory.checkedOutHistory
       } else {
         checkedOutHistoryInfo.value = 'No history found.'
