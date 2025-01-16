@@ -83,8 +83,9 @@ public class CheckoutController {
             HttpStatus.FORBIDDEN);
       }
 
-      if (book != null && checkoutStats != null) {
+      if (checkoutStats != null) {
         if (book.getQuantityForRent() <= 0) {
+          book.setAvailable(false);
           logger.info("Max Checkchout reached for book " + bookIsbn);
           return new ResponseEntity<>("Max Checkchout reached for book ", HttpStatus.FORBIDDEN);
         }

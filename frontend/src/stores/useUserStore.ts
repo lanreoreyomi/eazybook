@@ -40,7 +40,7 @@ export const useUserStore = defineStore('user', {
         console.error('Error fetching data:', error);
         if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
-          this.statusText = error.response?.statusText || 'Internal Server Error';
+          this.statusText = error.response?.data || 'Internal Server Error';
         } else {
           this.statusCode = 500;
           this.statusText = 'An unexpected error occurred';
