@@ -14,6 +14,7 @@ import com.amazonaws.services.servicediscovery.model.ServiceFilter;
 import com.amazonaws.services.servicediscovery.model.ServiceFilterName;
 import com.amazonaws.services.servicediscovery.model.ServiceSummary;
 import com.amazonaws.services.servicediscovery.model.ServiceTypeOption;
+import com.eazybooks.user.Config.IpAddressResolver;
 import jakarta.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -21,6 +22,7 @@ import java.util.Collections;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -37,6 +39,9 @@ public class UserApplication {
   @Component
   public class CloudMapRegistration {
     private static final Logger logger = LoggerFactory.getLogger(CloudMapRegistration.class);
+
+    @Autowired
+    private IpAddressResolver ipAddressResolver;
 
     @Value("${cloudmap.namespaceId}")
     private String namespaceId;
@@ -63,7 +68,9 @@ public class UserApplication {
 
     private void registerInstance() throws UnknownHostException {
       // Dynamically fetch the actual private IP address of the machine
-      String privateIpAddress = InetAddress.getLocalHost().getHostAddress();
+      logger.info("Registering instance " + ipAddressResolver.getIpAddress());
+     String privateIpAddress = InetAddress.getLocalHost().getHostAddress();
+//      String privateIpAddress = ipAddressResolver.getIpAddress();
       logger.info("Registering instance with IP: {}" , privateIpAddress);
 
       try {

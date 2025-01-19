@@ -10,6 +10,7 @@ import com.amazonaws.services.servicediscovery.model.ListServicesRequest;
 import com.amazonaws.services.servicediscovery.model.ListServicesResult;
 import com.amazonaws.services.servicediscovery.model.RegisterInstanceRequest;
 import com.amazonaws.services.servicediscovery.model.*;
+import com.eazybooks.authentication.config.IpAddressResolver;
 import jakarta.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -35,6 +37,7 @@ public class AuthenticationApplication {
   public class CloudMapRegistration {
     private static final Logger logger = LoggerFactory.getLogger(CloudMapRegistration.class);
 
+
     @Value("${cloudmap.namespaceId}")
     private String namespaceId;
 
@@ -49,6 +52,9 @@ public class AuthenticationApplication {
     private String serviceId; // Store the service ID
     private String instanceId; // Store the instance ID
 
+    @Autowired
+    private IpAddressResolver ipAddressResolver;
+
     @PostConstruct
     public void init() throws UnknownHostException {
       client = AWSServiceDiscoveryClientBuilder.defaultClient();
@@ -60,7 +66,10 @@ public class AuthenticationApplication {
 
     private void registerInstance() throws UnknownHostException {
       // Dynamically fetch the actual private IP address of the machine
-      String privateIpAddress = InetAddress.getLocalHost().getHostAddress();
+
+      logger.info("Resolved ip address " + ipAddressResolver.getIpAddress());
+//      String privateIpAddress = InetAddress.getLocalHost().getHostAddress();
+      String privateIpAddress = ipAddressResolver.getIpAddress();
       logger.info("Registering instance with IP: {}" , privateIpAddress);
 
       try {
