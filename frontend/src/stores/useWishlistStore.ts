@@ -18,9 +18,9 @@ interface BookCatalogueState {
 }
 export const useWishlistStore = defineStore('wishlist', {
   state: (): WishlistState => ({
-      username: '',
-      wishList: [],
-     statusCode: 0,
+    username: '',
+    wishList: [],
+    statusCode: 0,
     statusText: '',
   }),
 
@@ -39,22 +39,21 @@ export const useWishlistStore = defineStore('wishlist', {
           wishList: response.data, // Ensure statusText is a string
         })
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          this.$patch({
-            statusCode: error.response.status,
-            statusText: String(error.response.data), // Ensure statusText is a string
-          })
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.statusText || 'Internal Server Error';
         } else {
-          console.log('An unexpected error occurred:', error)
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
         }
       }
     },
     setCurrentUser(username: string) {
-       this.username = username;
-     },
+      this.username = username;
+    },
     async addBookToWishlist(book: BookCatalogue) {
 
-       try {
+      try {
 
         const response = await axios.post<BookCatalogueState>
         (addBookToWishlistWithUsername(username), book.isbn, {
@@ -63,23 +62,18 @@ export const useWishlistStore = defineStore('wishlist', {
             'Content-Type': 'application/json'
           }
         })
-        // console.log(`Response data: ${JSON.stringify(response)}`);
-
-
         this.$patch({
           statusCode: response.status,
           statusText: String(response.data),
         })
 
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          console.log(JSON.stringify(error.response.data))
-          this.$patch({
-            statusCode: error.response.status,
-            statusText: String(error.response.data),
-          })
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.statusText || 'Internal Server Error';
         } else {
-          console.log('An unexpected error occurred:', error)
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
         }
       }
     },
@@ -101,20 +95,18 @@ export const useWishlistStore = defineStore('wishlist', {
         })
 
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          console.log(JSON.stringify(error.response.data))
-          this.$patch({
-            statusCode: error.response.status,
-            statusText: String(error.response.data),
-          })
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.statusText || 'Internal Server Error';
         } else {
-          console.log('An unexpected error occurred:', error)
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
         }
       }
     },
   },
 
   getters: {
-      getCurrentUser: (state) => state.username
+    getCurrentUser: (state) => state.username
   },
 })

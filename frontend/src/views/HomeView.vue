@@ -5,11 +5,11 @@
       <h1>EazyBooks</h1>
       <h1 id="supporting_h1">Read the smart way</h1>
       <p>Eazybook is an online library that provides convenient access to a vast collection of books, audiobooks, and other digital content. Explore our extensive catalog, borrow titles with ease, and enjoy reading anytime, anywhere.</p>
-<div id="store_metrics">
-  <div>30,000 Books</div>
-  <div>1200 Daily Checkouts</div>
-  <div>300 Daily additions</div>
-</div>
+      <div id="store_metrics">
+        <div>30,000 Books</div>
+        <div>1200 Daily Checkouts</div>
+        <div>300 Daily additions</div>
+      </div>
       <div id="landing_text_buttons">
         <ul>
           <li id="log_in"><router-link to="/login" >Log In</router-link></li>
@@ -45,7 +45,7 @@ h1 {
 }
 
 #landing_container{
-   margin: 10px auto;
+  margin: 10px auto;
   align-items: center;
   justify-content: center;
   color: colors.$text-color;

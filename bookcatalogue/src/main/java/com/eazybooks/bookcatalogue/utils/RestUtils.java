@@ -61,10 +61,10 @@ public class RestUtils {
     }
   }
 
+
   public static ResponseEntity<Boolean> isTokenValid(HttpServletRequest request, String username,
       Logger logger, DiscoveryClient discoveryClient, RestTemplate restTemplate) {
     return verfiyToken(request, username, logger, discoveryClient, restTemplate);
 
   }
-
 }

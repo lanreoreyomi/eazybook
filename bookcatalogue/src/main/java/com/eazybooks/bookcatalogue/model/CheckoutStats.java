@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.springframework.boot.context.properties.bind.Name;
-
 @Entity
 @Table(name = "checkout_stats")
 public class CheckoutStats {
@@ -16,27 +15,27 @@ public class CheckoutStats {
   @Id
   @Column(nullable = false, unique = true)
   @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
-   private String id;
+  private String id;
   @Column(nullable = false)
   @Name("total_checkout")
-   private Long totalCheckout;
+  private int totalCheckout;
   @Name("book_isbn")
-   private Long bookIsbn;
-
-  public CheckoutStats(Long totalCheckout, Long bookIsbn) {
-    this.totalCheckout = totalCheckout;
-    this.bookIsbn = bookIsbn;
+  private Long bookIsbn;
+  @Name("title")
+  private String title;
+  public String getTitle() {
+    return title;
   }
 
-  public String getId() {
-    return id;
+  public void setTitle(String title) {
+    this.title = title;
   }
 
-  public Long getTotalCheckouts() {
+  public int getTotalCheckout() {
     return totalCheckout;
   }
 
-  public void setTotalCheckout(Long totalCheckout) {
+  public void setTotalCheckout(int totalCheckout) {
     this.totalCheckout = totalCheckout;
   }
 

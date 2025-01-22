@@ -19,6 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:5173") // Allow requests from this origin
 public class AuthenticationController {
 
   private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
@@ -160,7 +162,7 @@ public class AuthenticationController {
     }
     return ResponseEntity.ok()
         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-        .body("Login successful");
+        .body(token);
   }
 
   @PostMapping("/validate-token")

@@ -1,9 +1,9 @@
 <template>
   <div id="confirm_checkout" v-if="isModalOpen">
-<div>
-  <p>{{confirmCheckoutStatusText}} </p>
-  <button @click="toggleModal">Close</button>
-</div>
+    <div>
+      <p>{{confirmCheckoutStatusText}} </p>
+      <button @click="toggleModal">Close</button>
+    </div>
   </div>
   <p v-if="checkoutInfo" id="checkoutInfo">{{ checkoutInfo }}</p>
   <CheckoutComponent :books="checkoutItemsList" @completeCheckout="confirmBookCheckout"/>
@@ -55,7 +55,7 @@ export default defineComponent({
       }, 7000);
 
     }
-      const confirmCheckoutStatusText = computed(()=>{
+    const confirmCheckoutStatusText = computed(()=>{
       return checkoutStore.statusText;
     })
     const returnStatus = computed(()=>checkoutStore.statusCode === 200);
@@ -78,7 +78,6 @@ export default defineComponent({
         checkoutInfo.value = 'Checkout is empty'
       }
       if (checkoutHistory.checkedOutHistory.length > 0) {
-        console.log(checkoutHistory.checkedOutHistory.at(0))
         checkoutHistoryList.value = checkoutHistory.checkedOutHistory
       } else {
         checkedOutHistoryInfo.value = 'No history found.'
@@ -128,24 +127,24 @@ body {
   top: 250px;
   width: 40%;
   margin: 20px auto;
- padding: 40px;
+  padding: 40px;
   color: colors.$text-color;
   text-align: center;
 
-    button {
-      cursor: pointer;
-      width: 150px;
-      margin: 30px 0 20px;
-      padding: 15px ;
-      text-align: center;
-      justify-items: center;
-      background-color: colors.$text-color;
-      border: none;
-      color: colors.$white-color;
-      font-weight: 400;
-      border-radius: 0.5rem;
-      font-size: 16px;
-    }
+  button {
+    cursor: pointer;
+    width: 150px;
+    margin: 30px 0 20px;
+    padding: 15px ;
+    text-align: center;
+    justify-items: center;
+    background-color: colors.$text-color;
+    border: none;
+    color: colors.$white-color;
+    font-weight: 400;
+    border-radius: 0.5rem;
+    font-size: 16px;
+  }
 
 }
 </style>

@@ -1,10 +1,10 @@
 <template>
-<h2 v-if="wishListInfo" id="empty_list">{{wishListInfo}}</h2>
-   <div class="wish-list-items" v-if="wishListItems.length>0">
+  <h2 v-if="wishListInfo" id="empty_list">{{wishListInfo}}</h2>
+  <div class="wish-list-items" v-if="wishListItems.length>0">
     <div v-for="(wishList, index) in wishListItems" :key="index" class="wish-list">
       <div class="wishes">
-      <div class="wish-list-title">{{wishList.bookTitle}}</div>
-      <div class="remove-list" @click="removeBookFromWishlist(index)"><button>Remove from cart</button></div>
+        <div class="wish-list-title">{{wishList.bookTitle}}</div>
+        <div class="remove-list" @click="removeBookFromWishlist(index)"><button>Remove from cart</button></div>
         <div class="wish-list-checkout" @click="addToCheckoutItem(wishList.isbn, index)"><button>Checkout</button></div>
       </div>
     </div>
@@ -17,7 +17,7 @@ import { useWishlistStore } from '@/stores/useWishlistStore.ts'
 import type { WishList } from '@/model/model.ts'
 import router from '@/router'
 import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
-  export default defineComponent({
+export default defineComponent({
   name: 'WishList',
 
   setup() {
@@ -33,17 +33,21 @@ import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
       router.push({ path: '/checkout' })
     };
     const userWishList = computed(() => {
-      console.log(wishListStore.getUserWishList())
       return wishListStore.getUserWishList();
     });
 
-    const removeBookFromWishlist = (index: number): void => {
+    const removeBookFromWishlist = async (index: number): Promise<void> => {
       const wishlist = wishListItems.value.at(index);
       if (wishlist) {
-        wishListStore.removeBookToWishlist(wishlist);
+        try {
+          await wishListStore.removeBookToWishlist(wishlist); // Wait for API call to finish
+          wishListItems.value.splice(index, 1);
+          router.go(0)
+        } catch (error) {
 
+        }
       }
-      router.go(0)
+
     }
     onBeforeMount(async () => {
       await wishListStore.getUserWishList()
@@ -59,7 +63,7 @@ import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
       wishListItems,
       removeBookFromWishlist,
       addToCheckoutItem
-     };
+    };
   }
 })
 </script>
@@ -85,7 +89,7 @@ html, body {
   .wish-list-items{
     color: colors.$text-color;
     width: 70%;
-     margin: 10px auto;
+    margin: 10px auto;
     padding: 20px;
     border-radius: 0.5rem;
   }
@@ -103,7 +107,7 @@ html, body {
         padding:16px;
         font-size: 20px;
         width: 60%;
-       }
+      }
       .remove-list {
         button{
           font-size: 14px;
@@ -117,9 +121,9 @@ html, body {
           color: colors.$white-color;
         }
         color: colors.$white-color;
-         &:hover {
-           color: colors.$text-color;
-         }
+        &:hover {
+          color: colors.$text-color;
+        }
       }
       .wish-list-checkout {
         button{
@@ -135,7 +139,7 @@ html, body {
         }
 
       }
-     }
+    }
   }
 }
 </style>

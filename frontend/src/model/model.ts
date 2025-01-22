@@ -29,3 +29,9 @@ export interface Checkout {
   id: string,
   username: string,
 }
+
+export interface CheckoutStats {
+  totalCheckout: number,
+  bookIsbn: number
+  title: string
+}

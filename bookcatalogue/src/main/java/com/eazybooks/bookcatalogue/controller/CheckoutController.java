@@ -61,7 +61,7 @@ public class CheckoutController {
   private ResponseEntity<String> checkout(@PathVariable String username,
       @PathVariable Long bookIsbn, HttpServletRequest request) {
 
-    //verifies token
+//verifies token
     try {
       ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, discoveryClient, restTemplate);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
@@ -90,8 +90,9 @@ public class CheckoutController {
             HttpStatus.FORBIDDEN);
       }
 
-      if (book != null && checkoutStats != null) {
+      if (checkoutStats != null) {
         if (book.getQuantityForRent() <= 0) {
+          book.setAvailable(false);
           logger.info("Max Checkchout reached for book " + bookIsbn);
           return new ResponseEntity<>("Max Checkchout reached for book ", HttpStatus.FORBIDDEN);
         }
@@ -122,16 +123,19 @@ public class CheckoutController {
 
     try {
       checkoutStats = checkoutStatsService.findByIsbn(bookIsbn);
-      logger.info("Checkout found for isbn " + checkout_counter);
-
       if (checkoutStats != null) {
-        final Long totalCheckouts = checkoutStats.getTotalCheckouts();
-        checkout_counter = Math.toIntExact(totalCheckouts) + 1;
-        checkoutStats.setTotalCheckout((long) checkout_counter);
+        logger.info("Checkout stats found for isbn " + checkoutStats.toString());
+        final int totalCheckouts = checkoutStats.getTotalCheckout();
+        checkout_counter = totalCheckouts + 1;
+        checkoutStats.setTotalCheckout(checkout_counter);
+        checkoutStats.setTitle(book.getTitle());
       } else {
+        logger.info("Checkout stats not found for isbn " + bookIsbn);
         checkoutStats = new CheckoutStats();
-        checkoutStats.setTotalCheckout((long) 1);
+        checkoutStats.setTotalCheckout(1);
         checkoutStats.setBookIsbn(bookIsbn);
+        checkoutStats.setTitle(book.getTitle());
+
       }
 
       checkout.setCheckedOutBy(username);
@@ -141,7 +145,6 @@ public class CheckoutController {
       checkout.setIsbn(bookIsbn);
       checkoutService.save(checkout);
       checkoutStatsService.save(checkoutStats);
-
       logger.info("Checkout saved for isbn " + checkout_counter);
       book.setQuantityForRent(book.getQuantityForRent() - 1);
       try {

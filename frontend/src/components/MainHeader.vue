@@ -3,7 +3,7 @@
     <nav>
       <ul>
         <li id="welcome_username"  v-if="checkAuthenticated()">
-         <p v-if="loggedInUser !=null"> Welcome back {{ loggedInUser.toUpperCase() }}</p>
+          <p v-if="loggedInUser !=null"> Welcome back {{ loggedInUser.toUpperCase() }}</p>
         </li>
         <li>
           <router-link to="/" v-if="!checkAuthenticated()">Home</router-link>
@@ -37,7 +37,7 @@
     <form @submit.prevent="addNewBook">
       <div id="form_title">
         <p id="form_title_header">Add New Book</p>
-         <p id="close_modal" @click="toggleFormModal">close</p>
+        <p id="close_modal" @click="toggleFormModal">close</p>
       </div>
       <div>
         <label for="title">Title:</label>
@@ -62,7 +62,7 @@
       </div>
       <div>
         <label for="available">Available for Rent:</label>
-         <select id="available" name="available" required  v-model="book.available">
+        <select id="available" name="available" required  v-model="book.available">
           <option value="True" selected>True</option>
           <option value="False">False</option>
         </select>
@@ -174,12 +174,12 @@ header {
       }
       #welcome_username{
         color: colors.$accent-color;
-       p{
-         border-radius: 2rem;
-         padding: 10px;
-         font-weight: bolder;
-         background: #ecf0f1;
-       }
+        p{
+          border-radius: 2rem;
+          padding: 10px;
+          font-weight: bolder;
+          background: #ecf0f1;
+        }
       }
       #signup {
         padding: 15px;

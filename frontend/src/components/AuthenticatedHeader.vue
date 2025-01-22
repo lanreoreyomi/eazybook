@@ -2,12 +2,12 @@
 import { useLogOutStore } from '@/stores/useLogOutStore.ts'
 export default {
   name: 'AuthenticatedHeader',
- setup(){
+  setup(){
     const logoutStore = useLogOutStore();
     return {
       logOut: logoutStore.LogOut,
-     }
- }
+    }
+  }
 }
 
 </script>
@@ -15,13 +15,13 @@ export default {
   <header>
     <nav>
       <ul>
-         <li><router-link to="/catalogue">Catalogue</router-link></li>
+        <li><router-link to="/catalogue">Catalogue</router-link></li>
         <li><router-link to="/borrowhistory">Borrow History</router-link></li>
         <li id="profile"><router-link to="/profile">Profile</router-link></li>
         <li id="wishList"><router-link to="/wishlist">WishList</router-link></li>
         <li id="logout" ><button @click="logOut">Log Out</button></li>
 
-       </ul>
+      </ul>
     </nav>
   </header>
   <RouterView />

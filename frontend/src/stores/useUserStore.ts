@@ -37,13 +37,12 @@ export const useUserStore = defineStore('user', {
           statusText: String(response.data), // Ensure statusText is a string
         })
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          this.$patch({
-            statusCode: error.response.status,
-            statusText: String(error.response.data), // Ensure statusText is a string
-          })
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.data || 'Internal Server Error';
         } else {
-          console.log('An unexpected error occurred:', error)
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
         }
       }
     },

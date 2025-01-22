@@ -1,4 +1,9 @@
 <template>
+
+  <div class="stats" v-if="checkoutStats">
+    <p> <span style='font-size:20px;'>&#127775;</span>
+      {{checkoutStats.title}} is hot right now, Checkout out <span style='font-weight:bolder;'></span>{{checkoutStats?.totalCheckout}}  times</p>
+  </div>
   <div v-if="isCatalogueLoaded" id="catalogue_component">
     <div id="wishlist_control" v-if="wishListStatusText">
       <p id="addedToWishlist">{{ wishListStatusText }}</p>
@@ -19,6 +24,7 @@ import type { BookCatalogue } from '@/model/model.ts'
 import BookComponent from '@/components/BookComponent.vue'
 import { useWishlistStore } from '@/stores/useWishlistStore.ts'
 import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
+import { useCheckoutStatsStore } from '@/stores/useCheckoutStatsStore.ts'
 export default defineComponent({
   name: 'CatalogueView',
   components: { BookComponent },
@@ -29,12 +35,13 @@ export default defineComponent({
     const checkoutStore = useCheckoutItemStore()
     const books = ref<BookCatalogue[]>([])
     const wishlistStore= useWishlistStore();
-
+    const checkoutStatsStore = useCheckoutStatsStore()
     const bookCheckout = (book: BookCatalogue): void=>{
       if(book.quantityForRent > 0){
         checkoutStore.addBookToCheckoutItem(book.isbn);
       }
     }
+    const checkoutStats = computed(() => checkoutStatsStore.stats)
     const displayBook = (book: BookCatalogue): void => {addBookToWishList(book)}
     const isCatalogueLoaded = computed(() => bookCatalogueStore.statusCode === 200)
 
@@ -59,8 +66,9 @@ export default defineComponent({
     })
 
     onBeforeMount(async () => {
-       await bookCatalogueStore.getAllBookCatalogues()
-       books.value = bookCatalogueStore.bookCatalogue
+      await bookCatalogueStore.getAllBookCatalogues()
+      await checkoutStatsStore.fetchCheckoutStats();
+      books.value = bookCatalogueStore.bookCatalogue
     })
 
     return {
@@ -70,14 +78,27 @@ export default defineComponent({
       confirmation,
       bookCheckout,
       wishListStatusText,
-      checkoutStatusText
-      }
+      checkoutStatusText,
+      checkoutStats
+    }
   },
 })
 </script>
 <style lang="scss" scoped>
 @use '/src/assets/scss/colors.scss';
 
+.stats{
+  padding: 8px;
+  margin: 20px auto;
+  width: 60%;
+  background-color: rgba(211, 211, 211, 0.36);
+  border-radius: 0.5rem;
+  p{
+    text-align: center;
+    color: colors.$text-color;
+
+  }
+}
 #catalogue_component {
   font-size: 16px;
   color: colors.$text-color;
@@ -100,7 +121,7 @@ export default defineComponent({
     justify-content: center;
     margin: 20px auto;
     #addedToWishlist {
-       width: 90%;
+      width: 90%;
       padding-top: 10px;
       font-weight: bold;
 

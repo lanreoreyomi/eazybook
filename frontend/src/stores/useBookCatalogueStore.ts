@@ -24,30 +24,30 @@ interface AddBookCatalogueState {
 export const useBookCatalogueStore = defineStore('bookCatalogue', {
   state: (): BookCatalogueState => ({
     bookCatalogue: [],
-     statusCode: 0,
+    statusCode: 0,
     statusText: '',
   }),
   actions: {
     async getAllBookCatalogues() {
-       try {
+      try {
         const response = await axios.get<BookCatalogue[]>(BOOKCATALOGUE, {
           headers: {
             Authorization: accessToken
           }
         })
         // Handle successful user creation
-         this.$patch({
+        this.$patch({
           statusCode: response.status,
           bookCatalogue : response.data
           // Ensure statusText is a string
         })
-       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          this.$patch({
-            statusCode: error.response.status
-          })
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.statusText || 'Internal Server Error';
         } else {
-          console.log('An unexpected error occurred:', error)
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
         }
       }
     },
@@ -74,29 +74,25 @@ export const useAddBookCatalogueStore = defineStore('addBookCatalogue', {
       try {
         const response = await axios.post<AddBookCatalogueState>(addBookToCatalogueWithUsername(username),
           this.addBookCatalogue, {
-          headers: {
-            Authorization: accessToken
-          }
-        })
+            headers: {
+              Authorization: accessToken
+            }
+          })
         // Handle successful user creation
-
-        console.log(response.status)
         this.$patch({
           statusCode: response.status,
           statusText : String(response.data)
           // Ensure statusText is a string
         })
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          this.$patch({
-            statusCode: error.response.status,
-            statusText : String(error.response.data)
-          })
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.data || 'Internal Server Error';
         } else {
-          console.log('An unexpected error occurred:', error)
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
         }
       }
     },
   }
 })
-

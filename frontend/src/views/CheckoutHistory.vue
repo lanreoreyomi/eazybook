@@ -10,7 +10,7 @@
           <th>Checked Out Date</th>
           <th>Expected Returned date</th>
           <th>Return Status</th>
-           <th>Return</th>
+          <th>Return</th>
         </tr>
         </thead>
         <tbody>
@@ -23,7 +23,7 @@
           <td v-else>Not Returned</td>
           <td class="returnbook">
             <button class="returnbook" @click="returnBook(history.bookIsbn)">Return Book</button>
-           </td>
+          </td>
         </tr>
         </tbody>
       </table>
@@ -46,12 +46,12 @@ export default {
       default: false
     }
   },
- emits: ['returnBook', 'checkoutAgain'],
+  emits: ['returnBook', 'checkoutAgain'],
   setup(props, { emit }) {
     const returnBook = (bookIsbn: number) => {
       emit('returnBook', bookIsbn)
     }
-   const checkOutAgain = (bookIsbn: number) => {
+    const checkOutAgain = (bookIsbn: number) => {
       emit('checkoutAgain', bookIsbn)
     }
     return {

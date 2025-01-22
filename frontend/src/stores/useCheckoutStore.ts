@@ -3,7 +3,6 @@ import axios from 'axios'
 import { accessToken, username } from '@/Utils/AppUtils.ts'
 import {
   getAllCheckoutForUser,
-
   // addBookToCatalogueItem,
   processCheckout, returnCheckout
   // removeBookFromCatalogueItem
@@ -30,25 +29,24 @@ export const useCheckoutStore = defineStore('checkout', {
   }),
   actions: {
     async checkBookOut(bookIsbn: number) {
-        try {
+      try {
         const response =
           await axios.post<string>(processCheckout(username, bookIsbn), null, {
-          headers: {
-            Authorization: accessToken
-          }
-        })
-          this.$patch({
+            headers: {
+              Authorization: accessToken
+            }
+          })
+        this.$patch({
           statusCode: response.status,
           statusText: response.data, // Ensure statusText is a string
         })
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          this.$patch({
-            statusCode: error.response.status,
-            statusText: String(error.response.data), // Ensure statusText is a string
-          })
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.data || 'Internal Server Error';
         } else {
-          console.log('An unexpected error occurred:', error)
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
         }
       }
     },
@@ -61,24 +59,17 @@ export const useCheckoutStore = defineStore('checkout', {
             }
           })
 
-        console.log("response.data", response.data)
-        console.log("response.status", response.status)
-        console.log(response.statusText, response.statusText)
         this.$patch({
           statusCode: response.status,
           statusText: response.data, // Ensure statusText is a string
         })
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          this.$patch({
-            statusCode: error.response.status,
-            statusText: String(error.response.data), // Ensure statusText is a string
-          })
-          console.log("response.data", error.response.data)
-          console.log("response.status", error.response.status)
-          console.log("response.statusText", error.response.statusText)
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.statusText || 'Internal Server Error';
         } else {
-          console.log('An unexpected error occurred:', error)
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
         }
       }
     },
@@ -89,33 +80,32 @@ export const useCheckoutStore = defineStore('checkout', {
 export const useCheckedOutHistory = defineStore('CheckedOutHistory', {
   state: (): CheckoutInfoState  => ({
     checkedOutHistory: [],
-      statusCode: 0,
-      statusText: ''
+    statusCode: 0,
+    statusText: ''
   }),
-actions: {
-  async getAllCheckoutHistoryForUser() {
-    try {
+  actions: {
+    async getAllCheckoutHistoryForUser() {
+      try {
         const response = await axios.get<CheckedOutHistory[]>(getAllCheckoutForUser(username), {
-        headers: {
-          Authorization: accessToken
-        }
-      })
-    // Handle successful user creation
-      this.$patch({
-        statusCode: response.status,
-        checkedOutHistory: response.data
-        // Ensure statusText is a string
-      })
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        this.$patch({
-          statusCode: error.response.status
+          headers: {
+            Authorization: accessToken
+          }
         })
-      } else {
-        console.log('An unexpected error occurred:', error)
+        // Handle successful user creation
+        this.$patch({
+          statusCode: response.status,
+          checkedOutHistory: response.data
+          // Ensure statusText is a string
+        })
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.statusText || 'Internal Server Error';
+        } else {
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
+        }
       }
-    }
-  },
-
-}
+    },
+  }
 })

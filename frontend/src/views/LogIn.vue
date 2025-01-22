@@ -1,28 +1,28 @@
 
 <template>
 
-<div id="logInForm">
-  <form @submit.prevent="logIn">
-    <div>
-      <h2>Log In</h2>
-    </div>
-    <div>
-      <label for="username">Username:</label>
-      <input type="text" id="username" v-model="user.username" required />
-    </div>
-    <div>
-      <label for="password">Password:</label>
-      <input type="password" id="password" v-model="user.password" required />
-    </div>
-    <button type="submit" id="submit-form">Log In</button>
-    <div v-if="isSuccessful" id="user_created">{{statusText}}</div>
-    <div v-else-if="!isSuccessful" id="user_not_created">{{statusText}}</div>
-  </form>
-</div>
+  <div id="logInForm">
+    <form @submit.prevent="logIn">
+      <div>
+        <h2>Log In</h2>
+      </div>
+      <div>
+        <label for="username">Username:</label>
+        <input type="text" id="username" v-model="user.username" required />
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" v-model="user.password" required />
+      </div>
+      <button type="submit" id="submit-form">Log In</button>
+      <div v-if="isSuccessful" id="user_created">{{statusText}}</div>
+      <div v-else-if="!isSuccessful" id="user_not_created">{{statusText}}</div>
+    </form>
+  </div>
 </template>
 <script lang="ts">
- import { useLogInStore } from '@/stores/useLogInStore.js'
- import { computed } from 'vue'
+import { useLogInStore } from '@/stores/useLogInStore.js'
+import { computed } from 'vue'
 
 export default {
   setup() {
@@ -35,7 +35,7 @@ export default {
       logIn: logInStore.LogIn,
       isSuccessful,
       statusText
-     }
+    }
   },
 }
 </script>
@@ -65,7 +65,7 @@ body,
       h2{
         padding: 20px;
         color: colors.$text-color;
-         font-size: 40px;
+        font-size: 40px;
         font-weight: bold;
       }
       input {
