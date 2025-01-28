@@ -5,6 +5,7 @@ import static com.eazybooks.bookcatalogue.utils.RestUtils.isTokenValid;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.VerifyToken;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
+import com.eazybooks.bookcatalogue.service.TokenValidationService;
 import com.eazybooks.bookcatalogue.utils.RestUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -36,34 +37,36 @@ public class BookCatalogueController {
   private final BookCatalogueService bookCatalogueService;
   private final DiscoveryClient discoveryClient;
   RestTemplate restTemplate = new RestTemplate();
+  private final TokenValidationService tokenValidationService;
 
   public BookCatalogueController(BookCatalogueService bookCatalogueService,
-      DiscoveryClient discoveryClient) {
+      DiscoveryClient discoveryClient, TokenValidationService tokenValidationService) {
     this.bookCatalogueService = bookCatalogueService;
     this.discoveryClient = discoveryClient;
+    this.tokenValidationService = tokenValidationService;
   }
 
   @PostMapping("/{username}/addbook")
   public ResponseEntity<String> addBookToCatalogues(@PathVariable String username,
       @RequestBody BookCatalogue book, HttpServletRequest request) {
 
-    ResponseEntity<Boolean> tokenValidation = null;
-
     //verifies token
     try {
-      tokenValidation = isTokenValid(request, username, logger, discoveryClient, restTemplate);
+      ResponseEntity<Boolean>  tokenValidation = tokenValidationService.isTokenValid(username, request);
+
+      assert tokenValidation != null;
+      if (!Boolean.TRUE.equals(tokenValidation.getBody())) {
+        logger.error("Error validating token");
+        return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
+      }
     } catch (Exception e) {
       logger.error(e.getMessage());
     }
 
-    assert tokenValidation != null;
-    if (!Boolean.TRUE.equals(tokenValidation.getBody())) {
-      logger.error("Error validating token");
-      return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
-    }
+
     // Check if User is Admin
     try {
-      final ResponseEntity<String> userRole = getUserRole(username, request);
+      final ResponseEntity<String> userRole = tokenValidationService.getUserRole(username, request);
       if (!Objects.equals(userRole.getBody(), "ADMIN")) {
         return new ResponseEntity<>("Only admin can add new book", HttpStatus.FORBIDDEN);
       }
@@ -92,8 +95,7 @@ public class BookCatalogueController {
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValidation = isTokenValid(request, null, logger, discoveryClient,
-          restTemplate);
+      ResponseEntity<Boolean> tokenValidation = tokenValidationService.isTokenValid(null, request);
       List<BookCatalogue> books = bookCatalogueService.getAllCatalogue();
       return ResponseEntity.ok(books);
     } catch (Exception e) {
@@ -109,7 +111,7 @@ public class BookCatalogueController {
     logger.info("request {}", request.toString());
 
     try {
-      final ResponseEntity<Boolean> verifyTokenResponse = isTokenValid(request, null, logger, discoveryClient, restTemplate);
+      final ResponseEntity<Boolean> verifyTokenResponse = tokenValidationService.isTokenValid( null, request);
 
       if (verifyTokenResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
           verifyTokenResponse.getBody())) {
@@ -140,48 +142,4 @@ public class BookCatalogueController {
     logger.info("request {}", bookById.toString());
     return ResponseEntity.ok(bookById);
   }
-
-
-
-
-  private ResponseEntity<String> getUserRole(String username, HttpServletRequest request) {
-
-    String authHeader = request.getHeader("Authorization");
-
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      logger.warn("Authorization header missing or invalid");
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    String token = authHeader.substring(7);
-    ResponseEntity<String> authResponse;
-
-    try {
-      List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
-      if (instances.isEmpty()) {
-        logger.error("Authentication service not found");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
-
-      ServiceInstance instance = instances.get(0);
-      String authUrl = instance.getUri() + "/auth/" + username + "/role";
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Authorization", authHeader);
-      headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
-
-      HttpEntity<String> requestEntity = new HttpEntity<>(token, headers);
-      authResponse = restTemplate.exchange(
-          authUrl, HttpMethod.POST, requestEntity, String.class);
-      if (authResponse.getStatusCode() != HttpStatus.OK) {
-        return new ResponseEntity<>("User not admin", HttpStatus.UNAUTHORIZED);
-
-      }
-      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
-    } catch (Exception e) {
-      return new ResponseEntity<>("Error getting user role", HttpStatus.UNAUTHORIZED);
-
-    }
-
-  }
-
 }
