@@ -1,14 +1,15 @@
 package com.eazybooks.authentication.controller;
 
-import static com.eazybooks.authentication.config.RestUtils.RestUtils.get_USER_createUserUrl;
 
-import com.eazybooks.authentication.model.LoginRequest;
+ import com.eazybooks.authentication.model.LoginRequest;
 import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
 import com.eazybooks.authentication.model.UserDto.CreateAccountRequest;
 import com.eazybooks.authentication.model.VerifyToken;
 import com.eazybooks.authentication.service.AuthenticatorService;
 import com.eazybooks.authentication.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
+ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,8 +30,7 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:5173") // Allow requests from this origin
-public class AuthenticationController {
+ public class AuthenticationController {
 
   private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
   private final JwtService jwtService;
@@ -70,7 +69,7 @@ public class AuthenticationController {
           authenticatorService.createUserAccount(createAccountRequest);
       logger.info("AuthenticationResponse: {}", authenticationResponse);
 
-       String user_service_url =get_USER_createUserUrl();
+       String user_service_url =userServiceCreateUserUrl();
        logger.info("User_service_url: {}", user_service_url);
 
       HttpHeaders headers = new HttpHeaders();
@@ -150,20 +149,20 @@ public class AuthenticationController {
       logger.warn("Invalid login request: Log in details recieved ");
       return new ResponseEntity<String>("Log In Request is empty", HttpStatus.BAD_REQUEST);
     }
-    String token;
+
     try {
-      token = authenticatorService.authenticate(loginRequest);
-      if (token == null && token.isEmpty()) {
+     String token = authenticatorService.authenticate(loginRequest);
+      if (token == null || token.isEmpty()) {
         logger.info("Invalid log in request for {}", loginRequest.getUsername());
         return new ResponseEntity<>("Invalid login request", HttpStatus.UNAUTHORIZED);
       }
+      return ResponseEntity.ok()
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+          .body(token);
     } catch (Exception e) {
       logger.warn("Log in failed", e);
       return new ResponseEntity<String>("User log in Failed", HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    return ResponseEntity.ok()
-        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-        .body(token);
   }
 
   @PostMapping("/validate-token")
@@ -195,4 +194,7 @@ public class AuthenticationController {
     }
   }
 
+  public String userServiceCreateUserUrl() throws UnknownHostException {
+    return "http://"+ InetAddress.getLocalHost().getHostAddress()+":9087/user/create-account";
+  }
 }

@@ -1,6 +1,5 @@
 package com.eazybooks.bookcatalogue.controller;
 
-import static com.eazybooks.bookcatalogue.utils.RestUtils.isTokenValid;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.Checkout;
 import com.eazybooks.bookcatalogue.model.CheckoutInfo;
@@ -9,27 +8,23 @@ import com.eazybooks.bookcatalogue.service.BookCatalogueService;
 import com.eazybooks.bookcatalogue.service.CheckoutItemsService;
 import com.eazybooks.bookcatalogue.service.CheckoutService;
 import com.eazybooks.bookcatalogue.service.CheckoutStatsService;
+import com.eazybooks.bookcatalogue.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.client.RestTemplate;
-
 @Controller
-@RequestMapping("/checkout")
-@CrossOrigin(origins = "http://localhost:5173")
+@RequestMapping("/checkout/")
 public class CheckoutController {
 
   Logger logger = LoggerFactory.getLogger(CheckoutController.class);
@@ -37,26 +32,26 @@ public class CheckoutController {
   private final BookCatalogueService bookCatalogueService;
   final CheckoutStatsService checkoutStatsService;
   final CheckoutItemsService checkoutItemsService;
-
-  @Autowired
-  RestTemplate standardRestTemplate;
+  private final VerificationService verificationService;
 
   public CheckoutController(CheckoutService checkoutService,
       BookCatalogueService bookCatalogueService, DiscoveryClient discoveryClient,
-      CheckoutStatsService checkoutStatsService, CheckoutItemsService checkoutItemsService) {
+      CheckoutStatsService checkoutStatsService, CheckoutItemsService checkoutItemsService,
+      VerificationService verificationService) {
     this.checkoutService = checkoutService;
     this.bookCatalogueService = bookCatalogueService;
      this.checkoutStatsService = checkoutStatsService;
     this.checkoutItemsService = checkoutItemsService;
+    this.verificationService = verificationService;
   }
 
-  @PostMapping("/{username}/{bookIsbn}")
+  @PostMapping("{username}/{bookIsbn}")
   private ResponseEntity<String> checkout(@PathVariable String username,
       @PathVariable Long bookIsbn, HttpServletRequest request) {
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, standardRestTemplate);
+      ResponseEntity<Boolean> tokenValid = verificationService.verifyUserToken(request, username);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -159,13 +154,13 @@ public class CheckoutController {
 
   }
 
-  @PostMapping("/{username}/{bookIsbn}/return")
+  @PostMapping("{username}/{bookIsbn}/return")
   private ResponseEntity<String> returnBook(@PathVariable String username,
       @PathVariable Long bookIsbn, HttpServletRequest request) {
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, standardRestTemplate);
+      ResponseEntity<Boolean> tokenValid = verificationService.verifyUserToken(request, username);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -219,12 +214,12 @@ public class CheckoutController {
   }
 
 
-  @GetMapping("/{username}/all")
+  @GetMapping("{username}/all")
   private ResponseEntity<List<CheckoutInfo>> getCheckoutHistory(@PathVariable String username, HttpServletRequest request) {
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, standardRestTemplate);
+      ResponseEntity<Boolean> tokenValid = verificationService.verifyUserToken(request, username);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -265,4 +260,4 @@ public class CheckoutController {
 
   }
 
-  }
+}

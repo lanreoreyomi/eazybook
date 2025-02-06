@@ -29,7 +29,7 @@ export default defineComponent({
     props: {
     books: {
       type: Array as PropType<BookCatalogue[]>,  // Specify that 'book' should be a Book object
-       required: true // Make the prop required
+       required: true
     }
   },
   emits: ['getBookDetails', 'addToCheckout'],

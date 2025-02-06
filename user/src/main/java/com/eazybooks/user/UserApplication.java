@@ -14,7 +14,7 @@ import com.amazonaws.services.servicediscovery.model.ServiceFilter;
 import com.amazonaws.services.servicediscovery.model.ServiceFilterName;
 import com.amazonaws.services.servicediscovery.model.ServiceSummary;
 import com.amazonaws.services.servicediscovery.model.ServiceTypeOption;
-import com.eazybooks.user.Config.IpAddressResolver;
+import com.eazybooks.user.config.IpAddressResolver;
 import jakarta.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -68,7 +68,7 @@ public class UserApplication {
 
     private void registerInstance() throws UnknownHostException {
       // Dynamically fetch the actual private IP address of the machine
-      logger.info("Registering instance " + ipAddressResolver.getIpAddress());
+
      String privateIpAddress = InetAddress.getLocalHost().getHostAddress();
 //      String privateIpAddress = ipAddressResolver.getIpAddress();
       logger.info("Registering instance with IP: {}" , privateIpAddress);

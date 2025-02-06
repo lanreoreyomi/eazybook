@@ -2,19 +2,17 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { accessToken, username } from '@/Utils/AppUtils.ts'
 import {
+  api,
   getAllCheckoutForUser,
-  // addBookToCatalogueItem,
   processCheckout, returnCheckout
-  // removeBookFromCatalogueItem
 } from '@/api/apis.ts'
 import type { CheckedOutHistory } from '@/model/model.ts'
 
 
-//for getting all catalgues
 interface CheckoutState {
   statusCode: number;
   statusText: string;
-}//for getting all catalgues
+}
 
 interface CheckoutInfoState {
   checkedOutHistory: CheckedOutHistory[]
@@ -31,7 +29,7 @@ export const useCheckoutStore = defineStore('checkout', {
     async checkBookOut(bookIsbn: number) {
         try {
         const response =
-          await axios.post<string>(processCheckout(username, bookIsbn), null, {
+          await api.post<string>(processCheckout(username, bookIsbn), null, {
           headers: {
             Authorization: accessToken
           }
@@ -53,12 +51,14 @@ export const useCheckoutStore = defineStore('checkout', {
     async returnBook(bookIsbn: number) {
       try {
         const response =
-          await axios.post<string>(returnCheckout(username, bookIsbn), null, {
+          await api.post<string>(returnCheckout(username, bookIsbn), null, {
             headers: {
               Authorization: accessToken
             }
           })
-
+        console.log(response.status)
+        console.log(response.statusText)
+        console.log(response.data)
         this.$patch({
           statusCode: response.status,
           statusText: response.data, // Ensure statusText is a string
@@ -66,7 +66,8 @@ export const useCheckoutStore = defineStore('checkout', {
       } catch (error) {
         if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
-          this.statusText = error.response?.statusText || 'Internal Server Error';
+          this.statusText = error.response?.data || 'Internal Server Error';
+
         } else {
           this.statusCode = 500;
           this.statusText = 'An unexpected error occurred';
@@ -86,21 +87,19 @@ export const useCheckedOutHistory = defineStore('CheckedOutHistory', {
 actions: {
   async getAllCheckoutHistoryForUser() {
     try {
-        const response = await axios.get<CheckedOutHistory[]>(getAllCheckoutForUser(username), {
+        const response = await api.get<CheckedOutHistory[]>(getAllCheckoutForUser(username), {
         headers: {
           Authorization: accessToken
         }
       })
-    // Handle successful user creation
       this.$patch({
         statusCode: response.status,
         checkedOutHistory: response.data
-        // Ensure statusText is a string
       })
     } catch (error) {
       if (axios.isAxiosError(error)) {
         this.statusCode = error.response?.status || 500;
-        this.statusText = error.response?.statusText || 'Internal Server Error';
+        this.statusText = error.response?.data || 'Book already checked out';
       } else {
         this.statusCode = 500;
         this.statusText = 'An unexpected error occurred';

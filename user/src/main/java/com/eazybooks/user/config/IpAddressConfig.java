@@ -1,4 +1,4 @@
-package com.eazybooks.user.Config;
+package com.eazybooks.user.config;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

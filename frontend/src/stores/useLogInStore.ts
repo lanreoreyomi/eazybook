@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { LOGIN } from '@/api/apis.ts'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 
  interface LogInState {
@@ -22,23 +23,26 @@ import { LOGIN } from '@/api/apis.ts'
    }),
    actions: {
      async LogIn() {
+
+       const authStore = useAuthStore();
        try {
          const response = await axios.post<LogInState>(LOGIN, this.userLogIn)
-         // Handle successful log in
+
+         authStore.token = response.headers['authorization'];
+         authStore.username = this.userLogIn.username;
+
          localStorage.setItem('accessToken', response.headers['authorization'])
-         localStorage.setItem('refreshToken', response.headers['authorization'])
          localStorage.setItem('username', this.userLogIn.username)
 
          this.$patch({
            statusCode: response.status,
-           statusText: String(response.data),
            isLoggedIn: response.status === 200,
          })
 
        } catch (error) {
          if (axios.isAxiosError(error)) {
            this.statusCode = error.response?.status || 500;
-           this.statusText = error.response?.data || 'Internal Server Error';
+           this.statusText = "Error signing user in.";
          } else {
            this.statusCode = 500;
            this.statusText = 'An unexpected error occurred';
@@ -46,9 +50,6 @@ import { LOGIN } from '@/api/apis.ts'
        }
      },
 
-     setCurrentUser(username: string) {
-       this.loggedInUser = username
-     },
      checkAuth() {
        const token = localStorage.getItem('accessToken')
        this.isLoggedIn = !!token

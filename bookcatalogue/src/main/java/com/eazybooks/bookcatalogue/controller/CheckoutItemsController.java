@@ -1,11 +1,9 @@
 package com.eazybooks.bookcatalogue.controller;
-
-import static com.eazybooks.bookcatalogue.utils.RestUtils.isTokenValid;
-
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.CheckoutItems;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
 import com.eazybooks.bookcatalogue.service.CheckoutItemsService;
+import com.eazybooks.bookcatalogue.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +15,6 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,29 +22,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 
 @Controller
-@RequestMapping("/checkoutitems")
-@CrossOrigin(origins = "http://localhost:5173")
-public class CheckoutItemsController {
+@RequestMapping("/checkoutitems/")
+ public class CheckoutItemsController {
   Logger logger = LoggerFactory.getLogger(CheckoutItemsController.class);
 
   @Autowired
   RestTemplate standardRestTemplate;
   private final BookCatalogueService bookCatalogueService;
   private final CheckoutItemsService checkoutItemsService;
+  private final VerificationService verificationService;
 
   public CheckoutItemsController(DiscoveryClient discoveryClient,
-      BookCatalogueService bookCatalogueService, CheckoutItemsService checkoutItemsService) {
+      BookCatalogueService bookCatalogueService, CheckoutItemsService checkoutItemsService,
+      VerificationService verificationService) {
      this.bookCatalogueService = bookCatalogueService;
     this.checkoutItemsService = checkoutItemsService;
+    this.verificationService = verificationService;
   }
 
-  @PostMapping("/{username}/{bookisbn}/add")
+  @PostMapping("{username}/{bookisbn}/add")
   private ResponseEntity<String> addBookToCheckout(@PathVariable String username, @PathVariable Long bookisbn, HttpServletRequest request) {
     logger.info("Adding to book checkout");
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger, standardRestTemplate);
+      ResponseEntity<Boolean> tokenValid = verificationService.verifyUserToken(request, username);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -90,14 +89,13 @@ public class CheckoutItemsController {
     }
   }
 
-  @PostMapping("/{username}/{bookisbn}/remove")
+  @PostMapping("{username}/{bookisbn}/remove")
   private ResponseEntity<String> removeBookToCheckout(@PathVariable String username, @PathVariable Long bookisbn, HttpServletRequest request) {
     logger.info("Adding to book checkout");
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValid = isTokenValid(request, username, logger,
-          standardRestTemplate);
+      ResponseEntity<Boolean> tokenValid = verificationService.verifyUserToken(request, username);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -146,8 +144,7 @@ public class CheckoutItemsController {
 
     //verifies token
     try {
-      ResponseEntity<Boolean> tokenValid = isTokenValid(request,username, logger,
-          standardRestTemplate);
+      ResponseEntity<Boolean> tokenValid = verificationService.verifyUserToken(request, username);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -181,12 +178,8 @@ public class CheckoutItemsController {
 
     });
 
- bookCheckoutItems.forEach(item -> {
-   logger.info("Checkout item: " + item.toString());
- });
     return new ResponseEntity<>(bookCheckoutItems, HttpStatus.CREATED);
   }
-
 
 
 }

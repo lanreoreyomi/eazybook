@@ -1,5 +1,11 @@
 <template>
-<h2 v-if="wishListInfo" id="empty_list">{{wishListInfo}}</h2>
+<div  v-if="wishListItems.length<=0" id="empty_list">
+  <p>{{wishListInfo}}</p>
+  <p >
+    <img src="https://eazybooks-images.s3.us-east-1.amazonaws.com/empty_wishlist.png" alt="">
+  </p>
+
+</div>
    <div class="wish-list-items" v-if="wishListItems.length>0">
     <div v-for="(wishList, index) in wishListItems" :key="index" class="wish-list">
       <div class="wishes">
@@ -12,11 +18,13 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, ref } from 'vue'
+import { computed, defineComponent,onMounted, ref } from 'vue'
 import { useWishlistStore } from '@/stores/useWishlistStore.ts'
 import type { WishList } from '@/model/model.ts'
 import router from '@/router'
 import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
+import { useLogInStore } from '@/stores/useLogInStore.ts'
   export default defineComponent({
   name: 'WishList',
 
@@ -30,33 +38,56 @@ import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
     const addToCheckoutItem = (bookIsbn: number, index: number)=>{
       checkoutItemStore.addBookToCheckoutItem(bookIsbn);
       removeBookFromWishlist(index)
-      router.push({ path: '/checkout' })
+      router.push({ path: '/checkout/' })
     };
     const userWishList = computed(() => {
-      return wishListStore.getUserWishList();
+
+     return  wishListStore.getUserWishList();
+
     });
 
     const removeBookFromWishlist = async (index: number): Promise<void> => {
-      const wishlist = wishListItems.value.at(index);
+      const adjustedIndex = index < 0 ? wishListItems.value.length + index : index;
+      const wishlist = wishListItems.value[adjustedIndex];
       if (wishlist) {
         try {
           await wishListStore.removeBookToWishlist(wishlist); // Wait for API call to finish
           wishListItems.value.splice(index, 1);
-          router.go(0)
+          // router.go(0)
         } catch (error) {
-
+          console.log(error);
         }
       }
 
     }
-    onBeforeMount(async () => {
-      await wishListStore.getUserWishList()
-      if (wishListStore.wishList.length>0) {
+    onMounted( async () => {
+      const authStore = useAuthStore();
+
+      const checkAuth = useLogInStore().checkAuth();
+
+      if (!checkAuth && !authStore.username) {
+        await router.push('/')
+        return;
+      }
+
+      if (!authStore.token) {
+         authStore.token = localStorage.getItem("accessToken");
+      }
+      if (!authStore.username) {
+         authStore.username = localStorage.getItem("username");
+      }
+
+      if (authStore.token && authStore.username) {
+         await wishListStore.getUserWishList();
+      }
+
+      if (wishListStore.wishList.length > 0) {
         wishListItems.value = wishListStore.wishList
-      }else{
+      } else {
         wishListInfo.value = "Wishlist is empty"
       }
     })
+
     return {
       userWishList,
       wishListInfo,
@@ -76,14 +107,17 @@ html, body {
   margin: 0;
 
   #empty_list{
-    margin: 40px auto;
-    padding: 10px;
-    font-size: 40px;
+    margin: 10px auto;
     text-align: center;
-    color: colors.$accent-color;
-
-    width: 60%;
+    p{
+      padding: 10px;
+      font-size: 40px;
+      color: colors.$accent-color;
+    }
     border-radius:0.5rem;
+    img{
+      max-width: 40%;
+    }
   }
 
   .wish-list-items{

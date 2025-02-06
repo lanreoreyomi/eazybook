@@ -102,7 +102,8 @@ body,
     }
     #user_not_created {
       color: colors.$error-color;
-      font-weight: bolder;
+      font-weight: bold;
+      margin-bottom: 40px;
     }
   }
 }

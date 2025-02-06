@@ -27,6 +27,18 @@
 <script setup lang="ts">
 import bg_img from '/src/assets/images/bg_img.jpg'
 import { RouterLink } from 'vue-router'
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
+import router from '@/router'
+
+onMounted( async () => {
+  const authStore = useAuthStore();
+   if (!authStore.username) {
+    await router.push('/')
+    return;
+  }
+
+})
 
 </script>
 

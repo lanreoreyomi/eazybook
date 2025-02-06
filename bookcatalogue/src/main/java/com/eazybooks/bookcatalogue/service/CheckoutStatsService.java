@@ -37,7 +37,10 @@ public class CheckoutStatsService implements CheckoutStatsImpl {
   }
   @Override
   public CheckoutStats getAllCheckoutStats() {
-    return checkoutStatsRepository.findCheckoutStatsWithMaxTotalCheckout().get(0);
+
+    final List<CheckoutStats> checkoutStatsWithMaxTotalCheckout =
+        checkoutStatsRepository.findCheckoutStatsWithMaxTotalCheckout();
+    return !checkoutStatsWithMaxTotalCheckout.isEmpty() ? checkoutStatsWithMaxTotalCheckout.get(0) : null;
   }
 
 

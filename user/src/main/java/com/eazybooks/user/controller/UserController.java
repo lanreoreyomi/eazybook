@@ -1,22 +1,17 @@
 package com.eazybooks.user.controller;
 
-import static com.eazybooks.user.Utils.RestUtils.get_AUTH_ValidateTokenUrl;
-
 import com.eazybooks.user.DTO.UsersDto;
+import com.eazybooks.user.service.AwsServiceUtils;
 import com.eazybooks.user.model.CreateAccountRequest;
 import com.eazybooks.user.model.User;
-import com.eazybooks.user.model.VerifyToken;
+import com.eazybooks.user.service.VerificationService;
 import com.eazybooks.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,12 +30,14 @@ public class UserController {
   UserService userService;
   private DiscoveryClient discoveryClient;
 
-  @Autowired
-  RestTemplate standardRestTemplate;
+  private final VerificationService verificationService;
 
-  public UserController(UserService userService, DiscoveryClient discoveryClient) {
+
+  public UserController(UserService userService, DiscoveryClient discoveryClient,
+      AwsServiceUtils awsServiceUtils, VerificationService verificationService) {
     this.userService = userService;
     this.discoveryClient = discoveryClient;
+     this.verificationService = verificationService;
   }
 
   @GetMapping("/userid/{id}")
@@ -73,7 +70,7 @@ public class UserController {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    final ResponseEntity<Boolean> verified = verifyToken(request);
+    final ResponseEntity<Boolean> verified = verificationService.verifyUserToken(request, null);
 
     if (!Boolean.TRUE.equals(verified.getBody())) {
       logger.error("Error validating token");
@@ -163,7 +160,7 @@ public class UserController {
       @RequestBody UsersDto usersDto, HttpServletRequest request) {
     logger.info("Received request to get user with username: {}", username);
 
-    final ResponseEntity<Boolean> verified = verifyToken(request);
+    final ResponseEntity<Boolean> verified = verificationService.verifyUserToken(request, null);
     if (!Boolean.TRUE.equals(verified.getBody())) {
       logger.error("Error validating token");
       return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
@@ -177,13 +174,13 @@ public class UserController {
         logger.warn("User with username: {} not found", username);
         return ResponseEntity.notFound().build();
       }
-      User userToUpdate = userByUsername;
-      // Update user details (excluding password and salt for now)
-      userToUpdate.setEmail(usersDto.getEmail());
-      userToUpdate.setLastname(usersDto.getLastname());
-      userToUpdate.setFirstname(usersDto.getFirstname());
 
-      User updatedUser = userService.updateUser(userToUpdate);
+      // Update user details (excluding password and salt for now)
+       userByUsername.setEmail(usersDto.getEmail());
+       userByUsername.setLastname(usersDto.getLastname());
+       userByUsername.setFirstname(usersDto.getFirstname());
+
+      User updatedUser = userService.updateUser(userByUsername);
       logger.info("Successfully updated user with username: {}", username);
       UsersDto updatedUsersDto = new UsersDto();
 
@@ -208,7 +205,7 @@ public class UserController {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    final ResponseEntity<Boolean> verified = verifyToken(request);
+    final ResponseEntity<Boolean> verified = verificationService.verifyUserToken(request, null);
 
     if (!Boolean.TRUE.equals(verified.getBody())) {
       logger.error("Error validating token");
@@ -238,43 +235,5 @@ public class UserController {
       return new ResponseEntity<>("Error Creating User", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-
-  private ResponseEntity<Boolean> verifyToken(HttpServletRequest request) {
-
-    logger.info("request {}", request.toString());
-    String authHeader = request.getHeader("Authorization");
-
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      logger.warn("Authorization header missing or invalid");
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    String token = authHeader.substring(7);
-    ResponseEntity<Boolean> authResponse;
-
-    try {
-      String auth_service_url = get_AUTH_ValidateTokenUrl();
-
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Authorization", authHeader);
-      headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
-
-      HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token), headers);
-      authResponse = standardRestTemplate.exchange(
-          auth_service_url, HttpMethod.POST, requestEntity, Boolean.class);
-
-      if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
-          authResponse.getBody())) {
-        logger.warn("Token validation failed");
-        return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
-      }
-      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
-    } catch (Exception e) {
-      return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
-
-    }
-
-  }
-
 
 }

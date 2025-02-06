@@ -3,7 +3,7 @@
     <nav>
       <ul>
         <li id="welcome_username"  v-if="checkAuthenticated()">
-         <p v-if="loggedInUser !=null"> Welcome back {{ loggedInUser.toUpperCase() }}</p>
+         <p v-if="userProfile !=null"> Welcome back {{ userProfile}}</p>
         </li>
         <li>
           <router-link to="/" v-if="!checkAuthenticated()">Home</router-link>
@@ -15,14 +15,14 @@
           <router-link to="/create-account">Create Account</router-link>
         </li>
         <li v-if="checkAuthenticated()">
-          <router-link to="/catalogue">Catalogue</router-link>
+          <router-link to="/bookcatalogue/">Catalogue</router-link>
         </li>
 
         <li id="wishList" v-if="checkAuthenticated()">
-          <router-link to="/wishlist">WishList</router-link>
+          <router-link to="/wishlist/">WishList</router-link>
         </li>
         <li v-if="checkAuthenticated()">
-          <router-link to="/checkout"> Checkout</router-link>
+          <router-link to="/checkout/"> Checkout</router-link>
         </li>
         <li id="add_book" v-if="checkAuthenticated()">
           <button @click="toggleFormModal">Add Book</button>
@@ -80,10 +80,9 @@
 <script lang="ts">
 import { useLogOutStore } from '@/stores/useLogOutStore.ts'
 import router from '@/router'
-import { useLogInStore } from '@/stores/useLogInStore.ts'
-import { computed, onMounted, ref } from 'vue'
+ import { computed, onMounted, ref } from 'vue'
 import { useAddBookCatalogueStore } from '@/stores/useBookCatalogueStore.ts'
-import { username } from '../Utils/AppUtils.ts'
+import { useLogInStore } from '@/stores/useLogInStore.ts'
 
 export default {
   name: 'MainHeader',
@@ -92,29 +91,34 @@ export default {
     const isModalOpen = ref(false)
     const catalogueStore = useAddBookCatalogueStore()
     const logoutStore = useLogOutStore()
-    const logInStore = useLogInStore()
+     const logInStore = useLogInStore()
     const userProfile = ref('')
     const logOut = async () => {
       await logoutStore.LogOut()
       await router.push('/')
-      router.go(0)
+       router.go(0)
     }
     const getStatusText =computed(()=>catalogueStore.statusText);
-    const toggleFormModal = () =>
-      isModalOpen.value === true ? (isModalOpen.value = false) : (isModalOpen.value = true)
+    const toggleFormModal = () => isModalOpen.value === true ? (isModalOpen.value = false) : (isModalOpen.value = true)
 
     const checkAuthenticated = () => {
       const checkAuth = logInStore.checkAuth()
       if (logInStore.statusCode === 200) {
-        userProfile.value = JSON.stringify(localStorage.getItem('username'))
-        router.push('/catalogue')
+        userProfile.value = String(localStorage.getItem('username'))
+        router.push('/bookcatalogue/')
         router.go(0)
       }
       return checkAuth
     }
     onMounted(() => {
+      userProfile.value = String(localStorage.getItem('username'))
       if (!checkAuthenticated()) {
         router.push('/')
+        return;
+      }
+
+       if (checkAuthenticated()) {
+        router.push('/bookcatalogue/')
         return;
       }
     })
@@ -127,7 +131,7 @@ export default {
       toggleFormModal,
       isModalOpen,
       statusText: getStatusText,
-      loggedInUser: username,
+
     }
   },
 }
@@ -143,6 +147,7 @@ body,
   width: 100%;
   height: 100vh;
   display: unset;
+
 }
 
 header {
@@ -150,12 +155,13 @@ header {
   width: 100%;
   background-color: white;
   z-index: 99999;
+
   nav {
     width: 100%;
     margin-top: 1rem;
     text-align: center;
     ul {
-      padding: 0;
+      padding: 15px;
       margin: 0;
       display: flex;
       text-align: center;
@@ -178,11 +184,11 @@ header {
          border-radius: 2rem;
          padding: 10px;
          font-weight: bolder;
-         background: #ecf0f1;
+
        }
       }
       #signup {
-        padding: 15px;
+        padding-left: 55px;
         a {
           padding: 15px;
           color: colors.$white-color;
@@ -192,15 +198,11 @@ header {
       }
 
       #log_in {
-        padding: 15px;
-        a {
-          border-radius: 0.5rem;
-          padding: 15px;
-          border: 0.1rem solid colors.$text-color;
-          color: colors.$text-color;
-        }
+        padding-left: 55px;
+
       }
       #logout {
+        padding-left: 55px;
         cursor: pointer;
         button {
           width: 100px;
@@ -233,6 +235,7 @@ header {
         }
       }
     }
+
   }
 
   #add_new_book {
@@ -325,6 +328,17 @@ header {
         border-radius: 0.5rem;
       }
     }
+  }
+  .router-link-exact-active {
+
+    padding: 20px;
+    font-weight: bolder;
+    background: colors.$accent-color;
+
+    padding: 15px;
+    color: colors.$white-color;
+
+    border-radius: 0.5rem;
   }
 }
 </style>

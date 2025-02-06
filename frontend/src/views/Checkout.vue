@@ -5,20 +5,29 @@
   <button @click="toggleModal">Close</button>
 </div>
   </div>
-  <p v-if="checkoutInfo" id="checkoutInfo">{{ checkoutInfo }}</p>
-  <CheckoutComponent :books="checkoutItemsList" @completeCheckout="confirmBookCheckout"/>
+
+  <div  v-if="checkoutItemsList.length<=0" id="empty_cart">
+    <p v-if="checkoutInfo" id="checkoutInfo">{{ checkoutInfo }}</p>
+    <p >
+      <img src="https://eazybooks-images.s3.us-east-1.amazonaws.com/empty_cart.png" alt="empty cart">
+    </p>
+
+  </div>
+  <CheckoutComponent :books="checkoutItemsList" @completeCheckout="confirmBookCheckout" @removeBookFromCheckout="removeFromCheckout"/>
   <CheckoutHistory :checkout-history="checkoutHistoryList" :isSuccessful="returnStatus"
                    @checkout-again="checkOutAgain" @return-book="returnBook"/>
 </template>
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, ref } from 'vue'
+import { computed, defineComponent,onMounted, ref } from 'vue'
 import type { BookCatalogue, CheckedOutHistory } from '@/model/model.ts'
 import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
-import CheckoutComponent from '@/views/CheckoutComponent.vue'
+import CheckoutComponent from '@/components/CheckoutComponent.vue'
 import CheckoutHistory from '@/views/CheckoutHistory.vue'
 import { useCheckoutStore } from '@/stores/useCheckoutStore.ts'
-import router from '@/router'
 import { useCheckedOutHistory } from '@/stores/useCheckoutStore.ts'
+import router from '@/router'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
+import { useLogInStore } from '@/stores/useLogInStore.ts'
 
 export default defineComponent({
   name: 'check-out',
@@ -54,7 +63,22 @@ export default defineComponent({
         checkoutStore.$patch({ statusText: '' }); // Directly update the store
       }, 7000);
 
-    }
+    };
+
+      const removeFromCheckout = async (index: number) => {
+        const adjustedIndex = index < 0 ? checkoutItemsList.value.length + index : index;
+        const checkoutItem = checkoutItemsList.value[adjustedIndex];
+         if (checkoutItem) {
+          try {
+            await checkoutItemStore.removeBookFromCheckoutItem(checkoutItem.isbn); // Wait for API call to finish
+            checkoutItemsList.value.splice(index, 1);
+            router.go(0)
+          } catch (error) {
+            console.log(error);
+          }
+        }
+
+      }
       const confirmCheckoutStatusText = computed(()=>{
       return checkoutStore.statusText;
     })
@@ -68,12 +92,20 @@ export default defineComponent({
       }
     }
 
-    onBeforeMount(async () => {
-      await checkoutItemStore.getCatalogueItemsforUser()
+    onMounted(async () => {
+
+      const authStore = useAuthStore();
+      const checkAuth = useLogInStore().checkAuth();
+
+      if (!checkAuth && authStore.username) {
+        await router.push('/')
+        return;
+      }
+
+      await checkoutItemStore.getCheckoutItemsforUser()
       await checkoutHistory.getAllCheckoutHistoryForUser()
       if (checkoutItemStore.checkoutItems.length > 0) {
         checkoutItemsList.value = checkoutItemStore.checkoutItems
-
       } else {
         checkoutInfo.value = 'Checkout is empty'
       }
@@ -94,7 +126,8 @@ export default defineComponent({
       confirmCheckoutStatusText,
       checkedOutHistoryInfo,
       checkOutAgain,
-      returnStatus
+      returnStatus,
+      removeFromCheckout
     }
   },
 })
@@ -108,13 +141,19 @@ body {
   padding: 0;
   margin: 0;
 }
-#checkoutInfo{
-  color: colors.$accent-color;
-  margin: 50px auto;
-  font-size: 36px;
+#empty_cart{
+  margin: 10px auto;
   text-align: center;
+  p{
+    padding: 10px;
+    font-size: 40px;
+    color: colors.$accent-color;
+  }
+  border-radius:0.5rem;
+  img{
+    max-width: 40%;
+  }
 }
-
 #confirm_checkout {
   z-index: 999;
   position: fixed;

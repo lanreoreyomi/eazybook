@@ -1,18 +1,21 @@
 package com.eazybooks.authentication;
 
-import static com.amazonaws.services.servicediscovery.model.FilterCondition.EQ;
+ import static com.amazonaws.services.servicediscovery.model.FilterCondition.EQ;
 
-import com.amazonaws.services.servicediscovery.AWSServiceDiscovery;
-import com.amazonaws.services.servicediscovery.AWSServiceDiscoveryClientBuilder;
-import com.amazonaws.services.servicediscovery.model.CreateServiceRequest;
-import com.amazonaws.services.servicediscovery.model.CreateServiceResult;
-import com.amazonaws.services.servicediscovery.model.ListServicesRequest;
-import com.amazonaws.services.servicediscovery.model.ListServicesResult;
-import com.amazonaws.services.servicediscovery.model.RegisterInstanceRequest;
-import com.amazonaws.services.servicediscovery.model.*;
-import com.eazybooks.authentication.config.IpAddressResolver;
+ import com.amazonaws.services.servicediscovery.AWSServiceDiscovery;
+ import com.amazonaws.services.servicediscovery.AWSServiceDiscoveryClientBuilder;
+ import com.amazonaws.services.servicediscovery.model.CreateServiceRequest;
+ import com.amazonaws.services.servicediscovery.model.CreateServiceResult;
+ import com.amazonaws.services.servicediscovery.model.DeregisterInstanceRequest;
+  import com.amazonaws.services.servicediscovery.model.ListServicesRequest;
+ import com.amazonaws.services.servicediscovery.model.ListServicesResult;
+ import com.amazonaws.services.servicediscovery.model.RegisterInstanceRequest;
+ import com.amazonaws.services.servicediscovery.model.ServiceFilter;
+ import com.amazonaws.services.servicediscovery.model.ServiceFilterName;
+ import com.amazonaws.services.servicediscovery.model.ServiceSummary;
+ import com.amazonaws.services.servicediscovery.model.ServiceTypeOption;
+ import com.eazybooks.authentication.config.IpAddressResolver;
 import jakarta.annotation.PostConstruct;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Map;
@@ -86,10 +89,9 @@ public class AuthenticationApplication {
         client.registerInstance(registerInstanceRequest);
         logger.info("Registered instance with ID: {} successfully with serviceId: {}", instanceId, serviceId);
       } catch (Exception e) {
-        logger.error("Error registering instance: {} ",  e.getMessage());
+        logger.error("Error registering instance: {}", e.getMessage());
       }
     }
-
     private void deregisterInstance() {
       try {
         DeregisterInstanceRequest deregisterInstanceRequest = new DeregisterInstanceRequest()

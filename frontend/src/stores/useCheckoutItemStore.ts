@@ -2,7 +2,8 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import type { BookCatalogue, } from '@/model/model.ts'
 import { accessToken, username } from '@/Utils/AppUtils.ts'
-import { addBookToCatalogueItem, getCatalogueItemsforUser, removeBookFromCatalogueItem } from '@/api/apis.ts'
+import { addBookToCatalogueItem, api, getCatalogueItemsforUser, removeBookFromCatalogueItem } from '@/api/apis.ts'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 
 //for getting all catalgues
@@ -18,16 +19,16 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
     statusText: '',
   }),
   actions: {
-    async getCatalogueItemsforUser() {
+    async getCheckoutItemsforUser() {
       try {
-        const response = await axios.get<BookCatalogue[]>(getCatalogueItemsforUser(username), {
+        const response = await api.get<BookCatalogue[]>(getCatalogueItemsforUser(username), {
               headers: {
                Authorization: accessToken
               }
         })
         this.$patch({
           statusCode: response.status,
-          checkoutItems: response.data, // Ensure statusText is a string
+          checkoutItems: response.data,
         })
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -41,14 +42,15 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
     },
     async addBookToCheckoutItem(bookIsbn: number) {
 
-      const username = localStorage.getItem('username')
-      try {
+      const authStore = useAuthStore()
 
-        const response = await axios.post<string>
+      const username = String(authStore.username)
+
+      try {
+        const response = await api.post<string>
         (addBookToCatalogueItem(username, bookIsbn), bookIsbn, {
           headers: {
             Authorization: accessToken,
-            'Content-Type': 'application/json'
           }
         })
         this.$patch({
@@ -69,13 +71,8 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
       const username = localStorage.getItem('username')
       try {
 
-        const response = await axios.post<string>
-        (removeBookFromCatalogueItem(username, bookIsbn), bookIsbn, {
-          headers: {
-            Authorization: accessToken,
-            'Content-Type': 'application/json'
-          }
-        })
+        const response = await api.post<string>
+        (removeBookFromCatalogueItem(username, bookIsbn), bookIsbn)
         this.$patch({
           statusCode: response.status,
           statusText: String(response.data),
@@ -84,7 +81,7 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
       } catch (error) {
         if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
-          this.statusText = error.response?.statusText || 'Internal Server Error';
+          this.statusText = error.response?.data || 'Internal Server Error';
         } else {
           this.statusCode = 500;
           this.statusText = 'An unexpected error occurred';

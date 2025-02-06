@@ -1,14 +1,17 @@
 // stores/BookCatalogueState.ts
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { addBookToCatalogueWithUsername, BOOKCATALOGUE } from '@/api/apis.ts'
+import { addBookToCatalogueWithUsername, api, BOOKCATALOGUE } from '@/api/apis.ts'
 import { accessToken, username } from '@/Utils/AppUtils.ts'
 import type { BookCatalogue } from '@/model/model.ts'
+import router from '@/router'
 
 interface BookCatalogueState {
   bookCatalogue: BookCatalogue[]; // Array of BookCatalogue
   statusCode: number;
   statusText: string;
+  isLoading: boolean, // Add loading state
+
 }
 
 interface AddBookCatalogueState {
@@ -26,32 +29,33 @@ export const useBookCatalogueStore = defineStore('bookCatalogue', {
     bookCatalogue: [],
      statusCode: 0,
     statusText: '',
+    isLoading: false, // Add loading state
   }),
   actions: {
     async getAllBookCatalogues() {
-       try {
-        const response = await axios.get<BookCatalogue[]>(BOOKCATALOGUE, {
-          headers: {
-            Authorization: accessToken
-          }
-        })
-        // Handle successful user creation
-         this.$patch({
-          statusCode: response.status,
-          bookCatalogue : response.data
-          // Ensure statusText is a string
-        })
-       } catch (error) {
-         if (axios.isAxiosError(error)) {
-           this.statusCode = error.response?.status || 500;
-           this.statusText = error.response?.statusText || 'Internal Server Error';
-         } else {
-           this.statusCode = 500;
-           this.statusText = 'An unexpected error occurred';
-         }
-      }
-    },
+      this.isLoading = true;
 
+      try {
+        const response = await api.get<BookCatalogue[]>(BOOKCATALOGUE)
+
+        this.$patch({
+          statusCode: response.status,
+          bookCatalogue: response.data,
+          isLoading: false,
+        })
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.data || 'Internal Server Error';
+          this.isLoading = false;
+        } else {
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
+          this.isLoading = false;
+        }
+
+      }
+    }
   }
 })
 
@@ -72,7 +76,7 @@ export const useAddBookCatalogueStore = defineStore('addBookCatalogue', {
   actions: {
     async addBookToCatalogue() {
       try {
-        const response = await axios.post<AddBookCatalogueState>(addBookToCatalogueWithUsername(username),
+        const response = await api.post<AddBookCatalogueState>(addBookToCatalogueWithUsername(username),
           this.addBookCatalogue, {
           headers: {
             Authorization: accessToken
@@ -93,6 +97,7 @@ export const useAddBookCatalogueStore = defineStore('addBookCatalogue', {
           this.statusText = 'An unexpected error occurred';
         }
       }
+      router.go(0);
     },
   }
 })

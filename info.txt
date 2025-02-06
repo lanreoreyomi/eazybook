@@ -8,7 +8,7 @@ GRANT pg_write_all_data TO eazybook_dbuser;
 GRANT USAGE ON SCHEMA public TO eazybook_dbuser;
 GRANT ALL ON SCHEMA public TO eazybook_dbuser;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public to eazybook_dbuser;
-GRANT ALL PRIVILEGES ON ALL SEQUENCEs IN SCHEMA public to eazybook_dbuser;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public to eazybook_dbuser;
 
 
 

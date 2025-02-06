@@ -1,4 +1,4 @@
-package com.eazybooks.user.Config;
+package com.eazybooks.user.config;
 
 @FunctionalInterface
 public interface IpAddressResolver {

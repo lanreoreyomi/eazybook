@@ -1,15 +1,16 @@
 package com.eazybooks.bookcatalogue.controller;
 
-
-import static com.eazybooks.bookcatalogue.utils.RestUtils.get_AUTH_userRoleTokenUrl;
-import static com.eazybooks.bookcatalogue.utils.RestUtils.isTokenValid;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
+import com.eazybooks.bookcatalogue.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,22 +27,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 
 @Controller
-@RequestMapping("/bookcatalogue")
-@CrossOrigin(origins = "http://localhost:5173") // Allow requests from this origin
-public class BookCatalogueController {
+@RequestMapping("/bookcatalogue/")
+ public class BookCatalogueController {
 
   Logger logger = LoggerFactory.getLogger(BookCatalogueController.class);
 
   private final BookCatalogueService bookCatalogueService;
+  private final VerificationService verificationService;
 
-  @Autowired
-  RestTemplate standardRestTemplate;
-
-  public BookCatalogueController(BookCatalogueService bookCatalogueService) {
+  public BookCatalogueController(BookCatalogueService bookCatalogueService,
+      VerificationService verificationService) {
     this.bookCatalogueService = bookCatalogueService;
-   }
+    this.verificationService = verificationService;
+  }
 
-  @PostMapping("/{username}/addbook")
+  @PostMapping("{username}/addbook")
   public ResponseEntity<String> addBookToCatalogues(@PathVariable String username,
       @RequestBody BookCatalogue book, HttpServletRequest request) {
 
@@ -50,7 +49,7 @@ public class BookCatalogueController {
 
     //verifies token
     try {
-      tokenValidation = isTokenValid(request, username, logger, standardRestTemplate);
+      tokenValidation = verificationService.verifyUserToken(request, username);
     } catch (Exception e) {
       logger.error(e.getMessage());
     }
@@ -62,7 +61,7 @@ public class BookCatalogueController {
     }
     // Check if User is Admin
     try {
-      final ResponseEntity<String> userRole = getUserRole(username, request);
+      final ResponseEntity<String> userRole = verificationService.verifyUserRole(username, request);
       if (!Objects.equals(userRole.getBody(), "ADMIN")) {
         return new ResponseEntity<>("Only admin can add new book", HttpStatus.FORBIDDEN);
       }
@@ -84,31 +83,39 @@ public class BookCatalogueController {
     return new ResponseEntity<>(addedBook.getTitle() + " added successfully", HttpStatus.CREATED);
 
   }
-
-
-  @GetMapping()
+  @GetMapping
   public ResponseEntity<List<BookCatalogue>> getAllBookCatalogues(HttpServletRequest request) {
-
     //verifies token
+    logger.info("request from user: " + request.toString());
     try {
-      ResponseEntity<Boolean> tokenValidation = isTokenValid(request, null, logger,
-          standardRestTemplate);
-      List<BookCatalogue> books = bookCatalogueService.getAllCatalogue();
-      return ResponseEntity.ok(books);
+      ResponseEntity<Boolean> tokenValidation = verificationService.verifyUserToken(request, null);
+
+      if (!Boolean.TRUE.equals(tokenValidation.getBody())) {
+        logger.error("Error validating token");
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+      }
+
     } catch (Exception e) {
       logger.error("Error validating user token");
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+      try{
+        List<BookCatalogue> books = bookCatalogueService.getAllCatalogue();
+        return ResponseEntity.ok(books);
+      }catch(Exception e) {
+        logger.error(e.getMessage());
+      }
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
   }
 
-  @GetMapping("/isbn/{isbn}")
+  @GetMapping("isbn/{isbn}")
   public ResponseEntity<BookCatalogue> getBookByIsbn(@PathVariable Long isbn,
       HttpServletRequest request) {
 
     logger.info("request {}", request.toString());
 
     try {
-      final ResponseEntity<Boolean> verifyTokenResponse = isTokenValid(request, null, logger,  standardRestTemplate);
+      final ResponseEntity<Boolean> verifyTokenResponse = verificationService.verifyUserToken(request, null);
 
       if (verifyTokenResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
           verifyTokenResponse.getBody())) {
@@ -132,47 +139,12 @@ public class BookCatalogueController {
     return new ResponseEntity<>(bookByIsbn, HttpStatus.OK);
   }
 
-  @GetMapping("/book/{bookId}")
+  @GetMapping("book/{bookId}")
   public ResponseEntity<BookCatalogue> getBookCatalogueById(HttpServletRequest request,
       @PathVariable Long bookId) {
     final BookCatalogue bookById = bookCatalogueService.getBookById(bookId);
     logger.info("request {}", bookById.toString());
     return ResponseEntity.ok(bookById);
-  }
-
-
-  private ResponseEntity<String> getUserRole(String username, HttpServletRequest request) {
-
-    String authHeader = request.getHeader("Authorization");
-
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      logger.warn("Authorization header missing or invalid");
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    String token = authHeader.substring(7);
-    ResponseEntity<String> authResponse;
-
-    try {
-
-      String authUrl = get_AUTH_userRoleTokenUrl(username);
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Authorization", authHeader);
-      headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
-
-      HttpEntity<String> requestEntity = new HttpEntity<>(token, headers);
-      authResponse = standardRestTemplate.exchange(
-          authUrl, HttpMethod.POST, requestEntity, String.class);
-      if (authResponse.getStatusCode() != HttpStatus.OK) {
-        return new ResponseEntity<>("User not admin", HttpStatus.UNAUTHORIZED);
-
-      }
-      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
-    } catch (Exception e) {
-      return new ResponseEntity<>("Error getting user role", HttpStatus.UNAUTHORIZED);
-
-    }
-
   }
 
 }

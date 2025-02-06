@@ -1,8 +1,6 @@
 package com.eazybooks.bookcatalogue.model;
 
 
-import java.util.List;
-
 public interface CheckoutStatsImpl {
 
   CheckoutStats save(CheckoutStats checkoutStats);

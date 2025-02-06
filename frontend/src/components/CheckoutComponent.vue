@@ -14,7 +14,7 @@
           <li class="book_card_links">Book Publication year: {{book.publicationYear}} </li>
         </ul>
         <div class="checkout_button">
-          <button class="checkout_remove-list" @click="removeBookFromCheckout(book)">Remove from cart</button>
+          <button class="checkout_remove-list" @click="removeFromCheckout(index)">Remove from cart</button>
           <button class="checkout-checkout" @click="checkBookout(book)">Complete checkout</button>
         </div>
       </div>
@@ -27,7 +27,6 @@
 import { computed, type PropType } from 'vue'
 import type { BookCatalogue } from '@/model/model.ts'
 import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
-import router from '@/router'
 
 export default {
   name: 'CheckoutComponent',
@@ -37,38 +36,33 @@ export default {
       required: true // Make the prop required
     }
   },
-  emits: ['completeCheckout'],
+  emits: ['completeCheckout', 'removeBookFromCheckout'],
 
   setup(props, {emit}) {
     const checkoutStore = useCheckoutItemStore();
 
-   const removeBookFromCheckout = async (book: BookCatalogue): Promise<void> => {
-     if (book != null) {
-       try{
-         await checkoutStore.removeBookFromCheckoutItem(book.isbn);
-         router.go(0)
-       }catch (e) {
+   const removeFromCheckout = async (index: number): Promise<void> => {
+     emit('removeBookFromCheckout', index);
 
-       }
-     }
    }
     const checkBookout = (book: BookCatalogue) => {
       emit('completeCheckout', book);
     };
+
     const confirmationText  = computed(() => {
       return checkoutStore.statusText
     });
 
     return{
-      removeBookFromCheckout,
+      removeFromCheckout,
       confirmationText,
-      checkBookout
+      checkBookout,
     }
   }
 }
 </script>
 <style scoped lang="scss">
-@use '/src/assets/scss/colors.scss';
+@use '/src/assets/scss/colors';
 
 html,
 body {

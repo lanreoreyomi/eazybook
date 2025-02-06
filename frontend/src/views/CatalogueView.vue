@@ -18,14 +18,17 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeMount, ref } from 'vue'
+import { computed, defineComponent,onMounted, ref } from 'vue'
 import { useBookCatalogueStore } from '@/stores/useBookCatalogueStore.ts'
 import type { BookCatalogue } from '@/model/model.ts'
 import BookComponent from '@/components/BookComponent.vue'
 import { useWishlistStore } from '@/stores/useWishlistStore.ts'
 import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
- import { useCheckoutStatsStore } from '@/stores/useCheckoutStatsStore.ts'
-export default defineComponent({
+import { useCheckoutStatsStore } from '@/stores/useCheckoutStatsStore.ts'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
+import router from '@/router'
+import { useLogInStore } from '@/stores/useLogInStore.ts'
+   export default defineComponent({
   name: 'CatalogueView',
   components: { BookComponent },
 
@@ -33,9 +36,11 @@ export default defineComponent({
     const confirmation = ref('')
     const bookCatalogueStore = useBookCatalogueStore()
     const checkoutStore = useCheckoutItemStore()
-    const books = ref<BookCatalogue[]>([])
+    const books = ref<BookCatalogue[]>([]);
+
     const wishlistStore= useWishlistStore();
-    const checkoutStatsStore = useCheckoutStatsStore()
+    const checkoutStatsStore = useCheckoutStatsStore();
+    const isCatalogueLoaded = ref(false)
     const bookCheckout = (book: BookCatalogue): void=>{
       if(book.quantityForRent > 0){
         checkoutStore.addBookToCheckoutItem(book.isbn);
@@ -43,7 +48,6 @@ export default defineComponent({
     }
     const checkoutStats = computed(() => checkoutStatsStore.stats)
     const displayBook = (book: BookCatalogue): void => {addBookToWishList(book)}
-    const isCatalogueLoaded = computed(() => bookCatalogueStore.statusCode === 200)
 
     const addBookToWishList = (book: BookCatalogue): void => {
       wishlistStore.addBookToWishlist(book);
@@ -65,12 +69,35 @@ export default defineComponent({
       return text;
     })
 
-    onBeforeMount(async () => {
-       await bookCatalogueStore.getAllBookCatalogues()
-        await checkoutStatsStore.fetchCheckoutStats();
-       books.value = bookCatalogueStore.bookCatalogue
-    })
+    onMounted( async () => {
+      const authStore = useAuthStore();
+      const checkAuth = useLogInStore().checkAuth();
 
+        if (!checkAuth && authStore.username) {
+          await router.push('/')
+          return;
+      }
+
+
+      if (!authStore.token) {
+        authStore.token = localStorage.getItem("accessToken");
+      }
+      if (!authStore.username) {
+        authStore.username = localStorage.getItem("username");
+      }
+
+      if (authStore.token && authStore.username) {
+        await bookCatalogueStore.getAllBookCatalogues()
+        await checkoutStatsStore.fetchCheckoutStats();
+        books.value = bookCatalogueStore.bookCatalogue
+
+        await bookCatalogueStore.getAllBookCatalogues();
+        await checkoutStatsStore.fetchCheckoutStats();
+        books.value = bookCatalogueStore.bookCatalogue;
+        isCatalogueLoaded.value = computed(() => bookCatalogueStore.statusCode === 200).value
+      }
+
+    })
     return {
       isCatalogueLoaded,
       books,

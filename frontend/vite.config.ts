@@ -18,35 +18,35 @@ export default defineConfig({
   server: {
     proxy: {
       '/auth/create-account': {
-        target: 'http://eazybooks.com:9084',
+        target: 'http://ec2-52-91-196-70.compute-1.amazonaws.com',
         changeOrigin: true
       },
       '/auth/login': {
-        target: 'http://eazybooks.com:9084',
+        target: 'http://ec2-52-91-196-70.compute-1.amazonaws.com',
         changeOrigin: true
       },
       '/auth/logout': {
-        target: 'http://eazybooks.com:9084',
+        target: 'http://ec2-52-91-196-70.compute-1.amazonaws.com',
         changeOrigin: true
       },
-      '/bookcatalogue': {
-        target: 'http://eazybooks.com:9189',
+      '/bookcatalogue/': {
+        target: 'http://ec2-52-91-196-70.compute-1.amazonaws.com',
         changeOrigin: true
       },
-      '/stats': {
-        target: 'http://eazybooks.com:9189',
+      '/stats/': {
+        target: 'http://ec2-52-91-196-70.compute-1.amazonaws.com',
         changeOrigin: true
       },
       '/wishlist/': {
-        target: 'http://eazybooks.com:8017',
+        target: 'http://ec2-52-91-196-70.compute-1.amazonaws.com',
         changeOrigin: true
       },
       '/checkoutitems/': {
-        target: 'http://eazybooks.com:9189',
+        target: 'http://ec2-52-91-196-70.compute-1.amazonaws.com',
         changeOrigin: true
       },
       '/checkout/': {
-        target: 'http://eazybooks.com:9189',
+        target: 'http://ec2-52-91-196-70.compute-1.amazonaws.com',
         changeOrigin: true
       }
     }
