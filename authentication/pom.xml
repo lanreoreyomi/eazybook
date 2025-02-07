@@ -130,6 +130,16 @@
       <groupId>io.netty</groupId>
       <artifactId>netty-codec-dns</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <dependencyManagement>
     <dependencies>
@@ -163,11 +173,6 @@
       <id>aws-spring-release</id>
       <name>AWS Spring Release Repository</name>
       <url>https://repo.awspring.io/release</url>
-    </repository>
-    <repository>
-      <id>maven-central</id>
-      <name>Maven Central</name>
-      <url>https://repo.maven.apache.org/maven2</url>
     </repository>
     <repository>
       <id>spring-milestones</id>

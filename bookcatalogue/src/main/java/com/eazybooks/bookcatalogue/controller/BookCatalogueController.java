@@ -57,7 +57,7 @@ import org.springframework.web.client.RestTemplate;
     assert tokenValidation != null;
     if (!Boolean.TRUE.equals(tokenValidation.getBody())) {
       logger.error("Error validating token");
-      return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>("Error validating token", HttpStatus.UNAUTHORIZED);
     }
     // Check if User is Admin
     try {
@@ -131,7 +131,7 @@ import org.springframework.web.client.RestTemplate;
       bookByIsbn = bookCatalogueService.getBookByIsbn(isbn);
       logger.info("bookByIsbn {}", bookByIsbn);
     } catch (Exception e) {
-      logger.error("Book already exists");
+      logger.error("Error getting book");
     }
     if (bookByIsbn == null) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);

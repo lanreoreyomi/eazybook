@@ -46,7 +46,7 @@ public class CheckoutController {
   }
 
   @PostMapping("{username}/{bookIsbn}")
-  private ResponseEntity<String> checkout(@PathVariable String username,
+  public ResponseEntity<String> checkout(@PathVariable String username,
       @PathVariable Long bookIsbn, HttpServletRequest request) {
 
     //verifies token
@@ -54,7 +54,7 @@ public class CheckoutController {
       ResponseEntity<Boolean> tokenValid = verificationService.verifyUserToken(request, username);
       if (!Boolean.TRUE.equals(tokenValid.getBody())) {
         logger.error("Error validating token");
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
       }
     } catch (Exception e) {
       logger.error(e.getMessage());
@@ -79,6 +79,7 @@ public class CheckoutController {
       }
 
       if (checkoutStats != null) {
+
         if (book.getQuantityForRent() <= 0) {
           book.setAvailable(false);
           logger.info("Max Checkchout reached for book " + bookIsbn);
@@ -155,7 +156,7 @@ public class CheckoutController {
   }
 
   @PostMapping("{username}/{bookIsbn}/return")
-  private ResponseEntity<String> returnBook(@PathVariable String username,
+  public ResponseEntity<String> returnBook(@PathVariable String username,
       @PathVariable Long bookIsbn, HttpServletRequest request) {
 
     //verifies token
@@ -215,7 +216,7 @@ public class CheckoutController {
 
 
   @GetMapping("{username}/all")
-  private ResponseEntity<List<CheckoutInfo>> getCheckoutHistory(@PathVariable String username, HttpServletRequest request) {
+  public ResponseEntity<List<CheckoutInfo>> getCheckoutHistory(@PathVariable String username, HttpServletRequest request) {
 
     //verifies token
     try {
