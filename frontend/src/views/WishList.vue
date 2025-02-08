@@ -41,7 +41,6 @@ import { useLogInStore } from '@/stores/useLogInStore.ts'
       router.push({ path: '/checkout/' })
     };
     const userWishList = computed(() => {
-
      return  wishListStore.getUserWishList();
 
     });
@@ -62,9 +61,7 @@ import { useLogInStore } from '@/stores/useLogInStore.ts'
     }
     onMounted( async () => {
       const authStore = useAuthStore();
-
       const checkAuth = useLogInStore().checkAuth();
-
       if (!checkAuth && !authStore.username) {
         await router.push('/')
         return;

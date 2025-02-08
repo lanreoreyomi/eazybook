@@ -116,7 +116,6 @@ export default {
         router.push('/')
         return;
       }
-
        if (checkAuthenticated()) {
         router.push('/bookcatalogue/')
         return;

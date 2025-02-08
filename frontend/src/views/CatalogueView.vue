@@ -73,7 +73,7 @@ import { useLogInStore } from '@/stores/useLogInStore.ts'
       const authStore = useAuthStore();
       const checkAuth = useLogInStore().checkAuth();
 
-        if (!checkAuth && authStore.username) {
+        if (!checkAuth && !authStore.username) {
           await router.push('/')
           return;
       }
