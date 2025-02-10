@@ -117,7 +117,7 @@ export default {
         return;
       }
        if (checkAuthenticated()) {
-        router.push('/bookcatalogue/')
+        // router.go(0)
         return;
       }
     })

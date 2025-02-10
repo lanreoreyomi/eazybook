@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,6 +25,12 @@ public class VerificationService {
   RestTemplate standardRestTemplate;
 
   private final Logger logger = LoggerFactory.getLogger(VerificationService.class);
+
+  @Value("${authentication.service.url}")
+  private String authenticationServiceUrl;
+
+  @Value("${bookcatalogue.service.url}")
+  private String bookCatalogueServiceUrl;
 
   private ResponseEntity<Boolean> verifyToken(HttpServletRequest request, String username) {
     String authHeader = request.getHeader("Authorization");
@@ -103,7 +110,7 @@ public class VerificationService {
   }
 
   private String authenticationServiceUrl() throws UnknownHostException {
-    return "http://"+ InetAddress.getLocalHost().getHostAddress()+":9084/auth/validate-token";
+    return authenticationServiceUrl+"/auth/validate-token";
   }
   public ResponseEntity<BookCatalogue> verifyBookIsbn( HttpServletRequest request, Long bookIsbn) {
 
@@ -142,7 +149,7 @@ public class VerificationService {
 
   }
 
-  private  String bookCatalogueServiceIsbnUrl(Long bookIsbn) throws UnknownHostException {
-    return "http://"+ InetAddress.getLocalHost().getHostAddress()+":9189/bookcatalogue/isbn/"+ bookIsbn;
+  private  String bookCatalogueServiceIsbnUrl(Long bookIsbn) {
+    return bookCatalogueServiceUrl+"/bookcatalogue/isbn/"+ bookIsbn;
   }
 }

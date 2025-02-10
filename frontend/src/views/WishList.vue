@@ -35,6 +35,7 @@ import { useLogInStore } from '@/stores/useLogInStore.ts'
 
     // let userWishList;
     const wishListStore = useWishlistStore();
+
     const addToCheckoutItem = (bookIsbn: number, index: number)=>{
       checkoutItemStore.addBookToCheckoutItem(bookIsbn);
       removeBookFromWishlist(index)

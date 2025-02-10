@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,7 +25,11 @@ public class VerificationService {
   @Autowired
   RestTemplate standardRestTemplate;
 
-  private ResponseEntity<Boolean> verifyToken(HttpServletRequest request, String username) {
+  @Value("${authentication.service.url}")
+  private String authenticationServiceUrl;
+
+  private ResponseEntity<Boolean> verifyToken(HttpServletRequest request, String username)
+  {
     String authHeader = request.getHeader("Authorization");
 
     logger.info("authHeader");
@@ -37,7 +42,7 @@ public class VerificationService {
     String token = authHeader.substring(7);
     ResponseEntity<Boolean> authResponse;
 
-    try {
+     try {
       String authUrl = authenticationServiceUrl();
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", authHeader);
@@ -58,7 +63,8 @@ public class VerificationService {
 
     }
   }
-  private ResponseEntity<Boolean> verifyToken(HttpServletRequest request) {
+  private ResponseEntity<Boolean> verifyToken(HttpServletRequest request)
+      throws UnknownHostException {
 
     logger.info("request {}", request.toString());
     String authHeader = request.getHeader("Authorization");
@@ -69,6 +75,8 @@ public class VerificationService {
     }
     String token = authHeader.substring(7);
     ResponseEntity<Boolean> authResponse;
+
+    logger.info("Authentication Service url {}", authenticationServiceUrl());
     try {
       String auth_service_url = authenticationServiceUrl();
 
@@ -94,16 +102,18 @@ public class VerificationService {
   public ResponseEntity<Boolean> verifyUserToken(HttpServletRequest request, String username) {
     if (username == null) {
       logger.debug("Verifying token without username"); // Add logging
-      return verifyToken(request);
+      try {
+        return verifyToken(request);
+      } catch (UnknownHostException e) {
+        throw new RuntimeException(e);
+      }
     } else {
       logger.debug("Verifying token for username: {}", username); // Add logging
       return verifyToken(request, username);
     }
   }
 
-  private String authenticationServiceUrl() throws UnknownHostException {
-    return "http://"+ InetAddress.getLocalHost().getHostAddress()+":9084/auth/validate-token";
-  }
+
 
   private ResponseEntity<String> getUserRole(String username, HttpServletRequest request) {
     String authHeader = request.getHeader("Authorization");
@@ -142,6 +152,9 @@ public class VerificationService {
   }
 
   private  String authenticationServiceUserRoleUrl(String username) throws UnknownHostException {
-    return "http://"+ InetAddress.getLocalHost().getHostAddress()+":9084/auth/"+username + "/role";
+    return authenticationServiceUrl+"/auth/"+username + "/role";
+  }
+  private String authenticationServiceUrl() {
+    return authenticationServiceUrl+"/auth/validate-token";
   }
 }

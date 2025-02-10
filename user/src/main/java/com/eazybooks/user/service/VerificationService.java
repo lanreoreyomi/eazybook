@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,6 +25,8 @@ public class VerificationService {
 
   private final Logger logger = LoggerFactory.getLogger(VerificationService.class);
 
+  @Value("${authentication.service.url}")
+  private String authenticationServiceUrl;
 
   private ResponseEntity<Boolean> verifyToken(HttpServletRequest request, String username) {
     String authHeader = request.getHeader("Authorization");
@@ -71,6 +74,8 @@ public class VerificationService {
     String token = authHeader.substring(7);
     ResponseEntity<Boolean> authResponse;
     try {
+
+      logger.info("Authentication service url  {}", authenticationServiceUrl());
       String auth_service_url = authenticationServiceUrl();
 
       HttpHeaders headers = new HttpHeaders();
@@ -103,6 +108,6 @@ public class VerificationService {
   }
 
   private String authenticationServiceUrl() throws UnknownHostException {
-    return "http://"+ InetAddress.getLocalHost().getHostAddress()+":9084/auth/validate-token";
+    return  authenticationServiceUrl+"/auth/validate-token";
   }
 }

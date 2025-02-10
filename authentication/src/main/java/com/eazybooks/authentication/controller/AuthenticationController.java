@@ -13,7 +13,8 @@ import java.net.UnknownHostException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
+ import org.springframework.beans.factory.annotation.Value;
+ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -34,7 +35,10 @@ import org.springframework.web.client.RestTemplate;
 
   private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
   private final JwtService jwtService;
-  AuthenticatorService authenticatorService;
+  private final AuthenticatorService authenticatorService;
+
+  @Value("${user.service.url}")
+  private String userServiceUrl;
 
   @Autowired
   private RestTemplate standardRestTemplate;
@@ -69,7 +73,9 @@ import org.springframework.web.client.RestTemplate;
           authenticatorService.createUserAccount(createAccountRequest);
       logger.info("AuthenticationResponse: {}", authenticationResponse);
 
-       String user_service_url =userServiceCreateUserUrl();
+      logger.info("User service url  {}", userServiceUrl());
+
+      String user_service_url =userServiceUrl();
        logger.info("User_service_url: {}", user_service_url);
 
       HttpHeaders headers = new HttpHeaders();
@@ -194,7 +200,7 @@ import org.springframework.web.client.RestTemplate;
     }
   }
 
-  public String userServiceCreateUserUrl() throws UnknownHostException {
-    return "http://"+ InetAddress.getLocalHost().getHostAddress()+":9087/user/create-account";
+  public String userServiceUrl() throws UnknownHostException {
+    return userServiceUrl+"/user/create-account";
   }
 }

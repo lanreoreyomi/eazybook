@@ -104,8 +104,10 @@ export default defineComponent({
 
       await checkoutItemStore.getCheckoutItemsforUser()
       await checkoutHistory.getAllCheckoutHistoryForUser()
+
       if (checkoutItemStore.checkoutItems.length > 0) {
         checkoutItemsList.value = checkoutItemStore.checkoutItems
+        // location.reload();
       } else {
         checkoutInfo.value = 'Checkout is empty'
       }

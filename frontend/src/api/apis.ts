@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/useAuthStore.ts'
 
-const backEndUrl = 'http://ec2-52-91-196-70.compute-1.amazonaws.com';
+const backEndUrl = 'http://ec2-34-227-14-199.compute-1.amazonaws.com';
 
 
 const createAxiosInstance = () => {
