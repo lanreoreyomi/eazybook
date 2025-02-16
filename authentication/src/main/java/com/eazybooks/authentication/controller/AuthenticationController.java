@@ -8,12 +8,11 @@ import com.eazybooks.authentication.model.VerifyToken;
 import com.eazybooks.authentication.service.AuthenticatorService;
 import com.eazybooks.authentication.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import org.slf4j.Logger;
+import java.util.List;
+ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
- import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.ServiceInstance;
+ import org.springframework.cloud.client.discovery.DiscoveryClient;
  import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -37,16 +36,16 @@ import org.springframework.web.client.RestTemplate;
   private final JwtService jwtService;
   private final AuthenticatorService authenticatorService;
 
-  @Value("${user.service.url}")
-  private String userServiceUrl;
 
-  @Autowired
-  private RestTemplate standardRestTemplate;
+  private RestTemplate restTemplate = new RestTemplate();
+  private final DiscoveryClient discoveryClient;
 
-  public AuthenticationController(AuthenticatorService authenticatorService, JwtService jwtService) {
+  public AuthenticationController(AuthenticatorService authenticatorService, JwtService jwtService,
+      DiscoveryClient discoveryClient) {
     this.authenticatorService = authenticatorService;
     this.jwtService = jwtService;
-   }
+    this.discoveryClient = discoveryClient;
+  }
 
   @PostMapping("/create-account")
   public ResponseEntity<String> signUp(
@@ -71,12 +70,17 @@ import org.springframework.web.client.RestTemplate;
     try {
       final AuthenticationResponse authenticationResponse =
           authenticatorService.createUserAccount(createAccountRequest);
-      logger.info("AuthenticationResponse: {}", authenticationResponse);
 
-      logger.info("User service url  {}", userServiceUrl());
+      List<ServiceInstance> instances = discoveryClient.getInstances("user");
 
-      String user_service_url =userServiceUrl();
-       logger.info("User_service_url: {}", user_service_url);
+      if (instances.isEmpty()) {
+        logger.info("User service not found");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+      }
+
+
+      ServiceInstance instance = instances.get(0);
+      String userServiceUrl = instance.getUri() + "/user/create-account";
 
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", "Bearer " + authenticationResponse.getToken());
@@ -90,8 +94,8 @@ import org.springframework.web.client.RestTemplate;
           createAccountRequest.getEmail());
 
       HttpEntity<CreateAccountRequest> requestEntity = new HttpEntity<>(createUserRequest, headers);
-      ResponseEntity<String> userCreation = standardRestTemplate.exchange(
-          user_service_url, HttpMethod.POST, requestEntity, String.class);
+      ResponseEntity<String> userCreation = restTemplate.exchange(
+          userServiceUrl, HttpMethod.POST, requestEntity, String.class);
 
       if (userCreation.getStatusCode() == HttpStatus.CREATED) {
         return new ResponseEntity<>("User successfully created", HttpStatus.CREATED);
@@ -198,9 +202,5 @@ import org.springframework.web.client.RestTemplate;
       logger.error("Error during token validation: {}", e.getMessage(), e);
       return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-  }
-
-  public String userServiceUrl() throws UnknownHostException {
-    return userServiceUrl+"/user/create-account";
   }
 }
