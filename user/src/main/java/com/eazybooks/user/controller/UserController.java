@@ -1,7 +1,6 @@
 package com.eazybooks.user.controller;
 
 import com.eazybooks.user.DTO.UsersDto;
-import com.eazybooks.user.service.AwsServiceUtils;
 import com.eazybooks.user.model.CreateAccountRequest;
 import com.eazybooks.user.model.User;
 import com.eazybooks.user.service.VerificationService;
@@ -9,8 +8,6 @@ import com.eazybooks.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.client.RestTemplate;
 
 @Controller
 @RequestMapping("/user")
@@ -28,15 +24,12 @@ public class UserController {
 
   private static final Logger logger = LoggerFactory.getLogger(UserController.class);
   UserService userService;
-  private DiscoveryClient discoveryClient;
 
   private final VerificationService verificationService;
 
 
-  public UserController(UserService userService, DiscoveryClient discoveryClient,
-      AwsServiceUtils awsServiceUtils, VerificationService verificationService) {
+  public UserController(UserService userService, VerificationService verificationService) {
     this.userService = userService;
-    this.discoveryClient = discoveryClient;
      this.verificationService = verificationService;
   }
 

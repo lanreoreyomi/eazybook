@@ -2,9 +2,8 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import type { BookCatalogue, WishList } from '@/model/model.ts'
-import { accessToken, username } from '@/Utils/AppUtils.ts'
-import {
-  addBookToWishlistWithUsername, api,
+ import {
+  addBookToWishlistWithUsername,
   getWishListForUser,
   removeBookFromWishlistWithUsername
 } from '@/api/apis.ts'
@@ -36,7 +35,11 @@ export const useWishlistStore = defineStore('wishlist', {
 
       try {
         const response =
-          await api.get<WishList[]>(getWishListForUser(String(authstore.username)))
+          await axios.get<WishList[]>(getWishListForUser(String(authstore.username)), {
+            headers: {
+              Authorization: authstore.token,
+            }
+          })
 
         this.$patch({
           statusCode: response.status,
@@ -55,13 +58,13 @@ export const useWishlistStore = defineStore('wishlist', {
     },
 
     async addBookToWishlist(book: BookCatalogue) {
+      const authstore = useAuthStore()
 
        try {
-
         const response = await axios.post<BookCatalogueState>
-        (addBookToWishlistWithUsername(username), book.isbn, {
+        (addBookToWishlistWithUsername(authstore.username), book.isbn, {
           headers: {
-            Authorization: accessToken,
+            Authorization: authstore.token,
             'Content-Type': 'application/json'
           }
         })
@@ -82,12 +85,13 @@ export const useWishlistStore = defineStore('wishlist', {
     },
     async removeBookToWishlist(wishList: WishList) {
 
-      const username = localStorage.getItem('username')
+      const authstore = useAuthStore();
+
       try {
         const response = await axios.post<BookCatalogueState>
-        (removeBookFromWishlistWithUsername(username), wishList.isbn, {
+        (removeBookFromWishlistWithUsername(authstore.username), wishList.isbn, {
           headers: {
-            Authorization: accessToken,
+            Authorization: authstore.token,
             'Content-Type': 'application/json'
           }
         })

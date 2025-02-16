@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import type { BookCatalogue, } from '@/model/model.ts'
-import { accessToken, username } from '@/Utils/AppUtils.ts'
-import { addBookToCatalogueItem, api, getCatalogueItemsforUser, removeBookFromCatalogueItem } from '@/api/apis.ts'
+import { addBookToCatalogueItem, getCatalogueItemsforUser, removeBookFromCatalogueItem } from '@/api/apis.ts'
 import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 
@@ -20,10 +19,12 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
   }),
   actions: {
     async getCheckoutItemsforUser() {
+
       try {
-        const response = await api.get<BookCatalogue[]>(getCatalogueItemsforUser(username), {
+        const authStore = useAuthStore();
+        const response = await axios.get<BookCatalogue[]>(getCatalogueItemsforUser(authStore.username), {
               headers: {
-               Authorization: accessToken
+               Authorization: authStore.token
               }
         })
         this.$patch({
@@ -41,16 +42,12 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
       }
     },
     async addBookToCheckoutItem(bookIsbn: number) {
-
       const authStore = useAuthStore()
-
-      const username = String(authStore.username)
-
       try {
-        const response = await api.post<string>
-        (addBookToCatalogueItem(username, bookIsbn), bookIsbn, {
+        const response = await axios.post<string>
+        (addBookToCatalogueItem(authStore.username, bookIsbn), bookIsbn, {
           headers: {
-            Authorization: accessToken,
+            Authorization: authStore.token,
           }
         })
         this.$patch({
@@ -68,11 +65,16 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
       }
     },
     async removeBookFromCheckoutItem(bookIsbn: number) {
-      const username = localStorage.getItem('username')
-      try {
 
-        const response = await api.post<string>
-        (removeBookFromCatalogueItem(username, bookIsbn), bookIsbn)
+       try {
+         const authStore = useAuthStore();
+
+        const response = await axios.post<string>
+        (removeBookFromCatalogueItem(authStore.username, bookIsbn), bookIsbn, {
+          headers: {
+            Authorization: authStore.token,
+          }
+        })
         this.$patch({
           statusCode: response.status,
           statusText: String(response.data),

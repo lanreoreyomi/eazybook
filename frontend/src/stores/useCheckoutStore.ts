@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { accessToken, username } from '@/Utils/AppUtils.ts'
-import {
-  api,
+ import {
   getAllCheckoutForUser,
   processCheckout, returnCheckout
 } from '@/api/apis.ts'
 import type { CheckedOutHistory } from '@/model/model.ts'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 
 interface CheckoutState {
@@ -27,11 +26,12 @@ export const useCheckoutStore = defineStore('checkout', {
   }),
   actions: {
     async checkBookOut(bookIsbn: number) {
-        try {
+      const authStore = useAuthStore();
+      try {
         const response =
-          await api.post<string>(processCheckout(username, bookIsbn), null, {
+          await axios.post<string>(processCheckout(authStore.username, bookIsbn), null, {
           headers: {
-            Authorization: accessToken
+            Authorization: authStore.token,
           }
         })
           this.$patch({
@@ -48,12 +48,15 @@ export const useCheckoutStore = defineStore('checkout', {
           }
       }
     },
+
     async returnBook(bookIsbn: number) {
+      const authStore = useAuthStore();
+
       try {
         const response =
-          await api.post<string>(returnCheckout(username, bookIsbn), null, {
+          await axios.post<string>(returnCheckout(authStore.username, bookIsbn), null, {
             headers: {
-              Authorization: accessToken
+              Authorization: authStore.token
             }
           })
         console.log(response.status)
@@ -86,10 +89,12 @@ export const useCheckedOutHistory = defineStore('CheckedOutHistory', {
   }),
 actions: {
   async getAllCheckoutHistoryForUser() {
+    const authStore = useAuthStore();
     try {
-        const response = await api.get<CheckedOutHistory[]>(getAllCheckoutForUser(username), {
+        const response = await axios.get<CheckedOutHistory[]>
+        (getAllCheckoutForUser(authStore.username), {
         headers: {
-          Authorization: accessToken
+          Authorization: authStore.token,
         }
       })
       this.$patch({

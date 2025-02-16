@@ -13,10 +13,6 @@ public class CorsConfig implements WebMvcConfigurer {
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**")  // Allow all endpoints
         .allowedOrigins(
-            "http://ec2-3-87-219-132.compute-1.amazonaws.com",
-            "http://ec2-34-227-14-199.compute-1.amazonaws.com",
-            "http://ec2-3-83-107-213.compute-1.amazonaws.com",
-            "http://ec2-3-92-184-236.compute-1.amazonaws.com",
             "http://localhost:5173"
         ) // Frontend URL(s)
         .allowedMethods("*")

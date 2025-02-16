@@ -1,7 +1,7 @@
 package com.eazybooks.authentication.controller;
 
 
- import com.eazybooks.authentication.model.LoginRequest;
+import com.eazybooks.authentication.model.LoginRequest;
 import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
 import com.eazybooks.authentication.model.UserDto.CreateAccountRequest;
 import com.eazybooks.authentication.model.VerifyToken;

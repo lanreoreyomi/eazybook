@@ -1,8 +1,8 @@
 import type { CheckoutStats } from '@/model/model.ts'
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { accessToken } from '@/Utils/AppUtils.ts'
-import { api, CHECKOUTSTATS } from '@/api/apis.ts'
+ import { CHECKOUTSTATS } from '@/api/apis.ts'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 interface stats {
   stats: CheckoutStats | null,
@@ -21,10 +21,13 @@ export const useCheckoutStatsStore
 
   actions: {
     async fetchCheckoutStats (): Promise<void> {
+
+      const authStore = useAuthStore();
       try {
-        const response = await api.get<CheckoutStats>(CHECKOUTSTATS, {
+
+        const response = await axios.get<CheckoutStats>(CHECKOUTSTATS, {
           headers: {
-            Authorization: accessToken
+            Authorization: authStore.token
           }
         })
 

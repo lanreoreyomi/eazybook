@@ -25,7 +25,7 @@ const router = createRouter({
       component: LogIn,
     },
      {
-       path: '/bookcatalogue/',
+       path: '/bookcatalogue',
        name: 'bookcatalogue',
        component: CatalogueView,
      },

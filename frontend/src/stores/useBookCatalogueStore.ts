@@ -1,10 +1,10 @@
 // stores/BookCatalogueState.ts
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { addBookToCatalogueWithUsername, api, BOOKCATALOGUE } from '@/api/apis.ts'
-import { accessToken, username } from '@/Utils/AppUtils.ts'
+import { addBookToCatalogueWithUsername, BOOKCATALOGUE } from '@/api/apis.ts'
 import type { BookCatalogue } from '@/model/model.ts'
 import router from '@/router'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 interface BookCatalogueState {
   bookCatalogue: BookCatalogue[]; // Array of BookCatalogue
@@ -35,8 +35,14 @@ export const useBookCatalogueStore = defineStore('bookCatalogue', {
     async getAllBookCatalogues() {
       this.isLoading = true;
 
+      const authStore = useAuthStore()
+
       try {
-        const response = await api.get<BookCatalogue[]>(BOOKCATALOGUE)
+        const response = await axios.get<BookCatalogue[]>(BOOKCATALOGUE, {
+          headers: {
+            Authorization: authStore.token
+          }
+        })
 
         this.$patch({
           statusCode: response.status,
@@ -75,19 +81,21 @@ export const useAddBookCatalogueStore = defineStore('addBookCatalogue', {
   }),
   actions: {
     async addBookToCatalogue() {
+      const authStore = useAuthStore()
+
       try {
-        const response = await api.post<AddBookCatalogueState>(addBookToCatalogueWithUsername(username),
+        const response = await axios.post<AddBookCatalogueState>
+        (addBookToCatalogueWithUsername(authStore.username),
           this.addBookCatalogue, {
           headers: {
-            Authorization: accessToken
+            Authorization: authStore.token,
           }
         })
         // Handle successful user creation
         this.$patch({
           statusCode: response.status,
           statusText : String(response.data)
-          // Ensure statusText is a string
-        })
+         })
       } catch (error) {
         if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;

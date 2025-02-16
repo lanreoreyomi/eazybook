@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { api, LOGOUT } from '@/api/apis.ts'
+import { LOGOUT } from '@/api/apis.ts'
 import { defineStore } from 'pinia';
-import { accessToken } from '@/Utils/AppUtils.ts';
+ import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 interface LogOutState {
   loggedOut: '';
@@ -15,10 +15,12 @@ export const useLogOutStore = defineStore('logout', {
   actions: {
 
     async LogOut() {
+
+      const authStore = useAuthStore();
       try {
-        const response = await api.get<LogOutState>(LOGOUT, {
+        const response = await axios.get<LogOutState>(LOGOUT, {
           headers: {
-            Authorization: accessToken
+            Authorization: authStore.token
           }
         });
 
@@ -27,8 +29,10 @@ export const useLogOutStore = defineStore('logout', {
         });
 
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         localStorage.removeItem('username');
+
+        authStore.username=null;
+        authStore.token = null;
 
       } catch (error) {
         if (axios.isAxiosError(error)) {

@@ -9,6 +9,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.client.RestTemplate;
+
 @Controller
 @RequestMapping("/bookcatalogue/")
  public class BookCatalogueController {
@@ -30,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
       VerificationService verificationService) {
     this.bookCatalogueService = bookCatalogueService;
     this.verificationService = verificationService;
-  }
+   }
 
   @PostMapping("{username}/addbook")
   public ResponseEntity<String> addBookToCatalogues(@PathVariable String username,

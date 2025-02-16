@@ -1,26 +1,3 @@
-import axios from 'axios'
-import { useAuthStore } from '@/stores/useAuthStore.ts'
-
-const backEndUrl = 'http://ec2-34-227-14-199.compute-1.amazonaws.com';
-
-
-const createAxiosInstance = () => {
-  const axiosInstance = axios.create({
-    baseURL: backEndUrl,
-  });
-
-  axiosInstance.interceptors.request.use(config => {
-    const authStore = useAuthStore();
-    if (authStore.token) {
-      config.headers.Authorization = authStore.token; // Add "Bearer " prefix
-     }
-    return config;
-  });
-
-  return axiosInstance;
-};
-
-export const api = createAxiosInstance();
 
 export const CREATEACCOUUNT = "/auth/create-account"
 export const LOGIN =  "/auth/login"
