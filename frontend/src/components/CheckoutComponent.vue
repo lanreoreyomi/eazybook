@@ -3,7 +3,7 @@
   <div class="checkout-container" v-for="(book, index) in books" :key="index">
     <div class="checkout_info">
       <div class="book_img">
-        <img class="book_card-img" :src="`https://eazybooks-images.s3.us-east-1.amazonaws.com/${index + 1}-min.jpg`" alt="book_img" />
+        <img :src="`/src/assets/images/${index + 1}-min.jpg`" alt="lib_img" />
       </div>
       <div class="checkout_details">
         <ul>
@@ -14,7 +14,7 @@
           <li class="book_card_links">Book Publication year: {{book.publicationYear}} </li>
         </ul>
         <div class="checkout_button">
-          <button class="checkout_remove-list" @click="removeFromCheckout(index)">Remove from cart</button>
+          <button class="checkout_remove-list" @click="removeBookFromCheckout(book)">Remove from cart</button>
           <button class="checkout-checkout" @click="checkBookout(book)">Complete checkout</button>
         </div>
       </div>
@@ -27,6 +27,7 @@
 import { computed, type PropType } from 'vue'
 import type { BookCatalogue } from '@/model/model.ts'
 import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
+import router from '@/router'
 
 export default {
   name: 'CheckoutComponent',
@@ -36,33 +37,38 @@ export default {
       required: true // Make the prop required
     }
   },
-  emits: ['completeCheckout', 'removeBookFromCheckout'],
+  emits: ['completeCheckout'],
 
   setup(props, {emit}) {
     const checkoutStore = useCheckoutItemStore();
 
-   const removeFromCheckout = async (index: number): Promise<void> => {
-     emit('removeBookFromCheckout', index);
+    const removeBookFromCheckout = async (book: BookCatalogue): Promise<void> => {
+      if (book != null) {
+        try{
+          await checkoutStore.removeBookFromCheckoutItem(book.isbn);
+          router.go(0)
+        }catch (e) {
 
-   }
+        }
+      }
+    }
     const checkBookout = (book: BookCatalogue) => {
       emit('completeCheckout', book);
     };
-
     const confirmationText  = computed(() => {
       return checkoutStore.statusText
     });
 
     return{
-      removeFromCheckout,
+      removeBookFromCheckout,
       confirmationText,
-      checkBookout,
+      checkBookout
     }
   }
 }
 </script>
 <style scoped lang="scss">
-@use '/src/assets/scss/colors';
+@use '/src/assets/scss/colors.scss';
 
 html,
 body {

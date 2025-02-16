@@ -1,8 +1,8 @@
 import type { CheckoutStats } from '@/model/model.ts'
 import { defineStore } from 'pinia'
 import axios from 'axios'
- import { CHECKOUTSTATS } from '@/api/apis.ts'
-import { useAuthStore } from '@/stores/useAuthStore.ts'
+import { accessToken } from '@/Utils/AppUtils.ts'
+import { CHECKOUTSTATS } from '@/api/apis.ts'
 
 interface stats {
   stats: CheckoutStats | null,
@@ -21,24 +21,21 @@ export const useCheckoutStatsStore
 
   actions: {
     async fetchCheckoutStats (): Promise<void> {
-
-      const authStore = useAuthStore();
       try {
-
         const response = await axios.get<CheckoutStats>(CHECKOUTSTATS, {
           headers: {
-            Authorization: authStore.token
+            Authorization: accessToken
           }
         })
-
+        // Handle successful user creation
         this.$patch({
           stats: response.data,
           statusCode : response.status
         })
       }catch (error) {
-         if (axios.isAxiosError(error)) {
+        if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
-           this.statusText = error.response?.data || 'Internal Server Error';
+          this.statusText = error.response?.data || 'Internal Server Error';
         } else {
           this.statusCode = 500;
           this.statusText = 'An unexpected error occurred';

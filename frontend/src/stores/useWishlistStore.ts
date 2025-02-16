@@ -2,12 +2,8 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import type { BookCatalogue, WishList } from '@/model/model.ts'
- import {
-  addBookToWishlistWithUsername,
-  getWishListForUser,
-  removeBookFromWishlistWithUsername
-} from '@/api/apis.ts'
-import { useAuthStore } from '@/stores/useAuthStore.ts'
+import { accessToken, username } from '@/Utils/AppUtils.ts'
+import { addBookToWishlistWithUsername, getWishListForUser, removeBookFromWishlistWithUsername } from '@/api/apis.ts'
 
 interface WishlistState {
   username: string;
@@ -16,31 +12,28 @@ interface WishlistState {
   statusText: string,
 }
 interface BookCatalogueState {
-  bookCatalogue: BookCatalogue[];
+  bookCatalogue: BookCatalogue[]; // Array of BookCatalogue
   statusCode: number;
   statusText: string;
 }
 export const useWishlistStore = defineStore('wishlist', {
   state: (): WishlistState => ({
-      username: '',
-      wishList: [],
-     statusCode: 0,
+    username: '',
+    wishList: [],
+    statusCode: 0,
     statusText: '',
   }),
 
   actions: {
     async getUserWishList() {
-      const authstore = useAuthStore()
-       // Access loggedInUser *after* ensuring the user is logged in
-
+      // Access loggedInUser *after* ensuring the user is logged in
       try {
         const response =
-          await axios.get<WishList[]>(getWishListForUser(String(authstore.username)), {
+          await axios.get<WishList[]>(getWishListForUser(username), {
             headers: {
-              Authorization: authstore.token,
+              Authorization: accessToken
             }
           })
-
         this.$patch({
           statusCode: response.status,
           wishList: response.data, // Ensure statusText is a string
@@ -48,23 +41,24 @@ export const useWishlistStore = defineStore('wishlist', {
       } catch (error) {
         if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
-          this.statusText = error.response?.data || 'Internal Server Error';
+          this.statusText = error.response?.statusText || 'Internal Server Error';
         } else {
-
           this.statusCode = 500;
           this.statusText = 'An unexpected error occurred';
         }
       }
     },
-
+    setCurrentUser(username: string) {
+      this.username = username;
+    },
     async addBookToWishlist(book: BookCatalogue) {
-      const authstore = useAuthStore()
 
-       try {
+      try {
+
         const response = await axios.post<BookCatalogueState>
-        (addBookToWishlistWithUsername(authstore.username), book.isbn, {
+        (addBookToWishlistWithUsername(username), book.isbn, {
           headers: {
-            Authorization: authstore.token,
+            Authorization: accessToken,
             'Content-Type': 'application/json'
           }
         })
@@ -74,24 +68,23 @@ export const useWishlistStore = defineStore('wishlist', {
         })
 
       } catch (error) {
-         if (axios.isAxiosError(error)) {
-           this.statusCode = error.response?.status || 500;
-           this.statusText = error.response?.data || 'Internal Server Error';
-         } else {
-           this.statusCode = 500;
-           this.statusText = 'An unexpected error occurred';
-         }
+        if (axios.isAxiosError(error)) {
+          this.statusCode = error.response?.status || 500;
+          this.statusText = error.response?.statusText || 'Internal Server Error';
+        } else {
+          this.statusCode = 500;
+          this.statusText = 'An unexpected error occurred';
+        }
       }
     },
     async removeBookToWishlist(wishList: WishList) {
 
-      const authstore = useAuthStore();
-
+      const username = localStorage.getItem('username')
       try {
         const response = await axios.post<BookCatalogueState>
-        (removeBookFromWishlistWithUsername(authstore.username), wishList.isbn, {
+        (removeBookFromWishlistWithUsername(username), wishList.isbn, {
           headers: {
-            Authorization: authstore.token,
+            Authorization: accessToken,
             'Content-Type': 'application/json'
           }
         })
@@ -104,7 +97,7 @@ export const useWishlistStore = defineStore('wishlist', {
       } catch (error) {
         if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
-          this.statusText = error.response?.data || 'Internal Server Error';
+          this.statusText = error.response?.statusText || 'Internal Server Error';
         } else {
           this.statusCode = 500;
           this.statusText = 'An unexpected error occurred';
@@ -114,6 +107,6 @@ export const useWishlistStore = defineStore('wishlist', {
   },
 
   getters: {
-      getCurrentUser: (state) => state.username
+    getCurrentUser: (state) => state.username
   },
 })

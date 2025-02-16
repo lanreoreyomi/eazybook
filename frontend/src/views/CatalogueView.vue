@@ -2,7 +2,7 @@
 
   <div class="stats" v-if="checkoutStats">
     <p> <span style='font-size:20px;'>&#127775;</span>
-       {{checkoutStats.title}} is hot right now, Checkout out <span style='font-weight:bolder;'></span>{{checkoutStats?.totalCheckout}}  times</p>
+      {{checkoutStats.title}} is hot right now, Checkout out <span style='font-weight:bolder;'></span>{{checkoutStats?.totalCheckout}}  times</p>
   </div>
   <div v-if="isCatalogueLoaded" id="catalogue_component">
     <div id="wishlist_control" v-if="wishListStatusText">
@@ -18,17 +18,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent,onMounted, ref } from 'vue'
+import { computed, defineComponent, onBeforeMount, ref } from 'vue'
 import { useBookCatalogueStore } from '@/stores/useBookCatalogueStore.ts'
 import type { BookCatalogue } from '@/model/model.ts'
 import BookComponent from '@/components/BookComponent.vue'
 import { useWishlistStore } from '@/stores/useWishlistStore.ts'
 import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
 import { useCheckoutStatsStore } from '@/stores/useCheckoutStatsStore.ts'
-import { useAuthStore } from '@/stores/useAuthStore.ts'
-import router from '@/router'
-import { useLogInStore } from '@/stores/useLogInStore.ts'
-   export default defineComponent({
+export default defineComponent({
   name: 'CatalogueView',
   components: { BookComponent },
 
@@ -36,11 +33,9 @@ import { useLogInStore } from '@/stores/useLogInStore.ts'
     const confirmation = ref('')
     const bookCatalogueStore = useBookCatalogueStore()
     const checkoutStore = useCheckoutItemStore()
-    const books = ref<BookCatalogue[]>([]);
-
+    const books = ref<BookCatalogue[]>([])
     const wishlistStore= useWishlistStore();
-    const checkoutStatsStore = useCheckoutStatsStore();
-    const isCatalogueLoaded = ref(false)
+    const checkoutStatsStore = useCheckoutStatsStore()
     const bookCheckout = (book: BookCatalogue): void=>{
       if(book.quantityForRent > 0){
         checkoutStore.addBookToCheckoutItem(book.isbn);
@@ -48,6 +43,7 @@ import { useLogInStore } from '@/stores/useLogInStore.ts'
     }
     const checkoutStats = computed(() => checkoutStatsStore.stats)
     const displayBook = (book: BookCatalogue): void => {addBookToWishList(book)}
+    const isCatalogueLoaded = computed(() => bookCatalogueStore.statusCode === 200)
 
     const addBookToWishList = (book: BookCatalogue): void => {
       wishlistStore.addBookToWishlist(book);
@@ -69,35 +65,12 @@ import { useLogInStore } from '@/stores/useLogInStore.ts'
       return text;
     })
 
-    onMounted( async () => {
-      const authStore = useAuthStore();
-      const checkAuth = useLogInStore().checkAuth();
-
-        if (!checkAuth && !authStore.username) {
-          await router.push('/')
-          return;
-      }
-
-
-      if (!authStore.token) {
-        authStore.token = localStorage.getItem("accessToken");
-      }
-      if (!authStore.username) {
-        authStore.username = localStorage.getItem("username");
-      }
-
-      if (authStore.token && authStore.username) {
-        await bookCatalogueStore.getAllBookCatalogues()
-        await checkoutStatsStore.fetchCheckoutStats();
-        books.value = bookCatalogueStore.bookCatalogue
-
-        await bookCatalogueStore.getAllBookCatalogues();
-        await checkoutStatsStore.fetchCheckoutStats();
-        books.value = bookCatalogueStore.bookCatalogue;
-        isCatalogueLoaded.value = computed(() => bookCatalogueStore.statusCode === 200).value
-      }
-
+    onBeforeMount(async () => {
+      await bookCatalogueStore.getAllBookCatalogues()
+      await checkoutStatsStore.fetchCheckoutStats();
+      books.value = bookCatalogueStore.bookCatalogue
     })
+
     return {
       isCatalogueLoaded,
       books,
@@ -107,7 +80,7 @@ import { useLogInStore } from '@/stores/useLogInStore.ts'
       wishListStatusText,
       checkoutStatusText,
       checkoutStats
-      }
+    }
   },
 })
 </script>
@@ -117,8 +90,8 @@ import { useLogInStore } from '@/stores/useLogInStore.ts'
 .stats{
   padding: 8px;
   margin: 20px auto;
-   width: 60%;
-background-color: rgba(211, 211, 211, 0.36);
+  width: 60%;
+  background-color: rgba(211, 211, 211, 0.36);
   border-radius: 0.5rem;
   p{
     text-align: center;
@@ -148,7 +121,7 @@ background-color: rgba(211, 211, 211, 0.36);
     justify-content: center;
     margin: 20px auto;
     #addedToWishlist {
-       width: 90%;
+      width: 90%;
       padding-top: 10px;
       font-weight: bold;
 

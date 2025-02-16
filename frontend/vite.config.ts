@@ -4,10 +4,8 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
- // const backEndUrl = 'http://ec2-34-227-14-199.compute-1.amazonaws.com';
-
 // https://vite.dev/config/
- export default defineConfig({
+export default defineConfig({
   plugins: [
     vue(),
     vueDevTools(),
@@ -17,40 +15,40 @@ import vueDevTools from 'vite-plugin-vue-devtools'
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
-   server: {
-     proxy: {
-       '/auth/create-account': {
-         target: 'http://eazybooks.com:9084',
-         changeOrigin: true
-       },
-       '/auth/login': {
-         target: 'http://eazybooks.com:9084',
-         changeOrigin: true
-       },
-       '/auth/logout': {
-         target: 'http://eazybooks.com:9084',
-         changeOrigin: true
-       },
-       '/bookcatalogue': {
-         target: 'http://eazybooks.com:9189',
-         changeOrigin: true
-       },
-       '/stats': {
-         target: 'http://eazybooks.com:9189',
-         changeOrigin: true
-       },
-       '/wishlist/': {
-         target: 'http://eazybooks.com:8017',
-         changeOrigin: true
-       },
-       '/checkoutitems/': {
-         target: 'http://eazybooks.com:9189',
-         changeOrigin: true
-       },
-       '/checkout/': {
-         target: 'http://eazybooks.com:9189',
-         changeOrigin: true
-       }
-     }
-   }
+  server: {
+    proxy: {
+      '/auth/create-account': {
+        target: 'http://eazybooks.com:9084',
+        changeOrigin: true
+      },
+      '/auth/login': {
+        target: 'http://eazybooks.com:9084',
+        changeOrigin: true
+      },
+      '/auth/logout': {
+        target: 'http://eazybooks.com:9084',
+        changeOrigin: true
+      },
+      '/bookcatalogue': {
+        target: 'http://eazybooks.com:9189',
+        changeOrigin: true
+      },
+      '/stats': {
+        target: 'http://eazybooks.com:9189',
+        changeOrigin: true
+      },
+      '/wishlist/': {
+        target: 'http://eazybooks.com:8017',
+        changeOrigin: true
+      },
+      '/checkoutitems/': {
+        target: 'http://eazybooks.com:9189',
+        changeOrigin: true
+      },
+      '/checkout/': {
+        target: 'http://eazybooks.com:9189',
+        changeOrigin: true
+      }
+    }
+  }
 })

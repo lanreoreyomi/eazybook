@@ -42,7 +42,7 @@ export default {
     const isSuccessful = computed(
       () =>{
         if (userStore.statusCode === 201) {
-        router.push("/login");
+          router.push("/login");
           return true
         }else {
           return false
@@ -74,7 +74,7 @@ body,
   display: unset;
 }
 #create-account-form {
-   padding: 20px;
+  padding: 20px;
   justify-items: center;
   margin: 0 auto;
   div {
@@ -96,7 +96,7 @@ body,
       input {
         width: 100%;
         padding: 15px;
-         border: 1px solid colors.$text-color;
+        border: 1px solid colors.$text-color;
         border-radius: 0.5rem;
         margin: 10px 0;
         font-size: 20px;

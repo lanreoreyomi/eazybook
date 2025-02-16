@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import type { BookCatalogue, } from '@/model/model.ts'
+import { accessToken, username } from '@/Utils/AppUtils.ts'
 import { addBookToCatalogueItem, getCatalogueItemsforUser, removeBookFromCatalogueItem } from '@/api/apis.ts'
-import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 
 //for getting all catalgues
@@ -18,18 +18,16 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
     statusText: '',
   }),
   actions: {
-    async getCheckoutItemsforUser() {
-
+    async getCatalogueItemsforUser() {
       try {
-        const authStore = useAuthStore();
-        const response = await axios.get<BookCatalogue[]>(getCatalogueItemsforUser(authStore.username), {
-              headers: {
-               Authorization: authStore.token
-              }
+        const response = await axios.get<BookCatalogue[]>(getCatalogueItemsforUser(username), {
+          headers: {
+            Authorization: accessToken
+          }
         })
         this.$patch({
           statusCode: response.status,
-          checkoutItems: response.data,
+          checkoutItems: response.data, // Ensure statusText is a string
         })
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -42,12 +40,15 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
       }
     },
     async addBookToCheckoutItem(bookIsbn: number) {
-      const authStore = useAuthStore()
+
+      const username = localStorage.getItem('username')
       try {
+
         const response = await axios.post<string>
-        (addBookToCatalogueItem(authStore.username, bookIsbn), bookIsbn, {
+        (addBookToCatalogueItem(username, bookIsbn), bookIsbn, {
           headers: {
-            Authorization: authStore.token,
+            Authorization: accessToken,
+            'Content-Type': 'application/json'
           }
         })
         this.$patch({
@@ -65,14 +66,14 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
       }
     },
     async removeBookFromCheckoutItem(bookIsbn: number) {
-
-       try {
-         const authStore = useAuthStore();
+      const username = localStorage.getItem('username')
+      try {
 
         const response = await axios.post<string>
-        (removeBookFromCatalogueItem(authStore.username, bookIsbn), bookIsbn, {
+        (removeBookFromCatalogueItem(username, bookIsbn), bookIsbn, {
           headers: {
-            Authorization: authStore.token,
+            Authorization: accessToken,
+            'Content-Type': 'application/json'
           }
         })
         this.$patch({
@@ -83,7 +84,7 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
       } catch (error) {
         if (axios.isAxiosError(error)) {
           this.statusCode = error.response?.status || 500;
-          this.statusText = error.response?.data || 'Internal Server Error';
+          this.statusText = error.response?.statusText || 'Internal Server Error';
         } else {
           this.statusCode = 500;
           this.statusText = 'An unexpected error occurred';

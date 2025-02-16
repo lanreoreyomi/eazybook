@@ -2,11 +2,12 @@ package com.eazybooks.bookcatalogue.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
- import jakarta.persistence.GenerationType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.springframework.boot.context.properties.bind.Name;
-
 @Entity
 @Table(name = "checkout_stats")
 public class CheckoutStats {
@@ -14,12 +15,12 @@ public class CheckoutStats {
   @Id
   @Column(nullable = false, unique = true)
   @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
-   private String id;
+  private String id;
   @Column(nullable = false)
   @Name("total_checkout")
-   private int totalCheckout;
+  private int totalCheckout;
   @Name("book_isbn")
-   private Long bookIsbn;
+  private Long bookIsbn;
   @Name("title")
   private String title;
   public String getTitle() {

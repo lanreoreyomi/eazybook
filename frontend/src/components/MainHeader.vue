@@ -3,7 +3,7 @@
     <nav>
       <ul>
         <li id="welcome_username"  v-if="checkAuthenticated()">
-         <p v-if="userProfile !=null"> Welcome back {{ userProfile}}</p>
+          <p v-if="loggedInUser !=null"> Welcome back {{ loggedInUser.toUpperCase() }}</p>
         </li>
         <li>
           <router-link to="/" v-if="!checkAuthenticated()">Home</router-link>
@@ -15,14 +15,14 @@
           <router-link to="/create-account">Create Account</router-link>
         </li>
         <li v-if="checkAuthenticated()">
-          <router-link to="/bookcatalogue/">Catalogue</router-link>
+          <router-link to="/catalogue">Catalogue</router-link>
         </li>
 
         <li id="wishList" v-if="checkAuthenticated()">
-          <router-link to="/wishlist/">WishList</router-link>
+          <router-link to="/wishlist">WishList</router-link>
         </li>
         <li v-if="checkAuthenticated()">
-          <router-link to="/checkout/"> Checkout</router-link>
+          <router-link to="/checkout"> Checkout</router-link>
         </li>
         <li id="add_book" v-if="checkAuthenticated()">
           <button @click="toggleFormModal">Add Book</button>
@@ -37,7 +37,7 @@
     <form @submit.prevent="addNewBook">
       <div id="form_title">
         <p id="form_title_header">Add New Book</p>
-         <p id="close_modal" @click="toggleFormModal">close</p>
+        <p id="close_modal" @click="toggleFormModal">close</p>
       </div>
       <div>
         <label for="title">Title:</label>
@@ -62,7 +62,7 @@
       </div>
       <div>
         <label for="available">Available for Rent:</label>
-         <select id="available" name="available" required  v-model="book.available">
+        <select id="available" name="available" required  v-model="book.available">
           <option value="True" selected>True</option>
           <option value="False">False</option>
         </select>
@@ -80,9 +80,10 @@
 <script lang="ts">
 import { useLogOutStore } from '@/stores/useLogOutStore.ts'
 import router from '@/router'
- import { computed, onMounted, ref } from 'vue'
-import { useAddBookCatalogueStore } from '@/stores/useBookCatalogueStore.ts'
 import { useLogInStore } from '@/stores/useLogInStore.ts'
+import { computed, onMounted, ref } from 'vue'
+import { useAddBookCatalogueStore } from '@/stores/useBookCatalogueStore.ts'
+import { username } from '../Utils/AppUtils.ts'
 
 export default {
   name: 'MainHeader',
@@ -91,33 +92,29 @@ export default {
     const isModalOpen = ref(false)
     const catalogueStore = useAddBookCatalogueStore()
     const logoutStore = useLogOutStore()
-     const logInStore = useLogInStore()
+    const logInStore = useLogInStore()
     const userProfile = ref('')
     const logOut = async () => {
       await logoutStore.LogOut()
       await router.push('/')
-       router.go(0)
+      router.go(0)
     }
     const getStatusText =computed(()=>catalogueStore.statusText);
-    const toggleFormModal = () => isModalOpen.value === true ? (isModalOpen.value = false) : (isModalOpen.value = true)
+    const toggleFormModal = () =>
+      isModalOpen.value === true ? (isModalOpen.value = false) : (isModalOpen.value = true)
 
     const checkAuthenticated = () => {
       const checkAuth = logInStore.checkAuth()
       if (logInStore.statusCode === 200) {
-        userProfile.value = String(localStorage.getItem('username'))
-        router.push('/bookcatalogue/')
+        userProfile.value = JSON.stringify(localStorage.getItem('username'))
+        router.push('/catalogue')
         router.go(0)
       }
       return checkAuth
     }
     onMounted(() => {
-      userProfile.value = String(localStorage.getItem('username'))
       if (!checkAuthenticated()) {
         router.push('/')
-        return;
-      }
-       if (checkAuthenticated()) {
-        // router.go(0)
         return;
       }
     })
@@ -130,7 +127,7 @@ export default {
       toggleFormModal,
       isModalOpen,
       statusText: getStatusText,
-
+      loggedInUser: username,
     }
   },
 }
@@ -146,7 +143,6 @@ body,
   width: 100%;
   height: 100vh;
   display: unset;
-
 }
 
 header {
@@ -154,13 +150,12 @@ header {
   width: 100%;
   background-color: white;
   z-index: 99999;
-
   nav {
     width: 100%;
     margin-top: 1rem;
     text-align: center;
     ul {
-      padding: 15px;
+      padding: 0;
       margin: 0;
       display: flex;
       text-align: center;
@@ -179,15 +174,15 @@ header {
       }
       #welcome_username{
         color: colors.$accent-color;
-       p{
-         border-radius: 2rem;
-         padding: 10px;
-         font-weight: bolder;
-
-       }
+        p{
+          border-radius: 2rem;
+          padding: 10px;
+          font-weight: bolder;
+          background: #ecf0f1;
+        }
       }
       #signup {
-        padding-left: 55px;
+        padding: 15px;
         a {
           padding: 15px;
           color: colors.$white-color;
@@ -197,11 +192,15 @@ header {
       }
 
       #log_in {
-        padding-left: 55px;
-
+        padding: 15px;
+        a {
+          border-radius: 0.5rem;
+          padding: 15px;
+          border: 0.1rem solid colors.$text-color;
+          color: colors.$text-color;
+        }
       }
       #logout {
-        padding-left: 55px;
         cursor: pointer;
         button {
           width: 100px;
@@ -234,7 +233,6 @@ header {
         }
       }
     }
-
   }
 
   #add_new_book {
@@ -327,17 +325,6 @@ header {
         border-radius: 0.5rem;
       }
     }
-  }
-  .router-link-exact-active {
-
-    padding: 20px;
-    font-weight: bolder;
-    background: colors.$accent-color;
-
-    padding: 15px;
-    color: colors.$white-color;
-
-    border-radius: 0.5rem;
   }
 }
 </style>
