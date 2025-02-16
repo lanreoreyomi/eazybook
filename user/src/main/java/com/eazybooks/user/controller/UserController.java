@@ -3,22 +3,12 @@ package com.eazybooks.user.controller;
 import com.eazybooks.user.DTO.UsersDto;
 import com.eazybooks.user.model.CreateAccountRequest;
 import com.eazybooks.user.model.User;
-import com.eazybooks.user.model.VerifyToken;
+import com.eazybooks.user.service.VerificationService;
 import com.eazybooks.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.client.RestTemplate;
 
 @Controller
 @RequestMapping("/user")
@@ -35,22 +24,13 @@ public class UserController {
 
   private static final Logger logger = LoggerFactory.getLogger(UserController.class);
   UserService userService;
-  private DiscoveryClient discoveryClient;
-  RestTemplate restTemplate = new RestTemplate();
 
-  public UserController(UserService userService, DiscoveryClient discoveryClient) {
+  private final VerificationService verificationService;
+
+
+  public UserController(UserService userService, VerificationService verificationService) {
     this.userService = userService;
-    this.discoveryClient = discoveryClient;
-  }
-
-  public URI serviceUrl(String serviceId) {
-    List<ServiceInstance> list = discoveryClient.getInstances(serviceId);
-    if (list != null && list.size() > 0) {
-
-      System.out.println(list.get(0).getUri());
-      return list.get(0).getUri();
-    }
-    return null;
+     this.verificationService = verificationService;
   }
 
   @GetMapping("/userid/{id}")
@@ -83,7 +63,7 @@ public class UserController {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    final ResponseEntity<Boolean> verified = verifyToken(request);
+    final ResponseEntity<Boolean> verified = verificationService.verifyUserToken(request, null);
 
     if (!Boolean.TRUE.equals(verified.getBody())) {
       logger.error("Error validating token");
@@ -136,7 +116,6 @@ public class UserController {
       @RequestBody UsersDto usersDto) {
     logger.info("Received request to get user with id: {}", id);
 
-    //TODO: remove Ids from the loggers
     try {
       final User user = userService.findById(id);
 
@@ -174,9 +153,7 @@ public class UserController {
       @RequestBody UsersDto usersDto, HttpServletRequest request) {
     logger.info("Received request to get user with username: {}", username);
 
-
-    final ResponseEntity<Boolean> verified = verifyToken(request);
-
+    final ResponseEntity<Boolean> verified = verificationService.verifyUserToken(request, null);
     if (!Boolean.TRUE.equals(verified.getBody())) {
       logger.error("Error validating token");
       return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
@@ -191,23 +168,19 @@ public class UserController {
         return ResponseEntity.notFound().build();
       }
 
-      User userToUpdate = userByUsername;
-
       // Update user details (excluding password and salt for now)
-      userToUpdate.setEmail(usersDto.getEmail());
-      userToUpdate.setLastname(usersDto.getLastname());
-      userToUpdate.setFirstname(usersDto.getFirstname());
+       userByUsername.setEmail(usersDto.getEmail());
+       userByUsername.setLastname(usersDto.getLastname());
+       userByUsername.setFirstname(usersDto.getFirstname());
 
-      User updatedUser = userService.updateUser(userToUpdate);
+      User updatedUser = userService.updateUser(userByUsername);
       logger.info("Successfully updated user with username: {}", username);
       UsersDto updatedUsersDto = new UsersDto();
 
       updatedUsersDto.setFirstname(updatedUser.getFirstname());
       updatedUsersDto.setLastname(updatedUser.getLastname());
       updatedUsersDto.setEmail(updatedUser.getEmail());
-
       return new ResponseEntity<>("User successfully updated", HttpStatus.OK);  // Or return the actual user data
-
 
     } catch (Exception e) {
       logger.error("Error while updating user with username: {}", username, e);
@@ -225,13 +198,12 @@ public class UserController {
       return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    final ResponseEntity<Boolean> verified = verifyToken(request);
+    final ResponseEntity<Boolean> verified = verificationService.verifyUserToken(request, null);
 
     if (!Boolean.TRUE.equals(verified.getBody())) {
       logger.error("Error validating token");
       return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
     }
-
 
     if (userService.findByUsername(createAccountRequest.getUsername()) != null) {
       logger.warn("Username '{}' is already taken", createAccountRequest.getUsername());
@@ -243,9 +215,7 @@ public class UserController {
       return new ResponseEntity<>("Email already exists", HttpStatus.CONFLICT);
     }
 
-
     try {
-
       User user = new User();
       user.setUserId(createAccountRequest.getUserId());
       user.setUsername(createAccountRequest.getUsername());
@@ -258,49 +228,5 @@ public class UserController {
       return new ResponseEntity<>("Error Creating User", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-
-  private ResponseEntity<Boolean> verifyToken(HttpServletRequest request) {
-
-    logger.info("request {}", request.toString());
-    String authHeader = request.getHeader("Authorization");
-
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      logger.warn("Authorization header missing or invalid");
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    String token = authHeader.substring(7);
-    ResponseEntity<Boolean> authResponse;
-
-    try {
-      List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
-      if (instances.isEmpty()) {
-        logger.error("Authentication service not found");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
-
-      ServiceInstance instance = instances.get(0);
-      String authUrl = instance.getUri() + "/auth/validate-token";
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Authorization", authHeader);
-      headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
-
-      HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token), headers);
-      authResponse = restTemplate.exchange(
-          authUrl, HttpMethod.POST, requestEntity, Boolean.class);
-
-      if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
-          authResponse.getBody())) {
-        logger.warn("Token validation failed");
-        return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
-      }
-      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
-    } catch (Exception e) {
-      return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
-
-    }
-
-  }
-
 
 }

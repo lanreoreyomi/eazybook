@@ -2,7 +2,6 @@ package com.eazybooks.authentication.config;
 
 import com.eazybooks.authentication.model.Token;
 import com.eazybooks.authentication.repository.TokenRepository;
-import com.eazybooks.authentication.service.AuthenticatorService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;

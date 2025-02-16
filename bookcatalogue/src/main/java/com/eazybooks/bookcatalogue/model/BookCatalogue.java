@@ -2,22 +2,13 @@ package com.eazybooks.bookcatalogue.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
+ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="book_catalogue")
 public class BookCatalogue {
-
-//  @Id
-//  @Column(nullable = false, unique = true)
-//  @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)
-//
-//  @SequenceGenerator(name = "book_catalogue_seq_generator", sequenceName = "book_catalogue_seq")
-
   @Id
   @Column(nullable = false, unique = true)
   @jakarta.persistence.GeneratedValue(strategy = GenerationType.UUID)

@@ -27,11 +27,11 @@ public class CreateAccountRequest {
   }
 
   public String getUsername() {
-    return username;
+    return username.toLowerCase();
   }
 
   public void setUsername(String username) {
-    this.username = username;
+    this.username = username.toLowerCase();
   }
 
   public String getFirstname() {
@@ -59,16 +59,6 @@ public class CreateAccountRequest {
   }
 
   @Override
-  public String toString() {
-    return "CreateAccountRequest{" +
-        "username='" + username + '\'' +
-         ", firstname='" + firstname + '\'' +
-        ", lastname='" + lastname + '\'' +
-        ", email='" + email + '\'' +
-        '}';
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) {
       return false;
@@ -88,4 +78,15 @@ public class CreateAccountRequest {
     result = 31 * result + Objects.hashCode(email);
     return result;
   }
+
+  @Override
+  public String toString() {
+    return "CreateAccountRequest{" +
+        "username='" + username + '\'' +
+        ", firstname='" + firstname + '\'' +
+        ", lastname='" + lastname + '\'' +
+        ", email='" + email + '\'' +
+        '}';
+  }
+
 }
