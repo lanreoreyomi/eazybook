@@ -14,11 +14,11 @@
 import { computed, defineComponent, onBeforeMount, ref } from 'vue'
 import type { BookCatalogue, CheckedOutHistory } from '@/model/model.ts'
 import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
-import CheckoutComponent from '@/views/CheckoutComponent.vue'
-import CheckoutHistory from '@/views/CheckoutHistory.vue'
+ import CheckoutHistory from '@/views/CheckoutHistory.vue'
 import { useCheckoutStore } from '@/stores/useCheckoutStore.ts'
 import router from '@/router'
 import { useCheckedOutHistory } from '@/stores/useCheckoutStore.ts'
+import CheckoutComponent from '@/components/CheckoutComponent.vue'
 
 export default defineComponent({
   name: 'check-out',

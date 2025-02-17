@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import type { BookCatalogue, } from '@/model/model.ts'
-import { accessToken, username } from '@/Utils/AppUtils.ts'
-import { addBookToCatalogueItem, getCatalogueItemsforUser, removeBookFromCatalogueItem } from '@/api/apis.ts'
+ import { addBookToCatalogueItem, getCatalogueItemsforUser, removeBookFromCatalogueItem } from '@/api/apis.ts'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 
 //for getting all catalgues
@@ -20,9 +20,12 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
   actions: {
     async getCatalogueItemsforUser() {
       try {
-        const response = await axios.get<BookCatalogue[]>(getCatalogueItemsforUser(username), {
+        const authStore = useAuthStore();
+
+        const response =
+          await axios.get<BookCatalogue[]>(getCatalogueItemsforUser(authStore.username), {
           headers: {
-            Authorization: accessToken
+            Authorization: authStore.token,
           }
         })
         this.$patch({
@@ -43,11 +46,12 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
 
       const username = localStorage.getItem('username')
       try {
+        const authStore = useAuthStore();
 
         const response = await axios.post<string>
         (addBookToCatalogueItem(username, bookIsbn), bookIsbn, {
           headers: {
-            Authorization: accessToken,
+            Authorization: authStore.token,
             'Content-Type': 'application/json'
           }
         })
@@ -68,11 +72,11 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
     async removeBookFromCheckoutItem(bookIsbn: number) {
       const username = localStorage.getItem('username')
       try {
-
+        const authStore = useAuthStore();
         const response = await axios.post<string>
         (removeBookFromCatalogueItem(username, bookIsbn), bookIsbn, {
           headers: {
-            Authorization: accessToken,
+            Authorization: authStore.token,
             'Content-Type': 'application/json'
           }
         })

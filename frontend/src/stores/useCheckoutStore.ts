@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { accessToken, username } from '@/Utils/AppUtils.ts'
-import {
+ import {
   getAllCheckoutForUser,
   // addBookToCatalogueItem,
   processCheckout, returnCheckout
   // removeBookFromCatalogueItem
 } from '@/api/apis.ts'
 import type { CheckedOutHistory } from '@/model/model.ts'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 
 //for getting all catalgues
@@ -29,11 +29,13 @@ export const useCheckoutStore = defineStore('checkout', {
   }),
   actions: {
     async checkBookOut(bookIsbn: number) {
+      const authStore = useAuthStore();
+
       try {
         const response =
-          await axios.post<string>(processCheckout(username, bookIsbn), null, {
+          await axios.post<string>(processCheckout(authStore.username, bookIsbn), null, {
             headers: {
-              Authorization: accessToken
+              Authorization: authStore.token,
             }
           })
         this.$patch({
@@ -51,11 +53,14 @@ export const useCheckoutStore = defineStore('checkout', {
       }
     },
     async returnBook(bookIsbn: number) {
+      const authStore = useAuthStore();
+
       try {
+
         const response =
-          await axios.post<string>(returnCheckout(username, bookIsbn), null, {
+          await axios.post<string>(returnCheckout(authStore.username, bookIsbn), null, {
             headers: {
-              Authorization: accessToken
+              Authorization: authStore.token,
             }
           })
 
@@ -85,10 +90,13 @@ export const useCheckedOutHistory = defineStore('CheckedOutHistory', {
   }),
   actions: {
     async getAllCheckoutHistoryForUser() {
+      const authStore = useAuthStore();
+
       try {
-        const response = await axios.get<CheckedOutHistory[]>(getAllCheckoutForUser(username), {
+        const response =
+          await axios.get<CheckedOutHistory[]>(getAllCheckoutForUser(authStore.username), {
           headers: {
-            Authorization: accessToken
+            Authorization: authStore.token,
           }
         })
         // Handle successful user creation

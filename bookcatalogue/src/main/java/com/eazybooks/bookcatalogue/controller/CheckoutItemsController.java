@@ -26,8 +26,6 @@ import org.springframework.web.client.RestTemplate;
  public class CheckoutItemsController {
   Logger logger = LoggerFactory.getLogger(CheckoutItemsController.class);
 
-  @Autowired
-  RestTemplate standardRestTemplate;
   private final BookCatalogueService bookCatalogueService;
   private final CheckoutItemsService checkoutItemsService;
   private final VerificationService verificationService;

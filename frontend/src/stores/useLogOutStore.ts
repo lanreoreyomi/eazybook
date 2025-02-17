@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { LOGOUT } from '@/api/apis.ts';
 import { defineStore } from 'pinia';
-import { accessToken } from '@/Utils/AppUtils.ts';
-
+import { useAuthStore } from '@/stores/useAuthStore.ts'
 interface LogOutState {
   loggedOut: '';
 }
@@ -15,10 +14,12 @@ export const useLogOutStore = defineStore('logout', {
   actions: {
 
     async LogOut() {
+
+      const authStore = useAuthStore();
       try {
         const response = await axios.get<LogOutState>(LOGOUT, {
           headers: {
-            Authorization: accessToken
+            Authorization: authStore.token,
           }
         });
 

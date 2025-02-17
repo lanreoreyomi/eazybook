@@ -1,4 +1,10 @@
 services:
+  consul:
+    image: consul:1.15.3  # This was already using a Docker Hub image
+    ports:
+      - "8500:8500"
+    command: "agent -dev -client=0.0.0.0 -log-level=info"
+
   postgres:
     image: 'postgres'
     environment:
@@ -7,3 +13,80 @@ services:
       - 'POSTGRES_DB=eazybooks'
     ports:
       - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  authentication:
+    image: lanreoreyomi/authentication:v1.0
+    ports:
+      - "9084:9084"
+    depends_on:
+      - consul
+      - postgres
+    environment:
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/eazybooks
+      - SPRING_DATASOURCE_USERNAME=eazybook_dbuser
+      - SPRING_DATASOURCE_PASSWORD=eazybook_dbpassword
+      - SPRING_PROFILES_ACTIVE=local
+    restart: on-failure
+
+  user:
+    image: lanreoreyomi/user:v1.0  # Use the Docker Hub image
+
+    ports:
+      - "9087:9087"
+    depends_on:
+      - consul
+      - postgres
+    environment:
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/eazybooks
+      - SPRING_DATASOURCE_USERNAME=eazybook_dbuser
+      - SPRING_DATASOURCE_PASSWORD=eazybook_dbpassword
+    restart: on-failure
+
+  bookcatalogue:
+    image:  lanreoreyomi/bookcatalogue:v1.0  # Use the Docker Hub image
+    ports:
+      - "9189:9189"
+    depends_on:
+      - consul
+      - postgres
+    environment:
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/eazybooks
+      - SPRING_DATASOURCE_USERNAME=eazybook_dbuser
+      - SPRING_DATASOURCE_PASSWORD=eazybook_dbpassword
+    restart: on-failure
+
+  wishlist:
+    image: lanreoreyomi/wishlist:v1.0  # Use the Docker Hub image
+    ports:
+      - "8017:8017"
+    depends_on:
+      - consul
+      - postgres
+    environment:
+      - SPRING_CLOUD_CONSUL_HOST=consul
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/eazybooks
+      - SPRING_DATASOURCE_USERNAME=eazybook_dbuser
+      - SPRING_DATASOURCE_PASSWORD=eazybook_dbpassword
+    restart: on-failure
+
+  frontend:
+    image: lanreoreyomi/frontend:v1.0 # Use the Docker Hub image
+    ports:
+      - "80:80"
+    environment:
+      - VITE_APP_AUTHENTICATION_BASE_URL=http://authentication:9084
+      - VITE_APP_BOOK_CATALOGUE_URL=http://bookcatalogue:9189
+      - VITE_APP_WISHLIST_BASE_URL=http://wishlist:8017
+    depends_on:
+      - authentication
+      - user
+      - bookcatalogue
+      - wishlist
+
+volumes:
+  postgres_data:

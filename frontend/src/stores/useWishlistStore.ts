@@ -2,8 +2,8 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import type { BookCatalogue, WishList } from '@/model/model.ts'
-import { accessToken, username } from '@/Utils/AppUtils.ts'
-import { addBookToWishlistWithUsername, getWishListForUser, removeBookFromWishlistWithUsername } from '@/api/apis.ts'
+ import { addBookToWishlistWithUsername, getWishListForUser, removeBookFromWishlistWithUsername } from '@/api/apis.ts'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 interface WishlistState {
   username: string;
@@ -27,11 +27,13 @@ export const useWishlistStore = defineStore('wishlist', {
   actions: {
     async getUserWishList() {
       // Access loggedInUser *after* ensuring the user is logged in
+      const authStore = useAuthStore();
+
       try {
         const response =
-          await axios.get<WishList[]>(getWishListForUser(username), {
+          await axios.get<WishList[]>(getWishListForUser(authStore.username), {
             headers: {
-              Authorization: accessToken
+              Authorization: authStore.token,
             }
           })
         this.$patch({
@@ -54,11 +56,12 @@ export const useWishlistStore = defineStore('wishlist', {
     async addBookToWishlist(book: BookCatalogue) {
 
       try {
+        const authStore = useAuthStore();
 
         const response = await axios.post<BookCatalogueState>
-        (addBookToWishlistWithUsername(username), book.isbn, {
+        (addBookToWishlistWithUsername(authStore.username), book.isbn, {
           headers: {
-            Authorization: accessToken,
+            Authorization: authStore.token,
             'Content-Type': 'application/json'
           }
         })
@@ -79,12 +82,13 @@ export const useWishlistStore = defineStore('wishlist', {
     },
     async removeBookToWishlist(wishList: WishList) {
 
-      const username = localStorage.getItem('username')
+      const authStore = useAuthStore();
+
       try {
         const response = await axios.post<BookCatalogueState>
-        (removeBookFromWishlistWithUsername(username), wishList.isbn, {
+        (removeBookFromWishlistWithUsername(authStore.username), wishList.isbn, {
           headers: {
-            Authorization: accessToken,
+            Authorization: authStore.token,
             'Content-Type': 'application/json'
           }
         })

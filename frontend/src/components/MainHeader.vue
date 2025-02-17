@@ -83,7 +83,7 @@ import router from '@/router'
 import { useLogInStore } from '@/stores/useLogInStore.ts'
 import { computed, onMounted, ref } from 'vue'
 import { useAddBookCatalogueStore } from '@/stores/useBookCatalogueStore.ts'
-import { username } from '../Utils/AppUtils.ts'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 export default {
   name: 'MainHeader',
@@ -94,6 +94,7 @@ export default {
     const logoutStore = useLogOutStore()
     const logInStore = useLogInStore()
     const userProfile = ref('')
+    const authStore = useAuthStore()
     const logOut = async () => {
       await logoutStore.LogOut()
       await router.push('/')
@@ -127,7 +128,7 @@ export default {
       toggleFormModal,
       isModalOpen,
       statusText: getStatusText,
-      loggedInUser: username,
+      loggedInUser: authStore.username,
     }
   },
 }

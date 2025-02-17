@@ -2,8 +2,8 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { addBookToCatalogueWithUsername, BOOKCATALOGUE } from '@/api/apis.ts'
-import { accessToken, username } from '@/Utils/AppUtils.ts'
-import type { BookCatalogue } from '@/model/model.ts'
+ import type { BookCatalogue } from '@/model/model.ts'
+import { useAuthStore } from '@/stores/useAuthStore.ts'
 
 interface BookCatalogueState {
   bookCatalogue: BookCatalogue[]; // Array of BookCatalogue
@@ -29,10 +29,12 @@ export const useBookCatalogueStore = defineStore('bookCatalogue', {
   }),
   actions: {
     async getAllBookCatalogues() {
+
+      const authStore = useAuthStore();
       try {
         const response = await axios.get<BookCatalogue[]>(BOOKCATALOGUE, {
           headers: {
-            Authorization: accessToken
+            Authorization: authStore.token
           }
         })
         // Handle successful user creation
@@ -71,11 +73,13 @@ export const useAddBookCatalogueStore = defineStore('addBookCatalogue', {
   }),
   actions: {
     async addBookToCatalogue() {
+      const authStore = useAuthStore();
+
       try {
-        const response = await axios.post<AddBookCatalogueState>(addBookToCatalogueWithUsername(username),
+        const response = await axios.post<AddBookCatalogueState>(addBookToCatalogueWithUsername(authStore.username),
           this.addBookCatalogue, {
             headers: {
-              Authorization: accessToken
+              Authorization: authStore.token
             }
           })
         // Handle successful user creation

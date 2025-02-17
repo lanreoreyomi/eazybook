@@ -3,8 +3,7 @@ import HomeView from '@/views/HomeView.vue'
 import CreateAccount from '@/views/CreateAccount.vue'
 import LogIn from '@/views/LogIn.vue'
 import CatalogueView from '@/views/CatalogueView.vue'
-import Profile from '@/views/Profile.vue'
-import WishList from '@/views/WishList.vue'
+ import WishList from '@/views/WishList.vue'
 import Checkout from '@/views/Checkout.vue'
 
 const router = createRouter({
@@ -29,11 +28,6 @@ const router = createRouter({
       path: '/catalogue',
       name: 'catalogue',
       component: CatalogueView,
-    },
-    {
-      path: '/profile',
-      name: 'profile',
-      component: Profile,
     },
     {
       path: '/wishlist',

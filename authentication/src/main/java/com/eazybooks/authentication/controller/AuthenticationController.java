@@ -1,6 +1,5 @@
 package com.eazybooks.authentication.controller;
 
-import com.eazybooks.authentication.config.SERVICES;
 import com.eazybooks.authentication.model.LoginRequest;
 import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
 import com.eazybooks.authentication.model.UserDto.CreateAccountRequest;
@@ -70,7 +69,7 @@ public class AuthenticationController {
           authenticatorService.createUserAccount(createAccountRequest);
       logger.info("AuthenticationResponse: {}", authenticationResponse);
 
-      List<ServiceInstance> instances = discoveryClient.getInstances(SERVICES.USER.name());
+      List<ServiceInstance> instances = discoveryClient.getInstances("user");
       if (instances.isEmpty()) {
         logger.info("User service not found");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

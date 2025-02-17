@@ -38,6 +38,6 @@ Create extension if not exists pg_trim with schema public;
 5. Tag and image with the follwinfg command
     docker tag name-of-image dockerusername/repo-name:version like this below
      docker tag authentication lanreoreyomi/authentication:v1.0
-
+dok
 6. Push image
    docker push lanreoreyomi/authentication:v1.0
