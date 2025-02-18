@@ -15,7 +15,7 @@
           <router-link to="/create-account">Create Account</router-link>
         </li>
         <li v-if="checkAuthenticated()">
-          <router-link to="/catalogue">Catalogue</router-link>
+          <router-link to="/bookcatalogue">Catalogue</router-link>
         </li>
 
         <li id="wishList" v-if="checkAuthenticated()">

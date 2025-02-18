@@ -38,6 +38,12 @@ Create extension if not exists pg_trim with schema public;
 5. Tag and image with the follwinfg command
     docker tag name-of-image dockerusername/repo-name:version like this below
      docker tag authentication lanreoreyomi/authentication:v1.0
-dok
+
 6. Push image
    docker push lanreoreyomi/authentication:v1.0
+
+to start docker
+
+docker-compose down # Stop and remove existing containers
+docker-compose build # Rebuild the Nginx image (and frontend if needed)
+docker-compose up -d # Start everything in detached mode

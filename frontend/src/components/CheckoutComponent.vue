@@ -3,7 +3,7 @@
   <div class="checkout-container" v-for="(book, index) in books" :key="index">
     <div class="checkout_info">
       <div class="book_img">
-        <img :src="`/src/assets/images/${index + 1}-min.jpg`" alt="lib_img" />
+        <img class="book_card-img" :src="`https://eazybooks-images.s3.us-east-1.amazonaws.com/${index + 1}-min.jpg`" alt="book_img" />
       </div>
       <div class="checkout_details">
         <ul>

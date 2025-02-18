@@ -4,6 +4,8 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
+const reverseProxyHost = 'http://localhost'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -18,35 +20,35 @@ export default defineConfig({
   server: {
     proxy: {
       '/auth/create-account': {
-        target: 'http://eazybooks.com:9084',
+        target: `${reverseProxyHost}:9084`,
         changeOrigin: true
       },
-      '/auth/login': {
-        target: 'http://eazybooks.com:9084',
+      '/auth/login/': {
+        target: `${reverseProxyHost}:9084`,
         changeOrigin: true
       },
-      '/auth/logout': {
-        target: 'http://eazybooks.com:9084',
+      '/auth/logout/': {
+        target: `${reverseProxyHost}:9084`,
         changeOrigin: true
       },
-      '/bookcatalogue': {
-        target: 'http://eazybooks.com:9189',
+      '/bookcatalogue/': {
+        target: `${reverseProxyHost}:9189`,
         changeOrigin: true
       },
-      '/stats': {
-        target: 'http://eazybooks.com:9189',
+      '/stats/': {
+        target: `${reverseProxyHost}:9189`,
         changeOrigin: true
       },
       '/wishlist/': {
-        target: 'http://eazybooks.com:8017',
+        target: `${reverseProxyHost}:8017`,
         changeOrigin: true
       },
       '/checkoutitems/': {
-        target: 'http://eazybooks.com:9189',
+        target: `${reverseProxyHost}:9189`,
         changeOrigin: true
       },
       '/checkout/': {
-        target: 'http://eazybooks.com:9189',
+        target: `${reverseProxyHost}:9189`,
         changeOrigin: true
       }
     }
