@@ -108,7 +108,7 @@ export default {
       const checkAuth = logInStore.checkAuth()
       if (logInStore.statusCode === 200) {
         userProfile.value = JSON.stringify(localStorage.getItem('username'))
-        router.push('/catalogue')
+        router.push('/bookcatalogue')
         router.go(0)
       }
       return checkAuth
