@@ -1,7 +1,7 @@
 export const CREATEACCOUUNT = '/auth/create-account'
 export const LOGIN = '/auth/login'
 export const LOGOUT = '/auth/logout'
-export const BOOKCATALOGUE = '/bookcatalogue'
+export const BOOKCATALOGUE = '/bookcatalogue/'
 export const WISHLIST = '/wishlist/'
 export const CHECKOUTITEM = '/checkoutitems'
 export const CHECKBOOKOUT = '/checkout'

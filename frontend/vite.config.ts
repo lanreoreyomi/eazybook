@@ -23,7 +23,7 @@ export default defineConfig({
         target: `${reverseProxyHost}:9084`,
         changeOrigin: true
       },
-      '/auth/login/': {
+      '/auth/login': {
         target: `${reverseProxyHost}:9084`,
         changeOrigin: true
       },

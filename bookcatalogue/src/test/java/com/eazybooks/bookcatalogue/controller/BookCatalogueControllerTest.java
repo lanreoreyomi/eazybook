@@ -28,7 +28,7 @@ import org.springframework.web.client.RestTemplate;
 class BookCatalogueControllerTest {
 
   @InjectMocks
-  private BookCatalogueController bookCatalogueController; // Replace YourController
+  private BookCatalogueController bookCatalogueController;
 
   @Mock
   private BookCatalogueService bookCatalogueService;
@@ -49,7 +49,7 @@ class BookCatalogueControllerTest {
     HttpServletRequest request = new MockHttpServletRequest();
     request.setAttribute("Authorization", "Bearer " + validToken);
 
-    when(verificationService.verifyUserToken(request, username)).thenReturn(verifyToken); // Mock the URL method
+    when(verificationService.verifyUserToken(request, username)).thenReturn(verifyToken);
     when(verificationService.verifyUserRole(username, request)).thenReturn(verifyUserRole);
     when(bookCatalogueService.getBookByIsbn(book.getIsbn())).thenReturn(null);
     when(bookCatalogueService.addBookToCatalogue(book)).thenReturn(book);
