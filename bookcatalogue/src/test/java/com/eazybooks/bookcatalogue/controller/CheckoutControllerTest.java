@@ -127,6 +127,240 @@ class CheckoutControllerTest {
     verify(checkoutItemsService, times(1)).deleteCheckoutItemsByBookIsbn(bookIsbn);
   }
 
+  @Test
+  void checkout_AlreadyCheckedOut() {
+    String username = "testuser";
+    Long bookIsbn = 123L;
+    BookCatalogue book = createBook(bookIsbn);
+    book.setQuantityForRent(2);
+
+    Checkout checkout = new Checkout();
+    checkout.setIsbn(bookIsbn);
+    checkout.setCheckedOutBy(username);
+    List<Checkout> checkouts = new ArrayList<>();
+    checkouts.add(checkout);
+
+    final String validToken = getValidToken();
+
+    HttpServletRequest request = new MockHttpServletRequest();
+    request.setAttribute("Authorization", "Bearer " + validToken);
+
+    ResponseEntity<Boolean> verifyToken = ResponseEntity.status(HttpStatus.OK).body(true);
+
+    when(verificationService.verifyUserToken(request, username)).thenReturn(verifyToken);
+    when(bookCatalogueService.getBookByIsbn(bookIsbn)).thenReturn(book);
+    when(checkoutService.findCheckoutsByCheckedOutBy(username)).thenReturn(checkouts);
+
+    ResponseEntity<String> response = checkoutController.checkout(username, bookIsbn, request);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    assertEquals("Book already checked out", response.getBody());
+    verify(checkoutService, times(0)).save(any(Checkout.class));
+    verify(checkoutStatsService, times(0)).save(any(CheckoutStats.class));
+    verify(bookCatalogueService, times(0)).updateBook(any(BookCatalogue.class));
+  }
+
+  @Test
+  void checkout_BookNotFound() {
+    String username = "testuser";
+    Long bookIsbn = 123L;
+
+    final String validToken = getValidToken();
+    HttpServletRequest request = new MockHttpServletRequest();
+    request.setAttribute("Authorization", "Bearer " + validToken);
+    ResponseEntity<Boolean> verifyToken = ResponseEntity.status(HttpStatus.OK).body(true);
+
+    when(verificationService.verifyUserToken(request, username)).thenReturn(verifyToken);
+    when(bookCatalogueService.getBookByIsbn(bookIsbn)).thenReturn(null);
+
+    ResponseEntity<String> response = checkoutController.checkout(username, bookIsbn, request);
+
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("Book not found", response.getBody());
+  }
+
+  @Test
+  void checkout_QuantityZero() {
+    String username = "testuser";
+    Long bookIsbn = 123L;
+    BookCatalogue book = createBook(bookIsbn);
+    book.setQuantityForRent(0);
+    final String validToken = getValidToken();
+    HttpServletRequest request = new MockHttpServletRequest();
+    request.setAttribute("Authorization", "Bearer " + validToken);
+    ResponseEntity<Boolean> verifyToken = ResponseEntity.status(HttpStatus.OK).body(true);
+    when(verificationService.verifyUserToken(request, username)).thenReturn(verifyToken);
+
+    when(bookCatalogueService.getBookByIsbn(bookIsbn)).thenReturn(book);
+
+    ResponseEntity<String> response = checkoutController.checkout(username, bookIsbn, request);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    assertEquals("Book not available for checkout. Checkout is max out", response.getBody());
+  }
+
+
+  @Test
+  void checkout_TokenInvalid() {
+    String username = "testuser";
+    Long bookIsbn = 123L;
+    HttpServletRequest request = new MockHttpServletRequest();
+    request.setAttribute("Authorization", "Bearer invalid_token");
+
+    ResponseEntity<Boolean> tokenResponse = ResponseEntity.ok(false);
+    when(verificationService.verifyUserToken(request, username)).thenReturn(tokenResponse);
+
+    ResponseEntity<String> response = checkoutController.checkout(username, bookIsbn, request);
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+  }
+
+  @Test
+  void returnBook_Success() {
+    String username = "testuser";
+    Long bookIsbn = 123L;
+    BookCatalogue book = createBook(bookIsbn);
+    book.setQuantityForRent(0);
+
+    Checkout checkout = new Checkout();
+    checkout.setIsbn(bookIsbn);
+    checkout.setCheckedOutBy(username);
+    checkout.setReturned(false);
+
+    List<Checkout> checkouts = new ArrayList<>();
+    checkouts.add(checkout);
+    final String validToken = getValidToken();
+
+    HttpServletRequest request = new MockHttpServletRequest();
+    request.setAttribute("Authorization", "Bearer " + validToken);
+    ResponseEntity<Boolean> verifyToken = ResponseEntity.status(HttpStatus.OK).body(true);
+    when(verificationService.verifyUserToken(request, username)).thenReturn(verifyToken);
+    when(bookCatalogueService.getBookByIsbn(bookIsbn)).thenReturn(book);
+    when(checkoutService.findCheckoutsByCheckedOutBy(username)).thenReturn(checkouts);
+
+    ResponseEntity<String> response = checkoutController.returnBook(username, bookIsbn, request);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals("Book successfully returned", response.getBody());
+    verify(bookCatalogueService, times(1)).updateBook(any(BookCatalogue.class));
+    verify(checkoutService, times(1)).updateCheckout(any(Checkout.class));
+  }
+
+  @Test
+  void returnBook_BookNotFound() {
+    String username = "testuser";
+    Long bookIsbn = 123L;
+    HttpServletRequest request = new MockHttpServletRequest();
+    request.setAttribute("Authorization", "Bearer valid_token");
+    final String validToken = getValidToken();
+    ResponseEntity<Boolean> verifyToken = ResponseEntity.status(HttpStatus.OK).body(true);
+    when(verificationService.verifyUserToken(request, username)).thenReturn(verifyToken);
+
+    when(bookCatalogueService.getBookByIsbn(bookIsbn)).thenReturn(null);
+
+    ResponseEntity<String> response = checkoutController.returnBook(username, bookIsbn, request);
+
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    assertEquals("Book not found", response.getBody());
+  }
+
+  @Test
+  void returnBook_BookAlreadyReturned() {
+    String username = "testuser";
+    Long bookIsbn = 123L;
+    BookCatalogue book = createBook(bookIsbn);
+    book.setQuantityForRent(0);
+
+    Checkout checkout = new Checkout();
+    checkout.setIsbn(bookIsbn);
+    checkout.setCheckedOutBy(username);
+    checkout.setReturned(true);
+    checkout.setExpectedReturnDate(LocalDate.now());
+
+    List<Checkout> checkouts = new ArrayList<>();
+    checkouts.add(checkout);
+    final String validToken = getValidToken();
+
+    HttpServletRequest request = new MockHttpServletRequest();
+    request.setAttribute("Authorization", "Bearer " + validToken);
+    ResponseEntity<Boolean> verifyToken = ResponseEntity.status(HttpStatus.OK).body(true);
+    when(verificationService.verifyUserToken(request, username)).thenReturn(verifyToken);
+
+    when(bookCatalogueService.getBookByIsbn(bookIsbn)).thenReturn(book);
+    when(checkoutService.findCheckoutsByCheckedOutBy(username)).thenReturn(checkouts);
+
+    ResponseEntity<String> response = checkoutController.returnBook(username, bookIsbn, request);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    assertEquals("Book has already been  returned on " + checkout.getExpectedReturnDate(),
+        response.getBody());
+  }
+
+  @Test
+  void returnBook_NotCheckedOutByUser() {
+    String username = "testuser";
+    Long bookIsbn = 123L;
+    BookCatalogue book = createBook(bookIsbn);
+
+    List<Checkout> checkouts = new ArrayList<>();
+    final String validToken = getValidToken();
+
+    HttpServletRequest request = new MockHttpServletRequest();
+    request.setAttribute("Authorization", "Bearer " + validToken);
+    ResponseEntity<Boolean> verifyToken = ResponseEntity.status(HttpStatus.OK).body(true);
+    when(verificationService.verifyUserToken(request, username)).thenReturn(verifyToken);
+
+    when(bookCatalogueService.getBookByIsbn(bookIsbn)).thenReturn(book);
+    when(checkoutService.findCheckoutsByCheckedOutBy(username)).thenReturn(checkouts);
+
+    ResponseEntity<String> response = checkoutController.returnBook(username, bookIsbn, request);
+
+    assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    assertEquals("Book mut be checked out to be returned", response.getBody());
+  }
+
+  @Test
+  void returnBook_TokenInvalid() {
+    String username = "testuser";
+    Long bookIsbn = 123L;
+    HttpServletRequest request = new MockHttpServletRequest();
+    request.setAttribute("Authorization", "Bearer invalid_token");
+
+    ResponseEntity<Boolean> tokenResponse = ResponseEntity.ok(false);
+    when(verificationService.verifyUserToken(request, username)).thenReturn(tokenResponse);
+
+    ResponseEntity<String> response = checkoutController.returnBook(username, bookIsbn, request);
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+  }
+
+  @Test
+  void getCheckoutHistory_Success() {
+    String username = "testuser";
+    Long bookIsbn = 123L;
+    BookCatalogue book = createBook(bookIsbn);
+    Checkout checkout = new Checkout();
+    checkout.setIsbn(bookIsbn);
+    checkout.setCheckedOutBy(username);
+    List<Checkout> checkouts = new ArrayList<>();
+    checkouts.add(checkout);
+    final String validToken = getValidToken();
+
+    HttpServletRequest request = new MockHttpServletRequest();
+    request.setAttribute("Authorization", "Bearer " + validToken);
+    ResponseEntity<Boolean> verifyToken = ResponseEntity.status(HttpStatus.OK).body(true);
+    when(verificationService.verifyUserToken(request, username)).thenReturn(verifyToken);
+
+    when(checkoutService.findCheckoutsByCheckedOutBy(username)).thenReturn(checkouts);
+    when(bookCatalogueService.getBookByIsbn(bookIsbn)).thenReturn(book);
+
+    ResponseEntity<List<CheckoutInfo>> response = checkoutController.getCheckoutHistory(username,
+        request);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals(1, response.getBody().size());
+    verify(checkoutService, times(1)).findCheckoutsByCheckedOutBy(username);
+    verify(bookCatalogueService, times(1)).getBookByIsbn(anyLong());
+  }
 
   public BookCatalogue createBook(Long isbn) {
     BookCatalogue book = new BookCatalogue();

@@ -51,6 +51,6 @@ public class CheckoutStatsController {
 
     final CheckoutStats maxCheckoutStats = checkoutStatsService.getAllCheckoutStats();
 
-    return null;
+    return new ResponseEntity<>(maxCheckoutStats, HttpStatus.OK);
   }
 }
