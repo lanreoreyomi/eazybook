@@ -26,8 +26,8 @@
       </div>
       <button type="submit" id="submit-form">Create Account</button>
 
-      <div v-if="isSuccessful" id="user_created">{{ statusText }}</div>
-      <div v-else-if="!isSuccessful" id="user_not_created">{{ statusText }}</div>
+      <div v-if="isSuccessful" id="user_created">{{ signUpMessage }}</div>
+      <div v-else-if="!isSuccessful" id="user_not_created">{{ signUpMessage }}</div>
     </form>
   </div>
 </template>
@@ -38,27 +38,29 @@ import router from '@/router'
 
 export default {
   setup() {
-    const userStore = useUserStore()
-    const isSuccessful = computed(
-      () =>{
-        if (userStore.statusCode === 201) {
-          router.push("/login");
-          return true
-        }else {
-          return false
-        }
+    const userStore = useUserStore();
 
+    const isSuccessful = computed(() => {
+    const isSuccess = userStore.statusCode === 201;
+      if (isSuccess) {
+        router.push("/login");
       }
-    )
-    const statusText = computed(() => userStore.statusText)
+
+      return isSuccess;
+    });
+
+    const signUpMessage = computed(() => userStore.statusText);
+    const statusText = computed(() => userStore.statusText);
+
     return {
       user: userStore.user,
       createUser: userStore.createUser,
       isSuccessful,
       statusText,
-    }
-  },
-}
+      signUpMessage
+    };
+  }
+};
 </script>
 
 <style lang="scss" scoped>

@@ -29,8 +29,6 @@ export const useLogInStore = defineStore('login', {
         localStorage.setItem('refreshToken', response.headers['authorization'])
         localStorage.setItem('username', this.userLogIn.username)
 
-
-        console.log("response: ", response)
         this.$patch({
           statusCode: response.status,
           statusText: String(response.data),
@@ -38,9 +36,7 @@ export const useLogInStore = defineStore('login', {
         })
 
       } catch (error) {
-        console.log("response: ", error)
         if (axios.isAxiosError(error)) {
-          console.log("response: ", error)
           this.statusCode = error.response?.status || 500;
           this.statusText = error.response?.data || 'Internal Server Error';
         } else {

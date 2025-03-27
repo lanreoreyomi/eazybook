@@ -33,7 +33,7 @@
         <div class="footer-section">
           <h3>Contact Us</h3>
           <p>123 Main Street<br>Ottawa, ON 12345</p>
-          <p>Email: info@eazybooks.com<br>Phone: (613) 600 3820</p>
+          <p>Email: lanreorey@gmail.com<br>Phone: (613) 300 1233</p>
           <div class="social-icons">
             <a href="#"><i class="fab fa-facebook-f"></i></a>
             <a href="#"><i class="fab fa-twitter"></i></a>

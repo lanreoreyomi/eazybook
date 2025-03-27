@@ -93,7 +93,7 @@ body,
       border: none;
       color: colors.$white-color;
       font-weight: 600;
-      border-radius: 0.5rem;
+      border-radius: 1.5rem;
       font-size: 20px;
     }
     #user_created {
