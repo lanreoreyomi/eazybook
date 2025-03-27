@@ -31,48 +31,59 @@ Each microservice has a controller, service and database layer.
 
 ### Authentication Service
 
-- **Responsibilities:** Central authentication and role management.
+- **Responsibilities:** Central authentication, user data management, and token management.
 - **Functionality:**
-    - Generates and manages JWT tokens.
-    - Provides `/validate-token` endpoint for token validation by other services.
-    - Provides `/user-role` endpoint for permission checks based on user roles.
-    - Handles user login and logout.
-- **Technologies:** Spring Security
+  - Stores user information in a PostgreSQL database.
+  - Provides endpoints to add, retrieve, update, and delete user information.
+  - Provides endpoint to retrieve user by username.
+  - Handles user login.
+  - Generates and manages JWT tokens.
+  - Provides `/validate-token` endpoint for token validation by other services.
+- **Technologies:** Spring Boot, Spring Security, PostgreSQL
+- **Data Storage:** PostgreSQL
 
 ### Book Catalogue Service
 
-- **Responsibilities:** Manages book data and checkout operations.
+- **Responsibilities:** Manages book data and book stats.
 - **Functionality:**
-    - Stores book information in the database.
-    - Implements Checkout Stats and Checkout Items modules.
-        - Checkout Stats tracks book popularity and suggests books based on availability.
-        - Checkout Items functions as a shopping cart for book rentals.
-    - Enforces book rental rules (one book at a time, two-week hold).
-    - Provides checkout history tracking.
+  - Stores book information in a PostgreSQL database.
+  - Provides endpoints to add, retrieve, update, and delete book information.
+  - Provides endpoints to retrieve all books.
+  - Provides endpoints to retrieve book by id.
+  - Provides endpoints to retrieve book by title.
+  - Provides endpoints to retrieve book by author.
+  - Provides endpoints to retrieve book by isbn.
 - **Technologies:** Spring Boot, PostgreSQL
-- **Data Storage:** S3 for static files.
+- **Data Storage:** PostgreSQL
 
 ### Wishlist Service
 
 - **Responsibilities:** Manages user wishlists.
 - **Functionality:**
-    - Allows users to add and remove books from their wishlist.
-    - Enables moving books from the wishlist to the checkout.
-- **Technologies:** Spring Boot
+  - Allows users to add books to their wishlist.
+  - Allows users to remove books from their wishlist.
+  - Provides endpoints to retrieve all books in a user's wishlist.
+- **Technologies:** Spring Boot, PostgreSQL
+- **Data Storage:** PostgreSQL
 
 ### User Service
 
-- **Responsibilities:** Manages user-related operations.
+- **Responsibilities:** Manages user data and token validation.
 - **Functionality:**
-    - Communicates with the Authentication service to maintain data consistency.
-- **Technologies:** Spring Boot
+  - Stores user information in a PostgreSQL database.
+  - Provides endpoints to add, retrieve, update, and delete user information.
+  - Provides endpoint to retrieve user by username.
+  - Provides endpoint to validate user token.
+  - Communicates with the Authentication service to validate user tokens.
+- **Technologies:** Spring Boot, PostgreSQL
+- **Data Storage:** PostgreSQL
 
 ## Frontend
 
 - **Technology:** Vue.js
 - **State Management:** Pinia
 - **Deployment:** The `/dist` folder containing production files is hosted in an S3 bucket.
-- **Access:** [http://ec2-52-91-196-70.compute-1.amazonaws.com/#/](http://ec2-52-91-196-70.compute-1.amazonaws.com/#/)
+- **Access:** [http://eazybookapp.com/#/](http://eazybookapp.com/#/)
 
 ## Database
 
@@ -92,13 +103,46 @@ Each microservice has a controller, service and database layer.
 
 ## Technologies Used
 
-- **Java:** Java 17
-- **Architecture:** MVC
-- **Backend:** Spring Boot
-- **Frontend:** Vue.js
-- **Database:** PostgreSQL
-- **Security:** Spring Security
-- **State Management:** Pinia
-- **Service Discovery:** Consul (local), Cloud Map (AWS)
-- **Deployment:** AWS (EC2, RDS, S3, Cloud Map, ALB, Nginx)
-- **Other:** Docker, Maven, npm, JWT
+- **Programming Languages:**
+  - Java 17
+- **Backend Frameworks:**
+  - Spring Boot
+  - Spring Security
+  - Spring Data JPA
+- **Frontend Frameworks:**
+  - Vue.js
+  - Pinia (State Management)
+- **Databases:**
+  - PostgreSQL
+- **Communication:**
+  - HTTP
+  - REST
+  - JSON
+- **Authentication:**
+  - JWT (JSON Web Tokens)
+- **Testing:**
+  - JUnit
+  - Mockito
+  - Postman
+- **Service Discovery:**
+  - Consul (Local)
+  - AWS Cloud Map (AWS)
+- **Deployment:**
+  - AWS (EC2, RDS, S3, Cloud Map, ALB)
+  - Nginx (Reverse Proxy)
+  - Docker
+  - Docker Compose (Local)
+- **Build Tools:**
+  - Maven (Backend)
+  - npm (Frontend)
+- **Containerization:**
+  - Docker
+  - Docker Compose
+- **Version Control:**
+  - Git
+- **Other:**
+  - Openjdk
+  - Alpine
+  - Postgres
+  - Consul
+  - Docker Hub
