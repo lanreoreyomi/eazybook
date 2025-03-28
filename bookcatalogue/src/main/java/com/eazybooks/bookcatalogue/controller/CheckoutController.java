@@ -97,13 +97,16 @@ public class CheckoutController {
 
     final List<Checkout> checkoutsByUsername = checkoutService.findCheckoutsByCheckedOutBy(
         username);
+    System.out.println("checkoutsByUsername");
+    System.out.println(checkoutsByUsername);
 
     final Checkout alreadyCheckedOut = checkoutsByUsername.stream()
         .filter(item -> item.getCheckedOutBy().equals(username) && Objects.equals(item.getIsbn(),
             bookIsbn))
         .findFirst()
         .orElse(null);// Or provide a default value
-
+    System.out.println("alreadyCheckedOut");
+    System.out.println(alreadyCheckedOut);
     if (alreadyCheckedOut != null) {
       return new ResponseEntity<>("Book already checked out", HttpStatus.FORBIDDEN);
     }

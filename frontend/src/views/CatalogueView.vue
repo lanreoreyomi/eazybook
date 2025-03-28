@@ -2,7 +2,7 @@
 
   <div class="stats" v-if="checkoutStats">
     <p> <span style='font-size:20px;'>&#127775;</span>
-      {{checkoutStats.title}} is hot right now, Checkout out <span style='font-weight:bolder;'></span>{{checkoutStats?.totalCheckout}}  times</p>
+      {{checkoutStats.title}} is hot right now, checkout out <span style='font-weight:bolder;'></span>{{checkoutStats?.totalCheckout}}  times</p>
   </div>
   <div v-if="isCatalogueLoaded" id="catalogue_component">
     <div id="wishlist_control" v-if="wishListStatusText">
@@ -89,10 +89,9 @@ export default defineComponent({
 
 .stats{
   padding: 8px;
-  margin: 20px auto;
+  margin: 5px auto;
   width: 60%;
-  background-color: rgba(211, 211, 211, 0.36);
-  border-radius: 0.5rem;
+   border-radius: 0.5rem;
   p{
     text-align: center;
     color: colors.$text-color;
@@ -110,11 +109,11 @@ export default defineComponent({
     padding-bottom: 12px;
     padding-top: 8px;
     font-size: 16px;
-    color: colors.$text-color;
-    border: 1px solid colors.$text-color;
+    color: colors.$white-color;
+    //border: 1px solid colors.$text-color;
     text-align: center;
     width: 50%;
-    background-color: colors.$white-color;
+    background-color: colors.$text-color;
     border-radius: 0.5rem;
     align-content: center;
     box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1);
@@ -123,9 +122,7 @@ export default defineComponent({
     #addedToWishlist {
       width: 90%;
       padding-top: 10px;
-      font-weight: bold;
-
-
+      font-weight: normal;
     }
   }
 

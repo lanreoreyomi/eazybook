@@ -1,23 +1,24 @@
 
 <template>
-
+  <div class="login_card">
   <div id="logInForm">
     <form @submit.prevent="logIn">
       <div>
-        <h2>Log In</h2>
+        <h2>Log into your Account</h2>
       </div>
       <div>
-        <label for="username">Username:</label>
+        <label for="username">Username</label>
         <input type="text" id="username" v-model="user.username" required />
       </div>
       <div>
-        <label for="password">Password:</label>
+        <label for="password">Password</label>
         <input type="password" id="password" v-model="user.password" required />
       </div>
       <button type="submit" id="submit-form">Log In</button>
       <div v-if="isSuccessful" id="user_created">{{statusText}}</div>
       <div v-else-if="!isSuccessful" id="user_not_created">{{statusText}}</div>
     </form>
+  </div>
   </div>
 </template>
 <script lang="ts">
@@ -52,11 +53,25 @@ body,
   height: 100vh;
   display: unset;
 }
+.login_card{
+  box-shadow: 0 0 50px #ccc;
+  background-color: colors.$white-color;
+  margin: 40px auto;
+  width: 25%;
+  border-radius: 1.5rem;
+  h2{
+    text-align: center;
+    padding: 20px;
+  }
 #logInForm {
-  margin: 0 auto;
-  width: 20%;
+
+  padding: 20px;
+
   form {
+    margin: 0 auto;
     color: colors.$color-primary;
+
+
     div {
       color: colors.$color-primary;
       text-align: start;
@@ -65,7 +80,7 @@ body,
       h2{
         padding: 20px;
         color: colors.$text-color;
-        font-size: 40px;
+        font-size: 30px;
         font-weight: bold;
       }
       input {
@@ -107,5 +122,5 @@ body,
     }
   }
 }
-
+}
 </style>

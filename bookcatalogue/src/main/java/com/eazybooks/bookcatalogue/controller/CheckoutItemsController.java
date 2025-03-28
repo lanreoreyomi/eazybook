@@ -73,7 +73,7 @@ import org.springframework.web.client.RestTemplate;
             username))
         .findFirst()
         .orElse(null);// Or provide a default value
-
+    System.out.println("Already added");
     if (alreadyAdded != null) {
       return new ResponseEntity<>(bookByIsbn.getTitle()+ " already added to checkout", HttpStatus.FORBIDDEN);
     }
