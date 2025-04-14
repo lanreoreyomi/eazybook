@@ -61,9 +61,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       } catch (Exception e) {
         log.error("Error validating user token. User should be logged in for token to be validated{}", e.getMessage());
       }
-
-
-
     }
     filterChain.doFilter(request, response);
 

@@ -58,7 +58,7 @@ body,
   background-color: colors.$white-color;
   margin: 40px auto;
   width: 25%;
-  border-radius: 1.5rem;
+  border-radius: 10px;
   h2{
     text-align: center;
     padding: 20px;

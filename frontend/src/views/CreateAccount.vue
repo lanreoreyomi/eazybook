@@ -43,7 +43,7 @@ export default {
     const isSuccessful = computed(() => {
     const isSuccess = userStore.statusCode === 201;
       if (isSuccess) {
-        router.push("/login");
+       router.push("/login");
       }
 
       return isSuccess;
@@ -57,8 +57,8 @@ export default {
       createUser: userStore.createUser,
       isSuccessful,
       statusText,
-      signUpMessage
-    };
+      signUpMessage,
+     };
   }
 };
 </script>
@@ -76,9 +76,10 @@ body,
   display: unset;
 }
 #create-account-form {
-  padding: 20px;
+  padding: 40px;
   justify-items: center;
   margin: 0 auto;
+
   div {
     h2 {
       text-align: center;
@@ -90,6 +91,11 @@ body,
   }
 
   form {
+    box-shadow: 0 0 50px #ccc;
+    background-color: colors.$white-color;
+    width: 35%;
+    border-radius: 10px;
+    padding: 50px;
     color: colors.$color-primary;
     div {
       color: colors.$color-primary;
