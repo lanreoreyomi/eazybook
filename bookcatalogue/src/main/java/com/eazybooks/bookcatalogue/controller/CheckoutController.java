@@ -1,13 +1,13 @@
 package com.eazybooks.bookcatalogue.controller;
 
+import com.eazybooks.bookcatalogue.interfaces.IBookCatalogue;
+import com.eazybooks.bookcatalogue.interfaces.ICheckout;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.Checkout;
 import com.eazybooks.bookcatalogue.model.CheckoutInfo;
 import com.eazybooks.bookcatalogue.model.CheckoutStats;
-import com.eazybooks.bookcatalogue.service.BookCatalogueService;
-import com.eazybooks.bookcatalogue.service.CheckoutItemsService;
-import com.eazybooks.bookcatalogue.service.CheckoutService;
-import com.eazybooks.bookcatalogue.service.CheckoutStatsService;
+import com.eazybooks.bookcatalogue.service.ICheckoutItems;
+import com.eazybooks.bookcatalogue.service.IcheckoutStats;
 import com.eazybooks.bookcatalogue.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,17 +30,18 @@ import org.springframework.web.client.RestTemplate;
 public class CheckoutController {
 
   Logger logger = LoggerFactory.getLogger(CheckoutController.class);
-  private final CheckoutService checkoutService;
-  private final BookCatalogueService bookCatalogueService;
-  final CheckoutStatsService checkoutStatsService;
-  final CheckoutItemsService checkoutItemsService;
+
+  private final ICheckout checkoutService;
+  private final IBookCatalogue bookCatalogueService;
+  final IcheckoutStats checkoutStatsService;
+  final ICheckoutItems checkoutItemsService;
   private final DiscoveryClient discoveryClient;
   RestTemplate restTemplate = new RestTemplate();
   private final VerificationService verificationService;
 
-  public CheckoutController(CheckoutService checkoutService,
-      BookCatalogueService bookCatalogueService, DiscoveryClient discoveryClient,
-      CheckoutStatsService checkoutStatsService, CheckoutItemsService checkoutItemsService,
+  public CheckoutController(ICheckout checkoutService,
+      IBookCatalogue bookCatalogueService, DiscoveryClient discoveryClient,
+      IcheckoutStats checkoutStatsService, ICheckoutItems checkoutItemsService,
       VerificationService verificationService) {
     this.checkoutService = checkoutService;
     this.bookCatalogueService = bookCatalogueService;

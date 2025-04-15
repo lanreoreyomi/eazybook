@@ -1,18 +1,18 @@
 package com.eazybooks.bookcatalogue.service;
 
 import com.eazybooks.bookcatalogue.model.CheckoutStats;
-import com.eazybooks.bookcatalogue.model.CheckoutStatsImpl;
+import com.eazybooks.bookcatalogue.interfaces.ICheckoutStats;
 import com.eazybooks.bookcatalogue.repository.CheckoutStatsRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-public class CheckoutStatsService implements CheckoutStatsImpl {
+public class IcheckoutStats implements ICheckoutStats {
 
    CheckoutStatsRepository checkoutStatsRepository;
 
-  public CheckoutStatsService(CheckoutStatsRepository checkoutStatsRepository) {
+  public IcheckoutStats(CheckoutStatsRepository checkoutStatsRepository) {
     this.checkoutStatsRepository = checkoutStatsRepository;
   }
 

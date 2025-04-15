@@ -1,5 +1,6 @@
 package com.eazybooks.bookcatalogue.controller;
 
+import com.eazybooks.bookcatalogue.interfaces.IBookCatalogue;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
 import com.eazybooks.bookcatalogue.service.VerificationService;
@@ -9,7 +10,9 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
- import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
  import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/bookcatalogue/")
@@ -25,10 +27,10 @@ import org.springframework.web.client.RestTemplate;
 
   Logger logger = LoggerFactory.getLogger(BookCatalogueController.class);
 
-  private final BookCatalogueService bookCatalogueService;
+  private final IBookCatalogue bookCatalogueService;
   private final VerificationService verificationService;
 
-  public BookCatalogueController(BookCatalogueService bookCatalogueService,
+  public BookCatalogueController(IBookCatalogue bookCatalogueService,
       VerificationService verificationService) {
     this.bookCatalogueService = bookCatalogueService;
     this.verificationService = verificationService;
@@ -76,8 +78,8 @@ import org.springframework.web.client.RestTemplate;
     return new ResponseEntity<>(addedBook.getTitle() + " added successfully", HttpStatus.CREATED);
 
   }
-  @GetMapping
-  public ResponseEntity<List<BookCatalogue>> getAllBookCatalogues(HttpServletRequest request) {
+  @GetMapping("{pageNumber}")
+  public ResponseEntity<List<BookCatalogue>> getAllBookCatalogues(HttpServletRequest request, @PathVariable int pageNumber) {
     //verifies token
     logger.info("request from user: " + request.toString());
     try {
@@ -92,8 +94,9 @@ import org.springframework.web.client.RestTemplate;
       logger.error("Error validating user token");
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+    Pageable pageRequest = PageRequest.of(pageNumber, 5);
       try{
-        List<BookCatalogue> books = bookCatalogueService.getAllCatalogue();
+        List<BookCatalogue> books = bookCatalogueService.getAllCatalogue(pageRequest);
         return ResponseEntity.ok(books);
       }catch(Exception e) {
         logger.error(e.getMessage());

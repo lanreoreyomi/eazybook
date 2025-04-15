@@ -1,15 +1,18 @@
 package com.eazybooks.bookcatalogue.service;
 
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
-import com.eazybooks.bookcatalogue.model.BookCatalogueImpl;
+import com.eazybooks.bookcatalogue.interfaces.IBookCatalogue;
 import com.eazybooks.bookcatalogue.repository.BookCatalogueRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-public class BookCatalogueService implements BookCatalogueImpl {
+public class BookCatalogueService implements IBookCatalogue {
 
   final BookCatalogueRepository bookCatalogueRepository;
 
@@ -18,8 +21,9 @@ public class BookCatalogueService implements BookCatalogueImpl {
   }
 
   @Override
-  public List<BookCatalogue> getAllCatalogue() {
-    return bookCatalogueRepository.findAll();
+  public List<BookCatalogue> getAllCatalogue(Pageable pageable) {
+    final Page<BookCatalogue> all = bookCatalogueRepository.findAll(pageable);
+    return all.stream().collect(Collectors.toList());
   }
 
   @Override
@@ -30,11 +34,6 @@ public class BookCatalogueService implements BookCatalogueImpl {
   @Override
   public BookCatalogue addBookToCatalogue(BookCatalogue book) {
     return bookCatalogueRepository.save(book);
-  }
-
-  @Override
-  public void deleteBookById(Long id) {
-     bookCatalogueRepository.deleteById(id);
   }
 
   @Override

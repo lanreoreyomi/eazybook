@@ -17,12 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.web.client.RestTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class BookCatalogueControllerTest {
@@ -146,7 +143,6 @@ class BookCatalogueControllerTest {
     verify(verificationService).verifyUserToken(request, username);
 
   }
-
   @Test
   void getAllBookCatalogues() {
 
@@ -159,14 +155,14 @@ class BookCatalogueControllerTest {
     request.setAttribute("Authorization", "Bearer " + validToken);
 
     when(verificationService.verifyUserToken(request, null)).thenReturn(verifyToken); // Mock the URL method
-    when(bookCatalogueService.getAllCatalogue()).thenReturn(books);
+    when(bookCatalogueService.getAllCatalogue(null)).thenReturn(null);
 
-    final ResponseEntity<List<BookCatalogue>> response = bookCatalogueController.getAllBookCatalogues(request);
+    final ResponseEntity<List<BookCatalogue>> response = bookCatalogueController.getAllBookCatalogues(request, 0);
     final List<BookCatalogue> body = response.getBody();
 
     assertEquals(body.size(), books.size());
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    verify(bookCatalogueService).getAllCatalogue();
+    verify(bookCatalogueService).getAllCatalogue(null);
     verify(verificationService).verifyUserToken(request, null);
 
   }

@@ -2,7 +2,7 @@ package com.eazybooks.bookcatalogue.controller;
 
 
 import com.eazybooks.bookcatalogue.model.CheckoutStats;
-import com.eazybooks.bookcatalogue.service.CheckoutStatsService;
+import com.eazybooks.bookcatalogue.service.IcheckoutStats;
 import com.eazybooks.bookcatalogue.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -22,18 +22,14 @@ import org.springframework.web.client.RestTemplate;
 public class CheckoutStatsController {
   Logger logger = LoggerFactory.getLogger(CheckoutStatsController.class);
 
-  final CheckoutStatsService checkoutStatsService;
+  final IcheckoutStats checkoutStatsService;
   private final VerificationService verificationService;
-  private final DiscoveryClient discoveryClient;
-  RestTemplate restTemplate = new RestTemplate();
 
-  public CheckoutStatsController(CheckoutStatsService checkoutStatsService,
-      VerificationService verificationService,
-      DiscoveryClient discoveryClient) {
+  public CheckoutStatsController(IcheckoutStats checkoutStatsService,
+      VerificationService verificationService) {
     this.checkoutStatsService = checkoutStatsService;
     this.verificationService = verificationService;
-    this.discoveryClient = discoveryClient;
-  }
+   }
 
   @GetMapping("/all")
   public ResponseEntity<CheckoutStats> getMaxCheckoutOut(HttpServletRequest request) {

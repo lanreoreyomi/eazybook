@@ -1,8 +1,8 @@
 package com.eazybooks.bookcatalogue.controller;
+import com.eazybooks.bookcatalogue.interfaces.IBookCatalogue;
+import com.eazybooks.bookcatalogue.interfaces.ICheckoutItems;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.CheckoutItems;
-import com.eazybooks.bookcatalogue.service.BookCatalogueService;
-import com.eazybooks.bookcatalogue.service.CheckoutItemsService;
 import com.eazybooks.bookcatalogue.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -18,19 +18,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/checkoutitems/")
  public class CheckoutItemsController {
   Logger logger = LoggerFactory.getLogger(CheckoutItemsController.class);
 
-  private final BookCatalogueService bookCatalogueService;
-  private final CheckoutItemsService checkoutItemsService;
+  private final IBookCatalogue bookCatalogueService;
+  private final ICheckoutItems checkoutItemsService;
   private final VerificationService verificationService;
 
-  public CheckoutItemsController(DiscoveryClient discoveryClient,
-      BookCatalogueService bookCatalogueService, CheckoutItemsService checkoutItemsService,
+  public CheckoutItemsController(
+      IBookCatalogue bookCatalogueService, ICheckoutItems checkoutItemsService,
       VerificationService verificationService) {
      this.bookCatalogueService = bookCatalogueService;
     this.checkoutItemsService = checkoutItemsService;

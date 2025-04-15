@@ -1,6 +1,7 @@
 package com.eazybooks.user.controller;
 
 import com.eazybooks.user.DTO.UsersDto;
+import com.eazybooks.user.interfaces.IUser;
 import com.eazybooks.user.model.CreateAccountRequest;
 import com.eazybooks.user.model.User;
 import com.eazybooks.user.service.VerificationService;
@@ -23,12 +24,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UserController {
 
   private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-  UserService userService;
+
+  IUser userService;
 
   private final VerificationService verificationService;
 
 
-  public UserController(UserService userService, VerificationService verificationService) {
+  public UserController(IUser userService, VerificationService verificationService) {
     this.userService = userService;
      this.verificationService = verificationService;
   }

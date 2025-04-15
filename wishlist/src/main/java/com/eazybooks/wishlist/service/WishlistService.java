@@ -1,7 +1,7 @@
 package com.eazybooks.wishlist.service;
 
 import com.eazybooks.wishlist.model.Wishlist;
-import com.eazybooks.wishlist.model.WishlistRepositoryImpl;
+import interfaces.IWishlist;
 import com.eazybooks.wishlist.repository.WishlistRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-public class WishlistService  implements WishlistRepositoryImpl {
+public class WishlistService implements IWishlist {
 
   WishlistRepository wishlistRepository;
 

@@ -1,7 +1,9 @@
-package com.eazybooks.user.model;
+package com.eazybooks.user.interfaces;
 
 
-public interface UserRepositoryImpl {
+import com.eazybooks.user.model.User;
+
+public interface IUser {
 
   User updateUser(User user);
   User findById(Long id);

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,9 +13,9 @@ import com.eazybooks.bookcatalogue.model.Checkout;
 import com.eazybooks.bookcatalogue.model.CheckoutInfo;
 import com.eazybooks.bookcatalogue.model.CheckoutStats;
 import com.eazybooks.bookcatalogue.service.BookCatalogueService;
-import com.eazybooks.bookcatalogue.service.CheckoutItemsService;
+import com.eazybooks.bookcatalogue.service.ICheckoutItems;
 import com.eazybooks.bookcatalogue.service.CheckoutService;
-import com.eazybooks.bookcatalogue.service.CheckoutStatsService;
+import com.eazybooks.bookcatalogue.service.IcheckoutStats;
 import com.eazybooks.bookcatalogue.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
@@ -28,7 +27,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -47,9 +45,9 @@ class CheckoutControllerTest {
   private BookCatalogueService bookCatalogueService;
 
   @Mock
-  private CheckoutStatsService checkoutStatsService;
+  private IcheckoutStats checkoutStatsService;
   @Mock
-  private CheckoutItemsService checkoutItemsService;
+  private ICheckoutItems checkoutItemsService;
 
   @Mock
   private RestTemplate restTemplate;

@@ -1,9 +1,9 @@
-package com.eazybooks.bookcatalogue.model;
+package com.eazybooks.bookcatalogue.interfaces;
 
+import com.eazybooks.bookcatalogue.model.CheckoutItems;
 import java.util.List;
-import java.util.Optional;
 
-public interface CheckoutItemsImpl {
+public interface ICheckoutItems {
   CheckoutItems save(CheckoutItems checkoutItems);
   List<CheckoutItems>  findCheckoutItemsByBookIsbn(Long bookId);
   List<CheckoutItems> findCheckoutItemsByUsername(String username);

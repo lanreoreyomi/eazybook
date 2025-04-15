@@ -1,9 +1,9 @@
-package com.eazybooks.wishlist.model;
+package interfaces;
 
+import com.eazybooks.wishlist.model.Wishlist;
 import java.util.List;
-import java.util.Optional;
 
-public interface WishlistRepositoryImpl {
+public interface IWishlist {
 
   Wishlist save(Wishlist wishlist);
   Wishlist findById(Long id);

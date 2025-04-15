@@ -1,7 +1,6 @@
 package com.eazybooks.bookcatalogue.service;
 
 import com.eazybooks.bookcatalogue.model.CheckoutItems;
-import com.eazybooks.bookcatalogue.model.CheckoutItemsImpl;
 import com.eazybooks.bookcatalogue.repository.CheckoutItemsRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -9,11 +8,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-public class CheckoutItemsService  implements CheckoutItemsImpl {
+public class ICheckoutItems implements com.eazybooks.bookcatalogue.interfaces.ICheckoutItems {
 
   CheckoutItemsRepository checkoutItemsRepository;
 
-  public CheckoutItemsService(CheckoutItemsRepository checkoutItemsRepository) {
+  public ICheckoutItems(CheckoutItemsRepository checkoutItemsRepository) {
     this.checkoutItemsRepository = checkoutItemsRepository;
   }
 

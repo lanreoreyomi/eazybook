@@ -5,6 +5,7 @@ import com.eazybooks.wishlist.model.RemoveBookFromWishListRequest;
 import com.eazybooks.wishlist.model.Wishlist;
 import com.eazybooks.wishlist.service.VerificationService;
 import com.eazybooks.wishlist.service.WishlistService;
+import interfaces.IWishlist;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
@@ -24,10 +25,10 @@ import org.springframework.web.bind.annotation.RestController;
  public class WishlistController {
 
   private static final Logger logger = LoggerFactory.getLogger(WishlistController.class);
-  private final WishlistService wishlistService;
+  private final IWishlist wishlistService;
   private final VerificationService verificationService;
 
-  public WishlistController(WishlistService wishlistService,
+  public WishlistController(IWishlist wishlistService,
       VerificationService verificationService) {
     this.wishlistService = wishlistService;
     this.verificationService = verificationService;

@@ -1,15 +1,15 @@
-package com.eazybooks.bookcatalogue.model;
+package com.eazybooks.bookcatalogue.interfaces;
 
+import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import java.util.List;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 
-public interface BookCatalogueImpl {
+public interface IBookCatalogue {
 
-  List<BookCatalogue> getAllCatalogue();
+  List<BookCatalogue> getAllCatalogue(Pageable pageable);
   List<BookCatalogue> getBookByAuthor(String author);
   BookCatalogue addBookToCatalogue(BookCatalogue book);
   BookCatalogue updateBook(BookCatalogue book);
-  void deleteBookById(Long id);
   BookCatalogue getBookById(Long id);
   BookCatalogue getBookByIsbn(Long isbn);
  }

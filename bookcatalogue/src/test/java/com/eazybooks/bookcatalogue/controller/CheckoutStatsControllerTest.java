@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.eazybooks.bookcatalogue.model.CheckoutStats;
-import com.eazybooks.bookcatalogue.service.CheckoutStatsService;
+import com.eazybooks.bookcatalogue.service.IcheckoutStats;
 import com.eazybooks.bookcatalogue.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ class CheckoutStatsControllerTest {
   private CheckoutStatsController checkoutStatsController;
 
   @Mock
-  private CheckoutStatsService checkoutStatsService;
+  private IcheckoutStats checkoutStatsService;
 
   @Mock
   private VerificationService verificationService;

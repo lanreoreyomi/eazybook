@@ -1,17 +1,15 @@
 package com.eazybooks.bookcatalogue.service;
 
 import com.eazybooks.bookcatalogue.model.Checkout;
-import com.eazybooks.bookcatalogue.model.CheckoutImpl;
+import com.eazybooks.bookcatalogue.interfaces.ICheckout;
 import com.eazybooks.bookcatalogue.repository.CheckoutRepository;
 import jakarta.transaction.Transactional;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-public class CheckoutService implements CheckoutImpl {
+public class CheckoutService implements ICheckout {
 
   private final CheckoutRepository checkoutRepository;
 

@@ -1,9 +1,10 @@
-package com.eazybooks.bookcatalogue.model;
+package com.eazybooks.bookcatalogue.interfaces;
 
 
+import com.eazybooks.bookcatalogue.model.Checkout;
 import java.util.List;
 
-public interface CheckoutImpl {
+public interface ICheckout {
 
   Checkout save(Checkout checkout);
 

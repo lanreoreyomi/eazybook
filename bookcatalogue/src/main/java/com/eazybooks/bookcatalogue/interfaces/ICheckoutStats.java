@@ -1,7 +1,9 @@
-package com.eazybooks.bookcatalogue.model;
+package com.eazybooks.bookcatalogue.interfaces;
 
 
-public interface CheckoutStatsImpl {
+import com.eazybooks.bookcatalogue.model.CheckoutStats;
+
+public interface ICheckoutStats {
   CheckoutStats save(CheckoutStats checkoutStats);
   CheckoutStats findByIsbn(Long isbn);
   int updateStats(CheckoutStats checkoutStats);
