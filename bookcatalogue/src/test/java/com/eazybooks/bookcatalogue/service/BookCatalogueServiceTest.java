@@ -4,9 +4,9 @@ import com.eazybooks.bookcatalogue.DTO.VerifyToken;
 import com.eazybooks.bookcatalogue.DTO.VerifyUser;
 import com.eazybooks.bookcatalogue.DTO.VerifyUserRole;
 import com.eazybooks.bookcatalogue.enums.ROLE;
-import com.eazybooks.bookcatalogue.exceptions.*; // Import all custom exceptions
-import com.eazybooks.bookcatalogue.model.BookCatalogue; // Assuming model package
-import com.eazybooks.bookcatalogue.repository.BookCatalogueRepository; // Assuming repository package
+import com.eazybooks.bookcatalogue.exceptions.*;
+import com.eazybooks.bookcatalogue.model.BookCatalogue;
+import com.eazybooks.bookcatalogue.repository.BookCatalogueRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +38,7 @@ class BookCatalogueServiceTest {
   private VerificationService verificationService;
 
 
-  @InjectMocks // Creates BookCatalogueService and injects the mocks
+  @InjectMocks
   private BookCatalogueService bookCatalogueService;
 
 
@@ -60,7 +59,7 @@ class BookCatalogueServiceTest {
   void setUp() {
     sampleVerifyToken = new VerifyToken(validToken, username);
     sampleVerifyUser = new VerifyUser(validToken, username);
-    sampleVerifyUserRoleAdmin = new VerifyUserRole(adminUsername, validToken); // Assuming role check uses admin user
+    sampleVerifyUserRoleAdmin = new VerifyUserRole(adminUsername, validToken);
     sampleVerifyUserRoleUser = new VerifyUserRole(username, validToken);
 
 
@@ -114,13 +113,12 @@ class BookCatalogueServiceTest {
   void getAllCatalogue_TokenValidationFalse_LogsErrorAndReturnsList() throws AuthorizationHeaderNotFound {
 
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.FALSE);
-    when(bookCatalogueRepository.findAll()).thenReturn(List.of(sampleBook1)); // Still expect repo call
-
+    when(bookCatalogueRepository.findAll()).thenReturn(List.of(sampleBook1));
     List<BookCatalogue> result = bookCatalogueService.getAllCatalogue(sampleVerifyToken);
 
 
      assertNotNull(result);
-    assertEquals(1, result.size()); // Check that findAll was still called
+    assertEquals(1, result.size());
     verify(verificationService, times(1)).verifyUserToken(sampleVerifyToken);
     verify(bookCatalogueRepository, times(1)).findAll();
    }
@@ -129,7 +127,7 @@ class BookCatalogueServiceTest {
   @Test
   void getAllCatalogue_TokenVerificationThrowsException_ThrowsInternalServerException() throws AuthorizationHeaderNotFound {
     when(verificationService.verifyUserToken(any(VerifyToken.class)))
-        .thenThrow(new AuthorizationHeaderNotFound("Auth header missing")); // Example exception
+        .thenThrow(new AuthorizationHeaderNotFound("Auth header missing"));
     InternalServerException exception = assertThrows(InternalServerException.class, () -> {
       bookCatalogueService.getAllCatalogue(sampleVerifyToken);
     });
@@ -145,8 +143,8 @@ class BookCatalogueServiceTest {
     when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
     when(verificationService.verifyUserRole(any(VerifyUserRole.class))).thenReturn(ROLE.ADMIN.toString());
-    when(bookCatalogueRepository.findByBookByIsbn(sampleBook1.getIsbn())).thenReturn(Optional.empty()); // Book doesn't exist
-    when(bookCatalogueRepository.save(any(BookCatalogue.class))).thenReturn(sampleBook1); // Return saved book
+    when(bookCatalogueRepository.findByBookByIsbn(sampleBook1.getIsbn())).thenReturn(Optional.empty());
+    when(bookCatalogueRepository.save(any(BookCatalogue.class))).thenReturn(sampleBook1);
 
      BookCatalogue result = bookCatalogueService.addBookToCatalogue(adminToken, sampleBook1);
 
@@ -193,7 +191,7 @@ class BookCatalogueServiceTest {
     UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
       bookCatalogueService.addBookToCatalogue(sampleVerifyToken, sampleBook1);
     });
-    assertEquals("User not found", exception.getMessage()); // Matches the specific throw
+    assertEquals("User not found", exception.getMessage());
     verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(verificationService, never()).verifyUserToken(any());
     verify(verificationService, never()).verifyUserRole(any());
@@ -213,7 +211,7 @@ class BookCatalogueServiceTest {
     UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
       bookCatalogueService.addBookToCatalogue(sampleVerifyToken, sampleBook1);
     });
-    assertEquals("User not found", exception.getMessage()); // Matches the catch block's throw
+    assertEquals("User not found", exception.getMessage());
     verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(verificationService, never()).verifyUserToken(any());
 
@@ -249,7 +247,7 @@ class BookCatalogueServiceTest {
     InternalServerException exception = assertThrows(InternalServerException.class, () -> {
       bookCatalogueService.addBookToCatalogue(sampleVerifyToken, sampleBook1);
     });
-    assertEquals("Role service down", exception.getMessage()); // Exception message is propagated
+    assertEquals("Role service down", exception.getMessage());
     verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
     verify(verificationService, times(1)).verifyUserRole(any(VerifyUserRole.class));
@@ -267,7 +265,7 @@ class BookCatalogueServiceTest {
     when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
     when(verificationService.verifyUserRole(any(VerifyUserRole.class))).thenReturn(ROLE.ADMIN.toString());
-    when(bookCatalogueRepository.findByBookByIsbn(sampleBook1.getIsbn())).thenReturn(Optional.of(sampleBook1)); // Book *does* exist
+    when(bookCatalogueRepository.findByBookByIsbn(sampleBook1.getIsbn())).thenReturn(Optional.of(sampleBook1));
 
 
     BookExistException exception = assertThrows(BookExistException.class, () -> {
