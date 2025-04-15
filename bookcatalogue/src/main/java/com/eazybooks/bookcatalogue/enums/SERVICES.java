@@ -1,4 +1,4 @@
-package com.eazybooks.bookcatalogue.model;
+package com.eazybooks.bookcatalogue.enums;
 
 public enum SERVICES {
     USER,

@@ -1,10 +1,16 @@
 package com.eazybooks.bookcatalogue.controller;
 
 
+import com.eazybooks.bookcatalogue.DTO.VerifyToken;
+import com.eazybooks.bookcatalogue.exceptions.AuthorizationHeaderNotFound;
+import com.eazybooks.bookcatalogue.exceptions.InternalServerException;
+import com.eazybooks.bookcatalogue.exceptions.InvalidUserRequestException;
+import com.eazybooks.bookcatalogue.exceptions.InvalidUserTokenException;
 import com.eazybooks.bookcatalogue.model.CheckoutStats;
 import com.eazybooks.bookcatalogue.service.IcheckoutStats;
 import com.eazybooks.bookcatalogue.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -32,17 +38,24 @@ public class CheckoutStatsController {
    }
 
   @GetMapping("/all")
-  public ResponseEntity<CheckoutStats> getMaxCheckoutOut(HttpServletRequest request) {
-    //verifies token
+  public ResponseEntity<CheckoutStats> getMaxCheckoutOut(HttpServletRequest request)
+      throws AuthorizationHeaderNotFound {
+
+    if ( Objects.isNull(request)) {
+      logger.warn("Username is null");
+      throw new InvalidUserRequestException("Username is null");
+    }
+
     try {
-      ResponseEntity<Boolean> tokenValid = verificationService.verifyUserToken(request,null);
-      if (!Boolean.TRUE.equals(tokenValid.getBody())) {
+      VerifyToken verifyToken = new VerifyToken(request.getHeader("Authorization"));
+      Boolean tokenValid = verificationService.verifyUserToken(verifyToken);
+      if (!Boolean.TRUE.equals(tokenValid)) {
         logger.error("Error validating token");
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        throw new InvalidUserTokenException("Error validating token");
       }
     } catch (Exception e) {
       logger.error(e.getMessage());
-      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new InternalServerException(e.getMessage());
     }
 
     final CheckoutStats maxCheckoutStats = checkoutStatsService.getAllCheckoutStats();

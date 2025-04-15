@@ -1,6 +1,6 @@
 package com.eazybooks.bookcatalogue.service;
 
-import com.eazybooks.bookcatalogue.model.VerifyToken;
+import com.eazybooks.bookcatalogue.DTO.VerifyToken;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.slf4j.Logger;

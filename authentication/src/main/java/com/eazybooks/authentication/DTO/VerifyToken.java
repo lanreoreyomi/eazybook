@@ -1,4 +1,4 @@
-package com.eazybooks.authentication.model;
+package com.eazybooks.authentication.DTO;
 
 public class VerifyToken {
 

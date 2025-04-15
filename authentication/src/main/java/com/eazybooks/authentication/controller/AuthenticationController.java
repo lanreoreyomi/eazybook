@@ -3,11 +3,11 @@ package com.eazybooks.authentication.controller;
 import com.eazybooks.authentication.model.LoginRequest;
 import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
 import com.eazybooks.authentication.model.UserDto.CreateAccountRequest;
-import com.eazybooks.authentication.model.VerifyToken;
+import com.eazybooks.authentication.DTO.VerifyToken;
 import com.eazybooks.authentication.service.AuthenticatorService;
-import com.eazybooks.authentication.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.ServiceInstance;
@@ -32,16 +32,14 @@ import org.springframework.web.client.RestTemplate;
 public class AuthenticationController {
 
   private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
-  private final JwtService jwtService;
   AuthenticatorService authenticatorService;
   private final DiscoveryClient discoveryClient;
   RestTemplate restTemplate = new RestTemplate();
 
   public AuthenticationController(AuthenticatorService authenticatorService,
-      DiscoveryClient discoveryClient, JwtService jwtService) {
+      DiscoveryClient discoveryClient) {
     this.authenticatorService = authenticatorService;
     this.discoveryClient = discoveryClient;
-    this.jwtService = jwtService;
   }
 
   @PostMapping("/create-account")
@@ -173,26 +171,62 @@ public class AuthenticationController {
     }
 
     try {
+      logger.info("Token validated successfully");
       boolean isValid = authenticatorService.isTokenValid(verifyToken.getToken());
 
       if (!isValid) {
         logger.warn("Token validation failed");
         return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
       }
-      //some request doesnt send a username
-      if (verifyToken.getUsername() != null) {
-        final String usernameFromToken = jwtService.extractUsername(verifyToken.getToken());
-        if (!verifyToken.getUsername().equals(usernameFromToken)) {
-          logger.warn("Token validation failed username in request doesnt match token");
-          return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
-        }
-      }
-
-      logger.info("Token validated successfully");
       return new ResponseEntity<>(true, HttpStatus.OK);
     } catch (Exception e) {
       logger.error("Error during token validation: {}", e.getMessage(), e);
       return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+
   }
+
+  @PostMapping("/{username}/verify-user")
+  public ResponseEntity<Boolean> verifyUserExists(@PathVariable String username, HttpServletRequest request) {
+    logger.info("Verify user request: {}", username);
+
+      if(Objects.isNull(request)){
+        logger.warn("Authorization header missing");
+        return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+      }
+
+      String authHeader = request.getHeader("Authorization");
+
+      if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        logger.warn("Authorization header missing or invalid");
+        return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+      }
+
+    String token = authHeader.substring(7);
+
+    try {
+      logger.info("Token validated successfully");
+      boolean isTokenValid = authenticatorService.isTokenValid(token);
+      if (!isTokenValid) {
+        logger.warn("Token validation failed");
+        return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
+      }
+      logger.info("Token validated successfully");
+
+      boolean isUserExists = authenticatorService.findByUsername(username);
+
+      if (!isUserExists) {
+        logger.warn("User does not exist");
+        return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+      }
+      logger.info("User verified successfully: {}");
+       return new ResponseEntity<>(true, HttpStatus.OK);
+    } catch (Exception e) {
+      logger.error("Error during token validation: {}", e.getMessage(), e);
+      return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+  }
+
 }
