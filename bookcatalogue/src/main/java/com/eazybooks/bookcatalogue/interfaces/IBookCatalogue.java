@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface IBookCatalogue {
 
-  List<BookCatalogue> getAllCatalogue(VerifyToken verifyToken);
+  List<BookCatalogue> getAllCatalogue(VerifyToken verifyTokenRequest);
    BookCatalogue addBookToCatalogue(VerifyToken verifyTokenRequest, BookCatalogue book)
        throws AuthorizationHeaderNotFound, BookExistException, BookNotFoundException;
   BookCatalogue updateBook(BookCatalogue book);
-  BookCatalogue getBookByIsbn(VerifyToken verifyToken, Long isbn)
+  BookCatalogue getBookByIsbn(VerifyToken verifyTokenRequest, Long isbn)
       throws BookNotFoundException, AuthorizationHeaderNotFound;
  }

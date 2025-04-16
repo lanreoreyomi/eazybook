@@ -113,7 +113,7 @@ export default defineComponent({
     color: colors.$text-color;
     border: 1px solid colors.$text-color;
     text-align: center;
-    width: 50%;
+    width: 40%;
     background-color: colors.$white-color;
     border-radius: 0.5rem;
     align-content: center;
@@ -137,7 +137,7 @@ export default defineComponent({
     font-size: 16px;
     color: colors.$white-color;
     text-align: center;
-    width: 50%;
+    width: 40%;
     background-color: colors.$text-color;
     border-radius: 0.5rem;
     align-content: center;

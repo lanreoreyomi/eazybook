@@ -57,7 +57,7 @@ body,
   box-shadow: 0 0 50px #ccc;
   background-color: colors.$white-color;
   margin: 40px auto;
-  width: 25%;
+  width: 35%;
   border-radius: 10px;
   h2{
     text-align: center;
@@ -65,12 +65,11 @@ body,
   }
   #logInForm {
 
-    padding: 20px;
+    padding: 30px;
 
     form {
       margin: 0 auto;
       color: colors.$color-primary;
-
 
       div {
         color: colors.$color-primary;
@@ -101,14 +100,14 @@ body,
       button {
         width: 100%;
         margin: 20px 0;
-        padding: 20px;
+        padding: 15px;
         text-align: center;
         justify-items: center;
         background-color: colors.$text-color;
         border: none;
         color: colors.$white-color;
         font-weight: 600;
-        border-radius: 1.5rem;
+        border-radius: 0.8rem;
         font-size: 20px;
       }
       #user_created {

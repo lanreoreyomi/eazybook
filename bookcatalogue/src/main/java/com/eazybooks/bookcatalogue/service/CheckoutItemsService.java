@@ -93,7 +93,7 @@ public class CheckoutItemsService implements ICheckoutItems {
 
     if(!Objects.isNull(alreadyAdded)){
       logger.error("Book already in checkout");
-      throw new BookExistInCheckoutException("Book already in checkout");
+      throw new BookExistInCheckoutException(bookByIsbn.getTitle() + " already in checkout");
     }
 
     try{

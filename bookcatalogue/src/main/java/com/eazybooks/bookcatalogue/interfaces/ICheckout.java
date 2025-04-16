@@ -16,9 +16,9 @@ public interface ICheckout {
 
   Checkout updateCheckout(Checkout checkout);
 
-  String handleBookReturns(String username, Long bookIsbn, VerifyToken tokenRequest)
+  String handleBookReturns(String username, Long bookIsbn, VerifyToken verifyTokenRequest)
       throws BookNotFoundException, AuthorizationHeaderNotFound;
 
-  List<CheckoutInfo> getCheckoutInfo(VerifyToken verifyToken, String username)
+  List<CheckoutInfo> getCheckoutInfo(VerifyToken verifyTokenRequest, String username)
       throws AuthorizationHeaderNotFound;
 }
