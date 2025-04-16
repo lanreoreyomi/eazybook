@@ -11,7 +11,7 @@ public interface IBookCatalogue {
 
   List<BookCatalogue> getAllCatalogue(VerifyToken verifyToken);
    BookCatalogue addBookToCatalogue(VerifyToken verifyTokenRequest, BookCatalogue book)
-       throws AuthorizationHeaderNotFound, BookExistException;
+       throws AuthorizationHeaderNotFound, BookExistException, BookNotFoundException;
   BookCatalogue updateBook(BookCatalogue book);
   BookCatalogue getBookByIsbn(VerifyToken verifyToken, Long isbn)
       throws BookNotFoundException, AuthorizationHeaderNotFound;

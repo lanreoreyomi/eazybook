@@ -68,7 +68,7 @@ public class VerificationService {
         if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
             authResponse.getBody())) {
           logger.warn("Token validation failed");
-
+          throw new InvalidUserTokenException("Token validation failed");
         }
         return true;
       } catch (Exception e) {
@@ -92,7 +92,6 @@ public class VerificationService {
          List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
          logger.info("Found {} instances of authentication service", instances.size());
 
-
          ServiceInstance instance = instances.get(0);
          String authUrl = instance.getUri() +"/auth/"+ verifyUserRequest.getUsername()+"/verify-user";
 
@@ -113,7 +112,7 @@ public class VerificationService {
          }
          return true;
        } catch (Exception e) {
-         throw new InternalServerException("Something went wrong validating user");
+         throw new UserNotFoundException("User not found");
        }
 
      }
@@ -163,7 +162,7 @@ public class VerificationService {
           }
         return authResponse.getBody();
       } catch (Exception e) {
-        throw new InternalServerException(e.getMessage());
+        throw new UserNotAdminException("User is not admin");
 
       }
 

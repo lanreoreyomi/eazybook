@@ -38,8 +38,8 @@ private LocalDate expectedReturnDate;
     this.nameOfBook = nameOfBook;
   }
 
-  public LocalDate getCheckoutDate() {
-    return checkoutDate;
+  public String getCheckoutDate() {
+    return String.valueOf(checkoutDate);
   }
 
   public void setCheckoutDate(LocalDate checkoutDate) {
@@ -54,14 +54,34 @@ private LocalDate expectedReturnDate;
     this.returnStatus = returnStatus;
   }
 
-  public LocalDate getExpectedReturnDate() {
-    return expectedReturnDate;
+  public String getExpectedReturnDate() {
+    return String.valueOf(expectedReturnDate);
   }
 
   public void setExpectedReturnDate(LocalDate expectedReturnDate) {
     this.expectedReturnDate = expectedReturnDate;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
+    CheckoutInfo that = (CheckoutInfo) o;
+    return nameOfBook.equals(that.nameOfBook) && bookIsbn.equals(that.bookIsbn)
+        && checkoutDate.equals(that.checkoutDate) && returnStatus.equals(that.returnStatus)
+        && expectedReturnDate.equals(that.expectedReturnDate);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = nameOfBook.hashCode();
+    result = 31 * result + bookIsbn.hashCode();
+    result = 31 * result + checkoutDate.hashCode();
+    result = 31 * result + returnStatus.hashCode();
+    result = 31 * result + expectedReturnDate.hashCode();
+    return result;
+  }
 }
 

@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
   @PostMapping("{username}/addbook")
   public ResponseEntity<String> addBookToCatalogues(@PathVariable String username,
       @RequestBody BookCatalogue book, HttpServletRequest request)
-      throws AuthorizationHeaderNotFound, BookExistException {
+      throws AuthorizationHeaderNotFound, BookExistException, BookNotFoundException {
 
     if (Objects.isNull(username)) {
       logger.error("Username is null");
