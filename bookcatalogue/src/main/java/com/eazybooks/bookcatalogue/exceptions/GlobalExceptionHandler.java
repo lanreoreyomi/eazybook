@@ -73,11 +73,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<String> handleBookExistInCheckoutException(
       BookExistInCheckoutException ex) {
     logger.error(ex.getMessage());
-    return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-  }  @ExceptionHandler(UserNotFoundException.class)
+    return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+  }
+  @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<String> handleUserNotFoundException(
       UserNotFoundException ex) {
     logger.error(ex.getMessage());
     return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
   }
+
+
 }

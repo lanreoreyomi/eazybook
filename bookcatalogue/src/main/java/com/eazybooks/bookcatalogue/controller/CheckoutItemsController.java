@@ -1,5 +1,6 @@
 package com.eazybooks.bookcatalogue.controller;
 import com.eazybooks.bookcatalogue.DTO.VerifyToken;
+import com.eazybooks.bookcatalogue.enums.STRINGENUMS;
 import com.eazybooks.bookcatalogue.exceptions.AuthorizationHeaderNotFound;
 import com.eazybooks.bookcatalogue.exceptions.BookExistInCheckoutException;
 import com.eazybooks.bookcatalogue.exceptions.BookNotFoundException;
@@ -31,173 +32,71 @@ import org.springframework.web.bind.annotation.RestController;
  public class CheckoutItemsController {
   Logger logger = LoggerFactory.getLogger(CheckoutItemsController.class);
 
-  private final IBookCatalogue bookCatalogueService;
   private final ICheckoutItems checkoutItemsService;
-  private final VerificationService verificationService;
 
-  public CheckoutItemsController(
-      IBookCatalogue bookCatalogueService, ICheckoutItems checkoutItemsService,
-      VerificationService verificationService) {
-     this.bookCatalogueService = bookCatalogueService;
+  public CheckoutItemsController(ICheckoutItems checkoutItemsService) {
     this.checkoutItemsService = checkoutItemsService;
-    this.verificationService = verificationService;
+
   }
-//
-//  @PostMapping("{username}/{bookisbn}/add")
-//  private ResponseEntity<String> addBookToCheckout(@PathVariable String username, @PathVariable Long bookisbn, HttpServletRequest request)
-//      throws AuthorizationHeaderNotFound {
-//    logger.info("Adding to book checkout");
-//    //verifies token
-//    if (Objects.isNull(username)) {
-//      logger.warn("Username is null");
-//     throw new InvalidUserRequestException("Username is null");
-//    }
-//
-//    try {
-//
-//      VerifyToken verifyToken = new VerifyToken(request.getHeader("Authorization"), username);
-//      Boolean tokenValid = verificationService.verifyUserToken(verifyToken);
-//      if (!Boolean.TRUE.equals(tokenValid)) {
-//        logger.error("Error validating token");
-//       throw new InvalidUserTokenException("Error validating token");
-//      }
-//    } catch (Exception e) {
-//      logger.error(e.getMessage());
-//      throw new InternalServerException(e.getMessage());
-//    }
-//
-//    BookCatalogue bookByIsbn =null;
-//    try {
-//      bookByIsbn = bookCatalogueService.getBookByIsbn(bookisbn);
-//      if (bookByIsbn == null) {
-//        throw new BookNotFoundException("Book not found");
-//       }
-//    } catch (Exception | BookNotFoundException e) {
-//      logger.error(e.getMessage());
-//      throw new InternalServerException(e.getMessage());
-//    }
-//
-//    final List<CheckoutItems> checkoutItemsByBookIsbn = checkoutItemsService.findCheckoutItemsByBookIsbn(
-//        bookisbn);
-//
-//    final CheckoutItems alreadyAdded = checkoutItemsByBookIsbn.stream()
-//        .filter(item -> item.getBookIsbn().equals(bookisbn) && Objects.equals(item.getUsername(),
-//            username))
-//        .findFirst()
-//        .orElseThrow(()-> new BookExistInCheckoutException("Book already in checkout"));
-//
-//    try{
-//      checkoutItemsService.save(new CheckoutItems(username, bookisbn));
-//      return new ResponseEntity<>("Added" + bookByIsbn.getTitle()+ " to checkout", HttpStatus.CREATED);
-//    } catch (Exception e) {
-//      logger.error(e.getMessage());
-//      throw new InternalServerException(e.getMessage());    }
-//  }
-//
-//  @PostMapping("{username}/{bookisbn}/remove")
-//  private ResponseEntity<String> removeBookFromCheckout(@PathVariable String username, @PathVariable Long bookisbn, HttpServletRequest request)
-//      throws AuthorizationHeaderNotFound {
-//    logger.info("Adding to book checkout");
-//
-//    if (Objects.isNull(username) || Objects.isNull(bookisbn) || Objects.isNull(request)) {
-//      logger.warn("Username is null");
-//      throw new InvalidUserRequestException("Username is null");
-//    }
-//
-//    try {
-//      VerifyToken verifyToken = new VerifyToken(request.getHeader("Authorization"), username);
-//      Boolean tokenValid = verificationService.verifyUserToken(verifyToken);
-//      if (!Boolean.TRUE.equals(tokenValid)) {
-//        logger.error("Error validating token");
-//        throw new InvalidUserTokenException("Error validating token");
-//      }
-//    } catch (Exception e) {
-//      logger.error(e.getMessage());
-//      throw new InternalServerException(e.getMessage());
-//    }
-//
-//    BookCatalogue bookByIsbn = null;
-//    try {
-//      bookByIsbn = bookCatalogueService.getBookByIsbn(bookisbn);
-//      if (bookByIsbn == null) {
-//       throw new BookNotFoundException("Book not found");
-//      }
-//    } catch (Exception | BookNotFoundException e) {
-//      logger.error(e.getMessage());
-//      throw new InternalServerException(e.getMessage());
-//    }
-//
-//    final List<CheckoutItems> checkoutItemsByBookIsbn = checkoutItemsService.findCheckoutItemsByBookIsbn(
-//        bookisbn);
-//
-//    final CheckoutItems alreadyAdded = checkoutItemsByBookIsbn.stream()
-//        .filter(item -> item.getBookIsbn().equals(bookisbn) && Objects.equals(item.getUsername(),
-//            username))
-//        .findFirst()
-//        .orElseThrow(()-> new BookExistInCheckoutException("Book already in checkout"));// Or provide a default value
-//
-//    try {
-//      checkoutItemsService.deleteCheckoutItemsByBookIsbn(alreadyAdded.getBookIsbn());
-//      logger.info("Checkout items  deleted");
-//      return new ResponseEntity<>(bookByIsbn.getTitle() +"removed book from checkout", HttpStatus.OK);
-//    } catch (Exception e) {
-//      logger.error("Something went wrong deleting book", e.getMessage());
-//      throw new InternalServerException(e.getMessage());
-//    }
-//  }
-//
-//  @GetMapping("/{username}/all")
-//  private ResponseEntity<List<BookCatalogue>> getAllCheckout(@PathVariable String username, HttpServletRequest request)
-//      throws AuthorizationHeaderNotFound {
-//
-//    //verifies token
-//    if (Objects.isNull(username) || Objects.isNull(request)) {
-//      logger.warn("Username is null");
-//      throw new InvalidUserRequestException("Username is null");
-//    }
-//
-//    try {
-//      VerifyToken verifyToken = new VerifyToken(request.getHeader("Authorization"), username);
-//      Boolean tokenValid = verificationService.verifyUserToken(verifyToken);
-//      if (!Boolean.TRUE.equals(tokenValid)) {
-//        logger.error("Error validating token");
-//        throw new InvalidUserTokenException("Error validating token");
-//      }
-//    } catch (Exception e) {
-//      logger.error(e.getMessage());
-//      throw new InternalServerException(e.getMessage());
-//    }
-//
-//     List<CheckoutItems> checkoutItemsByusername = null;
-//
-//    try {
-//      checkoutItemsByusername = checkoutItemsService.findCheckoutItemsByUsername(username);
-//
-//      if (checkoutItemsByusername == null) {
-//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//      }
-//
-//    } catch (Exception e) {
-//    logger.warn("Something went wrong getting checkout items");
-//    throw  new InternalServerException(e.getMessage());
-//    }
-//
-//    List<BookCatalogue> bookCheckoutItems = new ArrayList<>();
-//
-//    checkoutItemsByusername.forEach(item -> {
-//      if(item.getUsername().equals(username)) {
-//        final BookCatalogue bookByIsbn;
-//        try {
-//          bookByIsbn = bookCatalogueService.getBookByIsbn(item.getBookIsbn());
-//        } catch (BookNotFoundException e) {
-//          throw new InternalServerException(e.getMessage());
-//        }
-//        bookCheckoutItems.add(0, bookByIsbn);
-//      }
-//
-//    });
-//
-//    return new ResponseEntity<>(bookCheckoutItems, HttpStatus.CREATED);
+
+  @PostMapping("{username}/{bookisbn}/add")
+  private ResponseEntity<String> addBookToCheckout(@PathVariable String username, @PathVariable Long bookisbn, HttpServletRequest request)
+      throws AuthorizationHeaderNotFound, BookNotFoundException {
+    logger.info("Adding to book checkout");
+    //verifies token
+    if (Objects.isNull(username)) {
+      logger.warn("Username is null");
+     throw new InvalidUserRequestException("Username is null");
+    }
+
+    VerifyToken verifyToken = new VerifyToken(request.getHeader("Authorization"), username);
+
+    final String response = checkoutItemsService.addBookItemsToCheckout(verifyToken, bookisbn);
+
+    if(response.equals(STRINGENUMS.SUCCESS.toString())){
+      return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+    return new ResponseEntity<>("Error adding book to checkout", HttpStatus.INTERNAL_SERVER_ERROR);
   }
+
+  @GetMapping("/{username}/all")
+  private ResponseEntity<List<BookCatalogue>> getAllCheckout(@PathVariable String username, HttpServletRequest request)
+      throws AuthorizationHeaderNotFound {
+
+    //verifies token
+    if (Objects.isNull(username) || Objects.isNull(request)) {
+      logger.warn("Username is null");
+      throw new InvalidUserRequestException("Username is null");
+    }
+VerifyToken verifyToken = new VerifyToken(request.getHeader("Authorization"), username);
+
+    final List<BookCatalogue> checkoutItems = checkoutItemsService.checkoutItemsForUser(
+        verifyToken);
+
+    return new ResponseEntity<>(checkoutItems, HttpStatus.OK);
+
+  }
+
+  @PostMapping("{username}/{bookisbn}/remove")
+  private ResponseEntity<String> removeBookFromCheckout(@PathVariable String username, @PathVariable Long bookisbn, HttpServletRequest request)
+      throws AuthorizationHeaderNotFound, BookNotFoundException {
+    logger.info("Adding to book checkout");
+
+    if (Objects.isNull(username) || Objects.isNull(bookisbn) || Objects.isNull(request)) {
+      logger.warn("Username is null");
+      throw new InvalidUserRequestException("Username is null");
+    }
+
+    VerifyToken verifyToken = new VerifyToken(request.getHeader("Authorization"), username);
+    final String response = checkoutItemsService.removeCheckoutItems(verifyToken, bookisbn);
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
+
+  }
+
+
+}
+
+
 
 

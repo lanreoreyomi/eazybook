@@ -114,25 +114,10 @@ class BookCatalogueServiceTest {
 
 
   @Test
-  void getAllCatalogue_TokenValidationFalse_LogsErrorAndReturnsList() throws AuthorizationHeaderNotFound {
-
-    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.FALSE);
-    when(bookCatalogueRepository.findAll()).thenReturn(List.of(sampleBook1));
-    List<BookCatalogue> result = bookCatalogueService.getAllCatalogue(sampleVerifyToken);
-
-
-     assertNotNull(result);
-    assertEquals(1, result.size());
-    verify(verificationService, times(1)).verifyUserToken(sampleVerifyToken);
-    verify(bookCatalogueRepository, times(1)).findAll();
-   }
-
-
-  @Test
-  void getAllCatalogue_TokenVerificationThrowsException_ThrowsInternalServerException() throws AuthorizationHeaderNotFound {
+  void getAllCatalogue_TokenVerificationThrowsException_ThrowsInvalidUserTokenException() throws AuthorizationHeaderNotFound {
     when(verificationService.verifyUserToken(any(VerifyToken.class)))
         .thenThrow(new AuthorizationHeaderNotFound("Auth header missing"));
-    InternalServerException exception = assertThrows(InternalServerException.class, () -> {
+    InvalidUserTokenException exception = assertThrows(InvalidUserTokenException.class, () -> {
       bookCatalogueService.getAllCatalogue(sampleVerifyToken);
     });
     assertEquals("Error validating user token", exception.getMessage());

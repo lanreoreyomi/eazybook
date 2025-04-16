@@ -45,21 +45,21 @@ public class BookCatalogueService implements IBookCatalogue {
 
   @Override
   public List<BookCatalogue> getAllCatalogue(VerifyToken verifyToken) {
-
     if (Objects.isNull(verifyToken)) {
       logger.error("Verify token is null");
       throw new InvalidUserRequestException("Verify token is null");
     }
-
     try {
 
       Boolean tokenValidation = verificationService.verifyUserToken(verifyToken);
-      if (!Boolean.TRUE.equals(tokenValidation)) {
+
+       if (!Boolean.TRUE.equals(tokenValidation)) {
         logger.error("Error validating token");
+        throw new InvalidUserTokenException("Error validating user token");
       }
 
     } catch (Exception | AuthorizationHeaderNotFound e) {
-      throw new InternalServerException("Error validating user token");
+      throw new InvalidUserTokenException("Error validating user token");
     }
     return bookCatalogueRepository.findAll();
   }
@@ -68,7 +68,7 @@ public class BookCatalogueService implements IBookCatalogue {
   @Override
   public BookCatalogue addBookToCatalogue(VerifyToken verifyTokenRequest,
       BookCatalogue book)
-      throws AuthorizationHeaderNotFound, BookNotFoundException, BookExistException {
+      throws AuthorizationHeaderNotFound, BookExistException {
 
 
     if (Objects.isNull(book) || Objects.isNull(verifyTokenRequest)) {
@@ -89,7 +89,6 @@ public class BookCatalogueService implements IBookCatalogue {
 
     // Check if User is Admin
     verifyUserROLE(verifyTokenRequest);
-
 
       final boolean present = bookCatalogueRepository.findByBookByIsbn(book.getIsbn()).isPresent();
       if(present){

@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-public class IcheckoutStats implements ICheckoutStats {
+public class checkoutStats implements ICheckoutStats {
 
    CheckoutStatsRepository checkoutStatsRepository;
 
-  public IcheckoutStats(CheckoutStatsRepository checkoutStatsRepository) {
+  public checkoutStats(CheckoutStatsRepository checkoutStatsRepository) {
     this.checkoutStatsRepository = checkoutStatsRepository;
   }
 

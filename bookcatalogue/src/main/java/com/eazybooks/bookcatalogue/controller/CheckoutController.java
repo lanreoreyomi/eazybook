@@ -2,29 +2,15 @@ package com.eazybooks.bookcatalogue.controller;
 
 import com.eazybooks.bookcatalogue.DTO.VerifyToken;
 import com.eazybooks.bookcatalogue.exceptions.AuthorizationHeaderNotFound;
-import com.eazybooks.bookcatalogue.exceptions.BookNotEligibleForRentException;
-import com.eazybooks.bookcatalogue.exceptions.BookNotEligibleForReturnException;
 import com.eazybooks.bookcatalogue.exceptions.BookNotFoundException;
-import com.eazybooks.bookcatalogue.exceptions.InternalServerException;
 import com.eazybooks.bookcatalogue.exceptions.InvalidUserRequestException;
-import com.eazybooks.bookcatalogue.exceptions.InvalidUserTokenException;
-import com.eazybooks.bookcatalogue.interfaces.IBookCatalogue;
 import com.eazybooks.bookcatalogue.interfaces.ICheckout;
-import com.eazybooks.bookcatalogue.model.BookCatalogue;
-import com.eazybooks.bookcatalogue.model.Checkout;
 import com.eazybooks.bookcatalogue.model.CheckoutInfo;
-import com.eazybooks.bookcatalogue.model.CheckoutStats;
-import com.eazybooks.bookcatalogue.service.ICheckoutItems;
-import com.eazybooks.bookcatalogue.service.IcheckoutStats;
-import com.eazybooks.bookcatalogue.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import org.mozilla.javascript.EcmaError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +18,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/checkout")

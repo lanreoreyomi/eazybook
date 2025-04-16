@@ -13,10 +13,13 @@ import com.eazybooks.bookcatalogue.exceptions.InvalidUserTokenException;
 import com.eazybooks.bookcatalogue.exceptions.UserNotAdminException;
 import com.eazybooks.bookcatalogue.exceptions.UserNotFoundException;
 import com.eazybooks.bookcatalogue.interfaces.IBookCatalogue;
+import com.eazybooks.bookcatalogue.interfaces.ICheckoutItems;
+import com.eazybooks.bookcatalogue.interfaces.ICheckoutStats;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.Checkout;
 import com.eazybooks.bookcatalogue.interfaces.ICheckout;
 import com.eazybooks.bookcatalogue.model.CheckoutInfo;
+import com.eazybooks.bookcatalogue.model.CheckoutItems;
 import com.eazybooks.bookcatalogue.repository.CheckoutRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
@@ -24,25 +27,22 @@ import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
 public class CheckoutService implements ICheckout {
 
-  Logger logger = LoggerFactory.getLogger(CheckoutService.class);
+  Logger logger = LoggerFactory.getLogger(CheckoutItemsService.class);
 
   private final CheckoutRepository checkoutRepository;
   private final IBookCatalogue bookCatalogueService;
-  final IcheckoutStats checkoutStatsService;
+  final ICheckoutStats checkoutStatsService;
   final ICheckoutItems checkoutItemsService;
   private final VerificationService verificationService;
 
   public CheckoutService(CheckoutRepository checkoutRepository, IBookCatalogue bookCatalogueService,
-      IcheckoutStats checkoutStatsService, ICheckoutItems checkoutItemsService, VerificationService verificationService) {
+      ICheckoutStats checkoutStatsService, ICheckoutItems checkoutItemsService, VerificationService verificationService) {
     this.checkoutRepository = checkoutRepository;
     this.bookCatalogueService = bookCatalogueService;
     this.checkoutStatsService = checkoutStatsService;
