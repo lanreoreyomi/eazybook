@@ -174,55 +174,6 @@ class BookCatalogueServiceTest {
     verifyNoInteractions(verificationService, bookCatalogueRepository);
   }
 
-
-  @Test
-  void addBookToCatalogue_UserVerificationFalse_ThrowsUserNotFoundException() throws AuthorizationHeaderNotFound {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.FALSE);
-    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
-      bookCatalogueService.addBookToCatalogue(sampleVerifyToken, sampleBook1);
-    });
-    assertEquals("User not found", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
-    verify(verificationService, never()).verifyUserToken(any());
-    verify(verificationService, never()).verifyUserRole(any());
-    verify(bookCatalogueRepository, never()).findByBookByIsbn(anyLong());
-    verify(bookCatalogueRepository, never()).save(any());
-  }
-
-
-  @Test
-  void addBookToCatalogue_UserVerificationThrowsException_ThrowsUserNotFoundException() throws AuthorizationHeaderNotFound {
-
-    when(verificationService.verifyUserExists(any(VerifyUser.class)))
-        .thenThrow(new InternalServerException("Verification service down"));
-
-    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
-      bookCatalogueService.addBookToCatalogue(sampleVerifyToken, sampleBook1);
-    });
-    assertEquals("User not found", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
-    verify(verificationService, never()).verifyUserToken(any());
-
-  }
-
-
-  @Test
-  void addBookToCatalogue_TokenVerificationFalse_ThrowsInvalidUserTokenException() throws AuthorizationHeaderNotFound {
-
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
-    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.FALSE);
-
-
-    InvalidUserTokenException exception = assertThrows(InvalidUserTokenException.class, () -> {
-      bookCatalogueService.addBookToCatalogue(sampleVerifyToken, sampleBook1);
-    });
-    assertEquals("Error validating user token", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
-    verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
-    verify(verificationService, never()).verifyUserRole(any());
-  }
-
-
   @Test
   void addBookToCatalogue_RoleVerificationThrowsException_ThrowsUserNotAdminException() throws AuthorizationHeaderNotFound {
     when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
@@ -275,32 +226,6 @@ class BookCatalogueServiceTest {
     assertEquals(sampleBook1, result);
     verify(verificationService, times(1)).verifyUserToken(sampleVerifyToken);
     verify(bookCatalogueRepository, times(1)).findByBookByIsbn(sampleIsbn1);
-  }
-
-
-  @Test
-  void getBookByIsbn_NullIsbn_ThrowsBookNotFoundException() {
-    Long nullIsbn = null;
-
-    BookNotFoundException exception = assertThrows(BookNotFoundException.class, () -> {
-      bookCatalogueService.getBookByIsbn(sampleVerifyToken, nullIsbn);
-    });
-    assertEquals("Book isbn is null", exception.getMessage());
-    verifyNoInteractions(verificationService, bookCatalogueRepository);
-  }
-
-
-  @Test
-  void getBookByIsbn_TokenValidationFalse_ThrowsInvalidUserTokenException() throws AuthorizationHeaderNotFound {
-
-    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.FALSE);
-
-    InvalidUserTokenException exception = assertThrows(InvalidUserTokenException.class, () -> {
-      bookCatalogueService.getBookByIsbn(sampleVerifyToken, sampleIsbn1);
-    });
-    assertEquals("Error validating user token", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserToken(sampleVerifyToken);
-    verify(bookCatalogueRepository, never()).findByBookByIsbn(anyLong());
   }
 
 

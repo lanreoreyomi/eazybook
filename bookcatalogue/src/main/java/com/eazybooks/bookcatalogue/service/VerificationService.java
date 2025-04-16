@@ -120,7 +120,7 @@ public class VerificationService {
 
       if (Objects.isNull(tokenRequest)) {
         logger.debug("Verifying token without username");
-          throw new InternalServerException("Something went wrong verifying token");
+          throw new InternalServerException("verify token request is empty");
         }
 
       return verifyToken(tokenRequest);
@@ -172,9 +172,9 @@ public class VerificationService {
     return verifyRole(roleRequest);
     }
 
-  public Boolean verifyUserExists (VerifyUser verifyUserRequest)
-      throws AuthorizationHeaderNotFound {
- return  verifyUser(verifyUserRequest);
+    public Boolean verifyUserExists (VerifyUser verifyUserRequest)
+        throws AuthorizationHeaderNotFound {
+   return  verifyUser(verifyUserRequest);
   }
   }
 

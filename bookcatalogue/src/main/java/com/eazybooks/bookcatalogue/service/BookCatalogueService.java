@@ -92,12 +92,12 @@ public class BookCatalogueService implements IBookCatalogue {
   @Override
   public BookCatalogue getBookByIsbn(VerifyToken verifyTokenRequest, Long isbn)
       throws BookNotFoundException, InvalidUserTokenException, AuthorizationHeaderNotFound {
-    logger.info("Getting book by isbn: {}", isbn);
 
-    if (isbn == null) {
-      logger.error("Book isbn is null: {} ", isbn);
-      throw new BookNotFoundException("Book isbn is null");
-    }
+      if (Objects.isNull(verifyTokenRequest) || Objects.isNull(isbn)) {
+        logger.error("Verify token cannot be empty");
+        throw new InvalidUserRequestException("Verify token cannot be empty");
+      }
+
     verificationService.verifyUserToken(verifyTokenRequest);
 
     logger.info("Book Found: {}", isbn);

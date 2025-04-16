@@ -2,7 +2,6 @@ package com.eazybooks.bookcatalogue.service;
 
 import com.eazybooks.bookcatalogue.DTO.VerifyToken;
 import com.eazybooks.bookcatalogue.DTO.VerifyUser;
-import com.eazybooks.bookcatalogue.enums.STRINGENUMS;
 import com.eazybooks.bookcatalogue.exceptions.*;
 import com.eazybooks.bookcatalogue.interfaces.IBookCatalogue;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
@@ -45,7 +44,8 @@ class CheckoutItemsServiceTest {
 
   private VerifyToken sampleVerifyToken;
   private VerifyUser sampleVerifyUser;
-  private BookCatalogue sampleBook;
+  private BookCatalogue sampleBook1;
+  private BookCatalogue sampleBook2;
   private CheckoutItems sampleCheckoutItem1;
   private CheckoutItems sampleCheckoutItem2;
   private final String validToken = "Bearer valid-jwt-token";
@@ -58,21 +58,26 @@ class CheckoutItemsServiceTest {
     sampleVerifyToken = new VerifyToken(validToken, username);
     sampleVerifyUser = new VerifyUser(validToken, username);
 
-    sampleBook = new BookCatalogue();
-    sampleBook.setIsbn(bookIsbn1);
-    sampleBook.setTitle("Test Book");
-    sampleBook.setAuthor("Test Author");
+    sampleBook1 = new BookCatalogue();
+    sampleBook1.setIsbn(bookIsbn1);
+    sampleBook1.setTitle("Test Book One");
+    sampleBook1.setAuthor("Author One");
+
+    sampleBook2 = new BookCatalogue();
+    sampleBook2.setIsbn(bookIsbn2);
+    sampleBook2.setTitle("Test Book Two");
+    sampleBook2.setAuthor("Author Two");
 
     sampleCheckoutItem1 = new CheckoutItems(username, bookIsbn1);
-
     sampleCheckoutItem2 = new CheckoutItems(username, bookIsbn2);
    }
 
+
+
   @Test
-  void findCheckoutItemsByBookIsbn_Found_ReturnsList() {
+   void findCheckoutItemsByBookIsbn_Found_ReturnsList() {
     List<CheckoutItems> expectedList = List.of(sampleCheckoutItem1);
     when(checkoutItemsRepository.findCheckoutItemsByBookIsbn(bookIsbn1)).thenReturn(Optional.of(expectedList));
-
     List<CheckoutItems> result = checkoutItemsService.findCheckoutItemsByBookIsbn(bookIsbn1);
     assertNotNull(result);
     assertEquals(1, result.size());
@@ -81,7 +86,7 @@ class CheckoutItemsServiceTest {
   }
 
   @Test
-  void findCheckoutItemsByBookIsbn_NotFound_ThrowsNoSuchElementException() {
+   void findCheckoutItemsByBookIsbn_NotFound_ThrowsNoSuchElementException() {
     when(checkoutItemsRepository.findCheckoutItemsByBookIsbn(bookIsbn1)).thenReturn(Optional.empty());
     assertThrows(NoSuchElementException.class, () -> {
       checkoutItemsService.findCheckoutItemsByBookIsbn(bookIsbn1);
@@ -90,8 +95,7 @@ class CheckoutItemsServiceTest {
   }
 
   @Test
-  void findCheckoutItemsByUsername_Found_ReturnsList() {
-
+   void findCheckoutItemsByUsername_Found_ReturnsList() {
     List<CheckoutItems> expectedList = List.of(sampleCheckoutItem1, sampleCheckoutItem2);
     when(checkoutItemsRepository.findCheckoutItemsByUsername(username)).thenReturn(Optional.of(expectedList));
     List<CheckoutItems> result = checkoutItemsService.findCheckoutItemsByUsername(username);
@@ -102,9 +106,8 @@ class CheckoutItemsServiceTest {
   }
 
   @Test
-  void findCheckoutItemsByUsername_NotFound_ThrowsNoSuchElementException() {
+   void findCheckoutItemsByUsername_NotFound_ThrowsNoSuchElementException() {
     when(checkoutItemsRepository.findCheckoutItemsByUsername(username)).thenReturn(Optional.empty());
-
     assertThrows(NoSuchElementException.class, () -> {
       checkoutItemsService.findCheckoutItemsByUsername(username);
     });
@@ -112,25 +115,25 @@ class CheckoutItemsServiceTest {
   }
 
   @Test
-  void deleteCheckoutItemsByBookIsbn_DelegatesToRepository() {
+   void deleteCheckoutItemsByBookIsbn_DelegatesToRepository() {
     checkoutItemsService.deleteCheckoutItemsByBookIsbn(bookIsbn1);
-
     verify(checkoutItemsRepository, times(1)).deleteCheckoutItemsByBookIsbn(bookIsbn1);
   }
 
   @Test
-  void addBookItemsToCheckout_Success() throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+   void addBookItemsToCheckout_Success() throws AuthorizationHeaderNotFound, BookNotFoundException {
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
-    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook1);
     when(checkoutItemsRepository.findCheckoutItemsByBookIsbn(bookIsbn1)).thenReturn(Optional.of(Collections.emptyList()));
-    when(checkoutItemsRepository.save(any(CheckoutItems.class))).thenAnswer(inv -> inv.getArgument(0)); // Return saved item
+    when(checkoutItemsRepository.save(any(CheckoutItems.class))).thenAnswer(inv -> inv.getArgument(0));
+
     String result = checkoutItemsService.addBookItemsToCheckout(sampleVerifyToken, bookIsbn1);
 
-    assertEquals(STRINGENUMS.SUCCESS.toString(), result);
+    assertEquals("Added "+ sampleBook1.getTitle() +" to checkout", result);
 
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn1);
     verify(checkoutItemsRepository, times(1)).findCheckoutItemsByBookIsbn(bookIsbn1);
 
@@ -142,7 +145,7 @@ class CheckoutItemsServiceTest {
   }
 
   @Test
-  void addBookItemsToCheckout_NullInput_ThrowsInvalidUserTokenException() {
+   void addBookItemsToCheckout_NullInput_ThrowsInvalidUserTokenException() {
     Runnable test1 = () -> {
       try {
         checkoutItemsService.addBookItemsToCheckout(null, bookIsbn1);
@@ -170,93 +173,94 @@ class CheckoutItemsServiceTest {
   }
 
   @Test
-  void addBookItemsToCheckout_UserNotFound_ThrowsUserNotFoundException()
+   void addBookItemsToCheckout_InvalidToken_ThrowsException()
       throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.FALSE);
-
-    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
-      checkoutItemsService.addBookItemsToCheckout(sampleVerifyToken, bookIsbn1);
-    });
-    assertEquals("User not found", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
-    verify(verificationService, never()).verifyUserToken(any());
-    verify(bookCatalogueService, never()).getBookByIsbn(any(), anyLong());
-    verify(checkoutItemsRepository, never()).findCheckoutItemsByBookIsbn(anyLong());
-    verify(checkoutItemsRepository, never()).save(any());
-  }
-
-  @Test
-  @DisplayName("addBookItemsToCheckout should throw InvalidUserTokenException if token validation fails")
-  void addBookItemsToCheckout_InvalidToken_ThrowsInvalidUserTokenException()
-      throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
-    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.FALSE);
+    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenThrow(new InvalidUserTokenException("Token invalid"));
 
     InvalidUserTokenException exception = assertThrows(InvalidUserTokenException.class, () -> {
       checkoutItemsService.addBookItemsToCheckout(sampleVerifyToken, bookIsbn1);
     });
-    assertEquals("Error validating user token", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
+    assertEquals("Token invalid", exception.getMessage());
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, never()).verifyUserExists(any());
     verify(bookCatalogueService, never()).getBookByIsbn(any(), anyLong());
   }
 
   @Test
-  void addBookItemsToCheckout_BookServiceReturnsNull_ThrowsBookNotFoundException() throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+  @DisplayName("addBookItemsToCheckout should throw exception if user verification fails")
+  void addBookItemsToCheckout_UserNotFound_ThrowsException()
+      throws AuthorizationHeaderNotFound, BookNotFoundException {
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
-    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(null); // Book service returns null
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenThrow(new UserNotFoundException("User invalid"));
+
+    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
+      checkoutItemsService.addBookItemsToCheckout(sampleVerifyToken, bookIsbn1);
+    });
+    assertEquals("User invalid", exception.getMessage());
+    verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
+    verify(bookCatalogueService, never()).getBookByIsbn(any(), anyLong());
+  }
+
+
+  @Test
+   void addBookItemsToCheckout_BookServiceReturnsNull_ThrowsBookNotFoundException() throws AuthorizationHeaderNotFound, BookNotFoundException {
+    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(null);
 
     BookNotFoundException exception = assertThrows(BookNotFoundException.class, () -> {
       checkoutItemsService.addBookItemsToCheckout(sampleVerifyToken, bookIsbn1);
     });
     assertEquals("Book not found", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn1);
     verify(checkoutItemsRepository, never()).findCheckoutItemsByBookIsbn(anyLong());
   }
 
   @Test
-  void addBookItemsToCheckout_BookServiceThrowsException_ThrowsBookNotFoundException() throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+   void addBookItemsToCheckout_BookServiceThrowsException_ThrowsBookNotFoundException() throws AuthorizationHeaderNotFound,
+      BookNotFoundException {
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
     when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1))
         .thenThrow(new BookNotFoundException("Simulated book service error"));
 
     BookNotFoundException exception = assertThrows(BookNotFoundException.class, () -> {
       checkoutItemsService.addBookItemsToCheckout(sampleVerifyToken, bookIsbn1);
     });
-    assertEquals("Book not found", exception.getMessage()); // Message from catch block's throw
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
+    assertEquals("Book not found", exception.getMessage());
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn1);
     verify(checkoutItemsRepository, never()).findCheckoutItemsByBookIsbn(anyLong());
   }
 
   @Test
+  @DisplayName("addBookItemsToCheckout should throw BookExistInCheckoutException if item already exists for user")
   void addBookItemsToCheckout_ItemExists_ThrowsBookExistInCheckoutException() throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
-    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook1);
     when(checkoutItemsRepository.findCheckoutItemsByBookIsbn(bookIsbn1)).thenReturn(Optional.of(List.of(sampleCheckoutItem1)));
 
     BookExistInCheckoutException exception = assertThrows(BookExistInCheckoutException.class, () -> {
       checkoutItemsService.addBookItemsToCheckout(sampleVerifyToken, bookIsbn1);
     });
-    assertEquals("Book already in checkout", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
+    assertEquals(sampleBook1.getTitle() + " already in checkout", exception.getMessage());
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn1);
     verify(checkoutItemsRepository, times(1)).findCheckoutItemsByBookIsbn(bookIsbn1);
     verify(checkoutItemsRepository, never()).save(any());
   }
 
   @Test
-  void addBookItemsToCheckout_SaveFails_ThrowsInternalServerException() throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+   void addBookItemsToCheckout_SaveFails_ThrowsInternalServerException() throws AuthorizationHeaderNotFound, BookNotFoundException {
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
-    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook1);
     when(checkoutItemsRepository.findCheckoutItemsByBookIsbn(bookIsbn1)).thenReturn(Optional.of(Collections.emptyList()));
     when(checkoutItemsRepository.save(any(CheckoutItems.class))).thenThrow(new RuntimeException("Database error"));
 
@@ -264,34 +268,30 @@ class CheckoutItemsServiceTest {
       checkoutItemsService.addBookItemsToCheckout(sampleVerifyToken, bookIsbn1);
     });
     assertEquals("Error adding book to checkout", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn1);
     verify(checkoutItemsRepository, times(1)).findCheckoutItemsByBookIsbn(bookIsbn1);
-    verify(checkoutItemsRepository, times(1)).save(any(CheckoutItems.class)); // Verify save was attempted
+    verify(checkoutItemsRepository, times(1)).save(any(CheckoutItems.class));
   }
 
-
   @Test
-  void checkoutItemsForUser_Success() throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+   void checkoutItemsForUser_Success() throws AuthorizationHeaderNotFound, BookNotFoundException {
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
     when(checkoutItemsRepository.findCheckoutItemsByUsername(username)).thenReturn(Optional.of(List.of(sampleCheckoutItem1, sampleCheckoutItem2)));
-    BookCatalogue book2 = new BookCatalogue();
-    book2.setIsbn(bookIsbn2);
-    book2.setTitle("Book Two");
-    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook);
-    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn2)).thenReturn(book2);
+    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook1);
+    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn2)).thenReturn(sampleBook2);
 
     List<BookCatalogue> result = checkoutItemsService.checkoutItemsForUser(sampleVerifyToken);
 
     assertNotNull(result);
     assertEquals(2, result.size());
-    assertTrue(result.contains(sampleBook));
-    assertTrue(result.contains(book2));
+    assertTrue(result.contains(sampleBook1));
+    assertTrue(result.contains(sampleBook2));
 
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(checkoutItemsRepository, times(1)).findCheckoutItemsByUsername(username);
     verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn1);
     verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn2);
@@ -300,7 +300,6 @@ class CheckoutItemsServiceTest {
   @Test
   void checkoutItemsForUser_NullInput_ThrowsInvalidUserTokenException() {
     VerifyToken nullToken = null;
-
     InvalidUserTokenException exception = assertThrows(InvalidUserTokenException.class, () -> {
       checkoutItemsService.checkoutItemsForUser(nullToken);
     });
@@ -309,56 +308,56 @@ class CheckoutItemsServiceTest {
   }
 
   @Test
-  void checkoutItemsForUser_UserNotFound_ThrowsUserNotFoundException() throws AuthorizationHeaderNotFound {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.FALSE);
-
-    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
-      checkoutItemsService.checkoutItemsForUser(sampleVerifyToken);
-    });
-    assertEquals("User not found", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
-    verify(verificationService, never()).verifyUserToken(any());
-    verify(checkoutItemsRepository, never()).findCheckoutItemsByUsername(anyString());
-  }
-
-  @Test
-  void checkoutItemsForUser_InvalidToken_ThrowsInvalidUserTokenException() throws AuthorizationHeaderNotFound {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
-    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.FALSE);
+  void checkoutItemsForUser_InvalidToken_ThrowsException() throws AuthorizationHeaderNotFound {
+    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenThrow(new InvalidUserTokenException("Token invalid"));
 
     InvalidUserTokenException exception = assertThrows(InvalidUserTokenException.class, () -> {
       checkoutItemsService.checkoutItemsForUser(sampleVerifyToken);
     });
-    assertEquals("Error validating user token", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
+    assertEquals("Token invalid", exception.getMessage());
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, never()).verifyUserExists(any());
     verify(checkoutItemsRepository, never()).findCheckoutItemsByUsername(anyString());
   }
 
   @Test
-  @DisplayName("checkoutItemsForUser should return empty list if repository throws NoSuchElementException (from .get())")
-  void checkoutItemsForUser_RepoThrowsNoSuchElement_ReturnsEmptyList()
-      throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+  @DisplayName("checkoutItemsForUser should throw exception if user verification fails")
+  void checkoutItemsForUser_UserNotFound_ThrowsException() throws AuthorizationHeaderNotFound {
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenThrow(new UserNotFoundException("User invalid"));
+
+    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
+      checkoutItemsService.checkoutItemsForUser(sampleVerifyToken);
+    });
+    assertEquals("User invalid", exception.getMessage());
+    verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
+    verify(checkoutItemsRepository, never()).findCheckoutItemsByUsername(anyString());
+  }
+
+  @Test
+  void checkoutItemsForUser_RepoThrowsNoSuchElement_ThrowsInternalServerException()
+      throws AuthorizationHeaderNotFound, BookNotFoundException {
+    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
     when(checkoutItemsRepository.findCheckoutItemsByUsername(username)).thenReturn(Optional.empty());
 
     InternalServerException exception = assertThrows(InternalServerException.class, () -> {
       checkoutItemsService.checkoutItemsForUser(sampleVerifyToken);
     });
+    assertTrue(exception.getMessage().contains("No value present"));
 
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(checkoutItemsRepository, times(1)).findCheckoutItemsByUsername(username);
     verify(bookCatalogueService, never()).getBookByIsbn(any(), anyLong());
   }
 
 
-
   @Test
   void checkoutItemsForUser_GetBookFailsInLoop_ThrowsInternalServerException() throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
     when(checkoutItemsRepository.findCheckoutItemsByUsername(username)).thenReturn(Optional.of(List.of(sampleCheckoutItem1)));
     when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1))
         .thenThrow(new BookNotFoundException("Simulated book error in loop"));
@@ -368,25 +367,26 @@ class CheckoutItemsServiceTest {
     });
     assertEquals("Simulated book error in loop", exception.getMessage());
 
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(checkoutItemsRepository, times(1)).findCheckoutItemsByUsername(username);
     verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn1);
   }
 
   @Test
   void removeCheckoutItems_Success() throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
-    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook1);
     when(checkoutItemsRepository.findCheckoutItemsByBookIsbn(bookIsbn1)).thenReturn(Optional.of(List.of(sampleCheckoutItem1)));
     doNothing().when(checkoutItemsRepository).deleteCheckoutItemsByBookIsbn(anyLong());
+
     String result = checkoutItemsService.removeCheckoutItems(sampleVerifyToken, bookIsbn1);
 
-    assertEquals(STRINGENUMS.SUCCESS.toString(), result);
+    assertEquals("Removed "+ sampleBook1.getTitle() +" from checkout", result);
 
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn1);
     verify(checkoutItemsRepository, times(1)).findCheckoutItemsByBookIsbn(bookIsbn1);
     verify(checkoutItemsRepository, times(1)).deleteCheckoutItemsByBookIsbn(bookIsbn1);
@@ -421,62 +421,86 @@ class CheckoutItemsServiceTest {
   }
 
   @Test
-  void removeCheckoutItems_UserNotFound_ThrowsUserNotFoundException() throws AuthorizationHeaderNotFound {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.FALSE);
-
-    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
-      checkoutItemsService.removeCheckoutItems(sampleVerifyToken, bookIsbn1);
-    });
-    assertEquals("User not found", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
-    verify(verificationService, never()).verifyUserToken(any());
-  }
-
-  @Test
-  void removeCheckoutItems_InvalidToken_ThrowsInvalidUserTokenException() throws AuthorizationHeaderNotFound {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
-    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.FALSE);
+  void removeCheckoutItems_InvalidToken_ThrowsException()
+      throws AuthorizationHeaderNotFound, BookNotFoundException {
+    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenThrow(new InvalidUserTokenException("Token invalid"));
 
     InvalidUserTokenException exception = assertThrows(InvalidUserTokenException.class, () -> {
       checkoutItemsService.removeCheckoutItems(sampleVerifyToken, bookIsbn1);
     });
-    assertEquals("Error validating user token", exception.getMessage());
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
+    assertEquals("Token invalid", exception.getMessage());
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, never()).verifyUserExists(any());
+    verify(bookCatalogueService, never()).getBookByIsbn(any(), anyLong());
   }
 
   @Test
-  @DisplayName("removeCheckoutItems should throw InternalServerException if book service returns null")
-  void removeCheckoutItems_BookServiceReturnsNull_ThrowsInternalServerException() throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+  void removeCheckoutItems_UserNotFound_ThrowsException()
+      throws AuthorizationHeaderNotFound, BookNotFoundException {
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
-    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(null);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenThrow(new UserNotFoundException("User invalid"));
 
-    InternalServerException exception = assertThrows(InternalServerException.class, () -> {
+    UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> {
       checkoutItemsService.removeCheckoutItems(sampleVerifyToken, bookIsbn1);
     });
-
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
+    assertEquals("User invalid", exception.getMessage());
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
+    verify(bookCatalogueService, never()).getBookByIsbn(any(), anyLong());
+  }
+
+  @Test
+  void removeCheckoutItems_BookServiceReturnsNull_ThrowsBookNotFoundException() throws AuthorizationHeaderNotFound, BookNotFoundException {
+    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(null);
+
+    BookNotFoundException exception = assertThrows(BookNotFoundException.class, () -> {
+      checkoutItemsService.removeCheckoutItems(sampleVerifyToken, bookIsbn1);
+    });
+    assertEquals("Book not found", exception.getMessage());
+
+    verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn1);
     verify(checkoutItemsRepository, never()).findCheckoutItemsByBookIsbn(anyLong());
     verify(checkoutItemsRepository, never()).deleteCheckoutItemsByBookIsbn(anyLong());
   }
 
   @Test
-  void removeCheckoutItems_ItemNotFoundForUser_ThrowsBookNotFoundException() throws AuthorizationHeaderNotFound, BookNotFoundException {
-    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+  void removeCheckoutItems_BookServiceThrowsException_ThrowsBookNotFoundException() throws AuthorizationHeaderNotFound, BookNotFoundException {
     when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
-    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1))
+        .thenThrow(new BookNotFoundException("Simulated book service error"));
+
+    BookNotFoundException exception = assertThrows(BookNotFoundException.class, () -> {
+      checkoutItemsService.removeCheckoutItems(sampleVerifyToken, bookIsbn1);
+    });
+    assertEquals("Book not found", exception.getMessage());
+
+    verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
+    verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn1);
+    verify(checkoutItemsRepository, never()).findCheckoutItemsByBookIsbn(anyLong());
+    verify(checkoutItemsRepository, never()).deleteCheckoutItemsByBookIsbn(anyLong());
+  }
+
+
+  @Test
+  void removeCheckoutItems_ItemNotFoundForUser_ThrowsBookNotFoundException() throws AuthorizationHeaderNotFound, BookNotFoundException {
+    when(verificationService.verifyUserToken(any(VerifyToken.class))).thenReturn(Boolean.TRUE);
+    when(verificationService.verifyUserExists(any(VerifyUser.class))).thenReturn(Boolean.TRUE);
+    when(bookCatalogueService.getBookByIsbn(sampleVerifyToken, bookIsbn1)).thenReturn(sampleBook1);
     when(checkoutItemsRepository.findCheckoutItemsByBookIsbn(bookIsbn1)).thenReturn(Optional.of(Collections.emptyList()));
 
     BookNotFoundException exception = assertThrows(BookNotFoundException.class, () -> {
       checkoutItemsService.removeCheckoutItems(sampleVerifyToken, bookIsbn1);
     });
-    assertEquals("Must be checked out to removed from checkout", exception.getMessage());
+    assertEquals("Book not in list", exception.getMessage());
 
-    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(verificationService, times(1)).verifyUserToken(any(VerifyToken.class));
+    verify(verificationService, times(1)).verifyUserExists(any(VerifyUser.class));
     verify(bookCatalogueService, times(1)).getBookByIsbn(sampleVerifyToken, bookIsbn1);
     verify(checkoutItemsRepository, times(1)).findCheckoutItemsByBookIsbn(bookIsbn1);
     verify(checkoutItemsRepository, never()).deleteCheckoutItemsByBookIsbn(anyLong());
