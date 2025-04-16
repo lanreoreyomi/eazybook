@@ -2,14 +2,12 @@ package com.eazybooks.bookcatalogue.service;
 
 import com.eazybooks.bookcatalogue.DTO.VerifyToken;
 import com.eazybooks.bookcatalogue.DTO.VerifyUser;
-import com.eazybooks.bookcatalogue.enums.STRINGENUMS;
-import com.eazybooks.bookcatalogue.exceptions.AuthorizationHeaderNotFound;
+ import com.eazybooks.bookcatalogue.exceptions.AuthorizationHeaderNotFound;
 import com.eazybooks.bookcatalogue.exceptions.BookExistInCheckoutException;
 import com.eazybooks.bookcatalogue.exceptions.BookNotFoundException;
 import com.eazybooks.bookcatalogue.exceptions.InternalServerException;
 import com.eazybooks.bookcatalogue.exceptions.InvalidUserTokenException;
-import com.eazybooks.bookcatalogue.exceptions.UserNotFoundException;
-import com.eazybooks.bookcatalogue.interfaces.IBookCatalogue;
+ import com.eazybooks.bookcatalogue.interfaces.IBookCatalogue;
 import com.eazybooks.bookcatalogue.interfaces.ICheckoutItems;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
 import com.eazybooks.bookcatalogue.model.CheckoutItems;
@@ -61,28 +59,22 @@ public class CheckoutItemsService implements ICheckoutItems {
   }
 
   @Override
-  public String addBookItemsToCheckout(VerifyToken verifyToken, Long bookisbn)
+  public String addBookItemsToCheckout(VerifyToken verifyTokenRequest, Long bookisbn)
       throws AuthorizationHeaderNotFound, BookNotFoundException {
 
-    if(Objects.isNull(verifyToken) || Objects.isNull(bookisbn)){
+    if(Objects.isNull(verifyTokenRequest) || Objects.isNull(bookisbn)){
       logger.error("Invalid request from user");
       throw new InvalidUserTokenException("Invalid request from user");
     }
 
-VerifyUser verifyUserRequest = new VerifyUser(verifyToken.getToken(), verifyToken.getUsername() );
+    VerifyUser verifyUserRequest = new VerifyUser(verifyTokenRequest.getToken(), verifyTokenRequest.getUsername() );
 
-    if(Objects.isNull(verifyUserRequest)){
-      logger.error("Invalid request from user");
-      throw new InvalidUserTokenException("Invalid request from user");
-    }
-
-    checkIfUserExist(verifyUserRequest);
-
-    validateToken(verifyToken);
+    verificationService.verifyUserToken(verifyTokenRequest);
+    verificationService.verifyUserExists(verifyUserRequest);
 
     BookCatalogue bookByIsbn =null;
     try {
-       bookByIsbn = bookCatalogueService.getBookByIsbn(verifyToken, bookisbn);
+       bookByIsbn = bookCatalogueService.getBookByIsbn(verifyTokenRequest, bookisbn);
       if (Objects.isNull(bookByIsbn)) {
         throw new BookNotFoundException("Book not found");
       }
@@ -96,7 +88,7 @@ VerifyUser verifyUserRequest = new VerifyUser(verifyToken.getToken(), verifyToke
 
     final CheckoutItems alreadyAdded = checkoutItemsByBookIsbn.stream()
         .filter(item -> item.getBookIsbn().equals(bookisbn) && Objects.equals(item.getUsername(),
-            verifyToken.getUsername()))
+            verifyTokenRequest.getUsername()))
         .findFirst().orElse(null);
 
     if(!Objects.isNull(alreadyAdded)){
@@ -105,8 +97,8 @@ VerifyUser verifyUserRequest = new VerifyUser(verifyToken.getToken(), verifyToke
     }
 
     try{
-      checkoutItemsRepository.save(new com.eazybooks.bookcatalogue.model.CheckoutItems(verifyToken.getUsername(), bookisbn));
-      return STRINGENUMS.SUCCESS.toString();
+      checkoutItemsRepository.save(new com.eazybooks.bookcatalogue.model.CheckoutItems(verifyTokenRequest.getUsername(), bookisbn));
+      return "Added "+ bookByIsbn.getTitle() +" to checkout";
     } catch (Exception e) {
       logger.error(e.getMessage());
         throw new InternalServerException("Error adding book to checkout");    }
@@ -122,9 +114,8 @@ public List<BookCatalogue> checkoutItemsForUser(VerifyToken verifyTokenRequest)
     }
     VerifyUser verifyUserRequest = new VerifyUser(verifyTokenRequest.getToken(), verifyTokenRequest.getUsername());
 
-    checkIfUserExist(verifyUserRequest);
-
-    validateToken(verifyTokenRequest);
+  verificationService.verifyUserToken(verifyTokenRequest);
+  verificationService.verifyUserExists(verifyUserRequest);
 
     List<CheckoutItems> checkoutItemsByusername = null;
 
@@ -165,10 +156,8 @@ public List<BookCatalogue> checkoutItemsForUser(VerifyToken verifyTokenRequest)
     }
 
     VerifyUser verifyUserRequest = new VerifyUser(verifyTokenRequest.getToken(), verifyTokenRequest.getUsername());
-
-    checkIfUserExist(verifyUserRequest);
-
-    validateToken(verifyTokenRequest);
+    verificationService.verifyUserToken(verifyTokenRequest);
+    verificationService.verifyUserExists(verifyUserRequest);
 
     BookCatalogue bookByIsbn = null;
     try {
@@ -178,7 +167,7 @@ public List<BookCatalogue> checkoutItemsForUser(VerifyToken verifyTokenRequest)
       }
     } catch (Exception | BookNotFoundException e) {
       logger.error(e.getMessage());
-      throw new InternalServerException(e.getMessage());
+      throw new BookNotFoundException("Book not found");
     }
 
     final List<CheckoutItems> checkoutItemsByBookIsbn = findCheckoutItemsByBookIsbn(
@@ -188,45 +177,11 @@ public List<BookCatalogue> checkoutItemsForUser(VerifyToken verifyTokenRequest)
         .filter(item -> item.getBookIsbn().equals(bookisbn) && Objects.equals(item.getUsername(),
             verifyTokenRequest.getUsername()))
         .findFirst()
-        .orElseThrow(()-> new BookNotFoundException("Must be checked out to removed from checkout"));// Or provide a default value
+        .orElseThrow(()-> new BookNotFoundException("Book not in list"));// Or provide a default value
 
       checkoutItemsRepository.deleteCheckoutItemsByBookIsbn(bookInCheckout.getBookIsbn());
-      logger.info("Checkout items  deleted");
-      return STRINGENUMS.SUCCESS.toString();
-  }
-
-
-
-
-  private void checkIfUserExist(VerifyUser verifyUserRequest) throws AuthorizationHeaderNotFound {
-
-    try {
-      Boolean userValidation = verificationService.verifyUserExists(verifyUserRequest);
-      if (!Boolean.TRUE.equals(userValidation)) {
-        logger.error("Error user ");
-        throw new UserNotFoundException("User not found");
-      }
-    } catch (Exception e) {
-      logger.error(e.getMessage());
-      throw new UserNotFoundException("User not found");
-    }
-  }
-
-
-
-
-//Refactor these common methods
-  private void validateToken(VerifyToken verifyToken) throws AuthorizationHeaderNotFound {
-    try {
-      VerifyToken tokenRequest = new VerifyToken(verifyToken.getToken(), verifyToken.getUsername());
-      Boolean tokenValidation = verificationService.verifyUserToken(tokenRequest);
-      if (!Boolean.TRUE.equals(tokenValidation)) {
-        logger.error("Error validating token");
-        throw new InvalidUserTokenException("Error validating user token");
-      }
-    } catch (Exception e) {
-      throw new InvalidUserTokenException("Error validating user token");
-    }
+      logger.info("Checkout items  removed");
+      return   "Removed "+ bookByIsbn.getTitle() +" from checkout";
   }
 
 }

@@ -40,13 +40,13 @@ public class CheckoutStatsController {
       throws AuthorizationHeaderNotFound {
 
     if ( Objects.isNull(request)) {
-      logger.warn("Username is null");
-      throw new InvalidUserRequestException("Username is null");
+      logger.warn("Username cannot be empty");
+      throw new InvalidUserRequestException("Username cannot be empty");
     }
 
     try {
-      VerifyToken verifyToken = new VerifyToken(request.getHeader("Authorization"));
-      Boolean tokenValid = verificationService.verifyUserToken(verifyToken);
+      VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"));
+      Boolean tokenValid = verificationService.verifyUserToken(verifyTokenRequest);
       if (!Boolean.TRUE.equals(tokenValid)) {
         logger.error("Error validating token");
         throw new InvalidUserTokenException("Error validating token");

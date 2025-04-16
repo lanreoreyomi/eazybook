@@ -174,12 +174,7 @@ public class VerificationService {
 
   public Boolean verifyUserExists (VerifyUser verifyUserRequest)
       throws AuthorizationHeaderNotFound {
-
-      if (Objects.isNull(verifyUserRequest) || Objects.isNull(verifyUserRequest.getToken())) {
-        logger.warn("Username cannot be null");
-        throw new InvalidUserRequestException("Username cannot be null");
-      }
-    return verifyUser(verifyUserRequest);
+ return  verifyUser(verifyUserRequest);
   }
   }
 

@@ -46,12 +46,13 @@ import org.springframework.web.bind.annotation.RestController;
       throws AuthorizationHeaderNotFound, BookExistException, BookNotFoundException {
 
     if (Objects.isNull(username)) {
-      logger.error("Username is null");
-      throw new InvalidUserRequestException("Username is null");
+      logger.error("Username can not be empty");
+      throw new InvalidUserRequestException("Username can not be empty");
     }
 
-    final BookCatalogue addedBook = bookCatalogueService.addBookToCatalogue(new VerifyToken(request.getHeader("Authorization"),
-        username), book);
+    VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"),
+    username);
+    final BookCatalogue addedBook = bookCatalogueService.addBookToCatalogue(verifyTokenRequest, book);
     return new ResponseEntity<>(addedBook.getTitle() + " added successfully", HttpStatus.CREATED);
 
   }
@@ -60,12 +61,12 @@ import org.springframework.web.bind.annotation.RestController;
   public ResponseEntity<List<BookCatalogue>> getAllBookCatalogues(HttpServletRequest request)
       throws AuthorizationHeaderNotFound {
     if(Objects.isNull(request)) {
-      logger.error("Request is null");
-      throw new AuthorizationHeaderNotFound("Request is null");
+      logger.error("Request can not be empty");
+      throw new AuthorizationHeaderNotFound("Request can not be empty");
     }
 
-        VerifyToken tokenRequest = new VerifyToken(request.getHeader("Authorization") );
-        List<BookCatalogue> books = bookCatalogueService.getAllCatalogue(tokenRequest);
+        VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization") );
+        List<BookCatalogue> books = bookCatalogueService.getAllCatalogue(verifyTokenRequest);
         return ResponseEntity.ok(books);
 
   }
@@ -76,12 +77,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 
     if(Objects.isNull(request)) {
-      logger.error("Request is null");
-      throw new InvalidUserRequestException("Request is null");
+      logger.error("Request can not be empty");
+      throw new InvalidUserRequestException("Request can not be empty");
     }
+    VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization") );
 
     BookCatalogue bookByIsbn = bookCatalogueService.getBookByIsbn(
-          new VerifyToken(request.getHeader("Authorization")), isbn);
+        verifyTokenRequest, isbn);
 
     return new ResponseEntity<>(bookByIsbn, HttpStatus.OK);
   }

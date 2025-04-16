@@ -38,12 +38,12 @@ public class CheckoutController {
       throws BookNotFoundException, AuthorizationHeaderNotFound {
 
     if (Objects.isNull(username)) {
-      logger.warn("Username is null");
-      throw new InvalidUserRequestException("Username is null");
+      logger.warn("Username can not be empty");
+      throw new InvalidUserRequestException("Username can not be emptyl");
     }
 
-    VerifyToken tokenRequest = new VerifyToken(request.getHeader("Authorization"), username);
-    final String response = checkoutService.handleBookReturns(username, bookIsbn, tokenRequest);
+    VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"), username);
+    final String response = checkoutService.handleBookReturns(username, bookIsbn, verifyTokenRequest);
     return  new ResponseEntity<>(response, HttpStatus.OK) ;
   }
 
@@ -52,13 +52,13 @@ public class CheckoutController {
       HttpServletRequest request) throws AuthorizationHeaderNotFound {
 
     if(Objects.isNull(request) || Objects.isNull(username)){
-      logger.error("Request is null");
-      throw new InvalidUserRequestException("Request is null");
+      logger.error("Request can not be empty");
+      throw new InvalidUserRequestException("Request can not be empty");
     }
 
-    VerifyToken verifyToken = new VerifyToken(request.getHeader("Authorization"), username);
+    VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"), username);
 
-    List<CheckoutInfo> checkoutInfo = checkoutService.getCheckoutInfo(verifyToken, username);
+    List<CheckoutInfo> checkoutInfo = checkoutService.getCheckoutInfo(verifyTokenRequest, username);
 
     return new ResponseEntity<>(checkoutInfo, HttpStatus.OK);
 
