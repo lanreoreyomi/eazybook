@@ -31,6 +31,22 @@ public class CheckoutController {
     this.checkoutService = checkoutService;
    }
 
+  @PostMapping("/{username}/{bookIsbn}")
+  ResponseEntity<String> checkout(@PathVariable String username,
+      @PathVariable Long bookIsbn, HttpServletRequest request)
+      throws BookNotFoundException, AuthorizationHeaderNotFound {
+
+    if (Objects.isNull(username)) {
+      logger.warn("Username can not be empty");
+      throw new InvalidUserRequestException("Username can not be emptyl");
+    }
+    VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"), username);
+
+    final String response = checkoutService.processCheckout(verifyTokenRequest, bookIsbn);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+
+  }
+
 
   @PostMapping("/{username}/{bookIsbn}/return")
   ResponseEntity<String> returnBook(@PathVariable String username,

@@ -1,4 +1,4 @@
-package com.eazybooks.bookcatalogue.exceptions;
+package com.eazybooks.wishlist.exceptions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,16 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
   Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-  @ExceptionHandler(UserNotAdminException.class)
-  public ResponseEntity<String> handleUserNotAdminExceptionException(UserNotAdminException ex) {
-    logger.error(ex.getMessage());
-    return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
-  }
-  @ExceptionHandler(EmptyBookRequestException.class)
-  public ResponseEntity<String> handleEmptyBookRequestException(EmptyBookRequestException ex) {
-    logger.error(ex.getMessage());
-    return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
-  }
   @ExceptionHandler(InvalidUserRequestException.class)
   public ResponseEntity<String> handleInvalidUserRequestException(InvalidUserRequestException ex) {
     logger.error(ex.getMessage());
@@ -56,35 +46,9 @@ public class GlobalExceptionHandler {
     logger.error(ex.getMessage());
     return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
   }
-  @ExceptionHandler(BookNotEligibleForRentException.class)
-  public ResponseEntity<String> handleBookNotEligibleForRentException(
-      BookNotEligibleForRentException ex) {
-    logger.error(ex.getMessage());
-    return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-  }
-
-  @ExceptionHandler(BookNotEligibleForReturnException.class)
-  public ResponseEntity<String> handleBookNotEligibleForReturnException(
-      BookNotEligibleForReturnException ex) {
-    logger.error(ex.getMessage());
-    return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
-  }
-  @ExceptionHandler(BookExistInCheckoutException.class)
-  public ResponseEntity<String> handleBookExistInCheckoutException(
-      BookExistInCheckoutException ex) {
-    logger.error(ex.getMessage());
-    return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
-  }
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<String> handleUserNotFoundException(
       UserNotFoundException ex) {
-    logger.error(ex.getMessage());
-    return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-  }
-
-  @ExceptionHandler(BookNotEligibleForCheckoutException.class)
-  public ResponseEntity<String> handleBookNotEligibleForCheckoutException(
-      BookNotEligibleForCheckoutException ex) {
     logger.error(ex.getMessage());
     return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
   }

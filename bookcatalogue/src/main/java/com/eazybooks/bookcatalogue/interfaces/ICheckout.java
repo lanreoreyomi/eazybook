@@ -10,7 +10,8 @@ import java.util.List;
 
 public interface ICheckout {
 
-  Checkout save(Checkout checkout);
+  String processCheckout(VerifyToken verifyTokenRequest, Long isbn )
+      throws BookNotFoundException, AuthorizationHeaderNotFound;
 
   List<Checkout> findCheckoutsByCheckedOutBy(String username);
 

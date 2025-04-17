@@ -5,6 +5,7 @@ import com.eazybooks.bookcatalogue.DTO.VerifyUser;
 import com.eazybooks.bookcatalogue.DTO.VerifyUserRole;
 import com.eazybooks.bookcatalogue.enums.ROLE;
 import com.eazybooks.bookcatalogue.exceptions.AuthorizationHeaderNotFound;
+import com.eazybooks.bookcatalogue.exceptions.BookNotEligibleForCheckoutException;
 import com.eazybooks.bookcatalogue.exceptions.BookNotEligibleForReturnException;
 import com.eazybooks.bookcatalogue.exceptions.BookNotFoundException;
 import com.eazybooks.bookcatalogue.exceptions.InternalServerException;
@@ -20,6 +21,7 @@ import com.eazybooks.bookcatalogue.model.Checkout;
 import com.eazybooks.bookcatalogue.interfaces.ICheckout;
 import com.eazybooks.bookcatalogue.model.CheckoutInfo;
 import com.eazybooks.bookcatalogue.model.CheckoutItems;
+import com.eazybooks.bookcatalogue.model.CheckoutStats;
 import com.eazybooks.bookcatalogue.repository.CheckoutRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
@@ -27,6 +29,8 @@ import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -51,13 +55,110 @@ public class CheckoutService implements ICheckout {
   }
 
   @Override
-  public Checkout save(Checkout checkout) {
-    return checkoutRepository.save(checkout);
-  }
-  @Override
   public Checkout updateCheckout(Checkout checkout) {
     return checkoutRepository.save(checkout);
   }
+
+  @Override
+  public String processCheckout(VerifyToken verifyTokenRequest, Long bookIsbn)
+      throws BookNotFoundException, AuthorizationHeaderNotFound {
+
+    if (Objects.isNull(verifyTokenRequest) || Objects.isNull(bookIsbn)) {
+      logger.error("Request is null");
+      throw new InvalidUserRequestException("Request is null");
+    }
+
+
+      CheckoutStats checkoutStats = null;
+      BookCatalogue book = null;
+      try {
+        checkoutStats = checkoutStatsService.findByIsbn(bookIsbn);
+        book = bookCatalogueService.getBookByIsbn(verifyTokenRequest, bookIsbn);
+
+        if (book == null) {
+          throw new BookNotFoundException("Book not found");
+        }
+
+        if (book.getQuantityForRent() == 0) {
+          logger.warn("Book quantity not eligible for checkout: " + book.getQuantityForRent());
+          throw new BookNotEligibleForReturnException("Book quantity not eligible for checkout");
+        }
+
+        if (checkoutStats != null) {
+          if (book.getQuantityForRent() <= 0) {
+            book.setAvailable(false);
+            logger.info("Max Checkchout reached for book " + bookIsbn);
+            throw new BookNotEligibleForReturnException("Max Checkchout reached for book ");
+          }
+        }
+      } catch (Exception e) {
+        logger.error(e.getMessage());
+        throw new InternalServerException("Error processing stats");
+      }
+
+      final List<Checkout> checkoutsByUsername = findCheckoutsByCheckedOutBy(
+          verifyTokenRequest.getUsername());
+
+      final Checkout alreadyCheckedOut = checkoutsByUsername.stream()
+          .filter(item -> item.getCheckedOutBy().equals(verifyTokenRequest.getUsername())
+              && Objects.equals(item.getIsbn(),
+              bookIsbn))
+          .findFirst()
+          .orElse(null);
+
+      if (alreadyCheckedOut != null) {
+        throw new BookNotEligibleForCheckoutException( "Book already checked out");
+      }
+
+      Checkout checkout = new Checkout();
+      LocalDate checkoutDate = LocalDate.now();
+      LocalDate expectedReturnDate = LocalDate.now().plusWeeks(2);
+
+      int checkout_counter = 1;
+
+      try {
+        checkoutStats = checkoutStatsService.findByIsbn(bookIsbn);
+        if (checkoutStats != null) {
+          logger.info("Checkout stats found for isbn " + checkoutStats.toString());
+          final int totalCheckouts = checkoutStats.getTotalCheckout();
+          checkout_counter = totalCheckouts + 1;
+          checkoutStats.setTotalCheckout(checkout_counter);
+          checkoutStats.setTitle(book.getTitle());
+        } else {
+          logger.info("Checkout stats not found for isbn " + bookIsbn);
+          checkoutStats = new CheckoutStats();
+          checkoutStats.setTotalCheckout(1);
+          checkoutStats.setBookIsbn(bookIsbn);
+          checkoutStats.setTitle(book.getTitle());
+
+        }
+
+        checkout.setCheckedOutBy(verifyTokenRequest.getUsername());
+        checkout.setDateOfCheckout(checkoutDate);
+        checkout.setExpectedReturnDate(expectedReturnDate);
+        checkout.setReturned(false);
+        checkout.setIsbn(bookIsbn);
+        checkoutRepository.save(checkout);
+        checkoutStatsService.save(checkoutStats);
+        logger.info("Checkout saved for isbn " + checkout_counter);
+        book.setQuantityForRent(book.getQuantityForRent() - 1);
+
+        try {
+          // updating the available quantity
+          bookCatalogueService.updateBook(book);
+
+        } catch (Exception e) {
+          logger.error(e.getMessage());
+          throw new InternalServerException("Error Updating  book quantity for rent");
+        }
+         checkoutItemsService.deleteCheckoutItemsByBookIsbn(bookIsbn);
+
+        return "Book successfully checked out";
+      } catch (Exception e) {
+        throw new InternalServerException("Error Updating  book quantity for rent");
+      }
+    }
+
 
   @Override
   public List<Checkout> findCheckoutsByCheckedOutBy(String username) {
@@ -162,7 +263,7 @@ public class CheckoutService implements ICheckout {
           );
         })
         .toList();
-    return  checkoutInfo;
+    return  checkoutInfo ;
   }
 
   private void checkIfUserExist(VerifyUser verifyUserRequest) throws AuthorizationHeaderNotFound {

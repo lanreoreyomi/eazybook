@@ -1,17 +1,18 @@
-package com.eazybooks.authentication.DTO;
+package com.eazybooks.wishlist.DTO;
 
-public class VerifyToken {
+
+public class VerifyUser {
 
   String token;
   String username;
 
-  public VerifyToken(String token, String username) {
-    this.token = token;
-    this.username = username;
-  }
 
   public String getToken() {
     return token;
+  }
+
+  public void setToken(String token) {
+    this.token = token;
   }
 
   public String getUsername() {
@@ -22,11 +23,10 @@ public class VerifyToken {
     this.username = username;
   }
 
-  public void setToken(String token) {
-    this.token = token;
-  }
 
-  public VerifyToken() {
+  public VerifyUser(String token, String username) {
+    this.token = token;
+    this.username = username;
   }
 
   @Override
