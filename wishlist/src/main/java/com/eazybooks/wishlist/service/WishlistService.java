@@ -56,11 +56,11 @@ public class WishlistService implements IWishlist {
       final boolean bookIspresent = wishlistRepository.findByIsbnAndUsername(wishListRequest.getIsbn(),
           verifyTokenRequest.getUsername()).isPresent();
       if (bookIspresent) {
-        throw new BookExistException("Book already added to wishlist");
+        throw new BookExistException(bookCatalogue.getTitle()+" already added to wishlist");
       }
 
     } catch (Exception  e) {
-      throw new BookExistException("Book already added to wishlist");
+      throw new BookExistException(bookCatalogue.getTitle()+" already added to wishlist");
     }
 
     LocalDate localDate = LocalDate.now();

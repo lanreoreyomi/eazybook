@@ -146,7 +146,7 @@ class WishlistServiceTest {
     BookExistException exception = assertThrows(BookExistException.class, () -> {
       wishlistService.adBookToWishlist(sampleVerifyToken, sampleWishlistRequest);
     });
-    assertEquals("Book already added to wishlist", exception.getMessage());
+    assertEquals(sampleBookCatalogue.getTitle()+" already added to wishlist", exception.getMessage());
     verify(verificationService, times(1)).verifyUserToken(sampleVerifyToken);
     verify(verificationService, times(1)).verifyBookIsbn(sampleVerifyToken, bookIsbn);
     verify(wishlistRepository, times(1)).findByIsbnAndUsername(bookIsbn, username);
@@ -163,7 +163,9 @@ class WishlistServiceTest {
     BookExistException exception = assertThrows(BookExistException.class, () -> {
       wishlistService.adBookToWishlist(sampleVerifyToken, sampleWishlistRequest);
     });
-    assertEquals("Book already added to wishlist", exception.getMessage());
+
+
+    assertEquals(sampleBookCatalogue.getTitle()+" already added to wishlist", exception.getMessage());
     verify(verificationService, times(1)).verifyUserToken(sampleVerifyToken);
     verify(verificationService, times(1)).verifyBookIsbn(sampleVerifyToken, bookIsbn);
     verify(wishlistRepository, times(1)).findByIsbnAndUsername(bookIsbn, username);
