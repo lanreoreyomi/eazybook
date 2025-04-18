@@ -10,13 +10,6 @@
         <div>1200 Daily Checkouts</div>
         <div>300 Daily additions</div>
       </div>
-      <div id="landing_text_buttons">
-        <ul>
-          <li id="log_in"><router-link to="/login" >Log In</router-link></li>
-          <li id="signup"><router-link to="/create-account">Create Account</router-link></li>
-        </ul>
-
-      </div>
     </div>
     <div id="landing_img">
       <img :src=bg_img alt="landing_page">
@@ -26,8 +19,7 @@
 </template>
 <script setup lang="ts">
 import bg_img from '/src/assets/images/bg_img.jpg'
-import { RouterLink } from 'vue-router'
-import { onMounted } from 'vue'
+ import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/useAuthStore.ts'
 import router from '@/router'
 
@@ -117,13 +109,13 @@ h1 {
             padding: 15px;
             color: colors.$white-color;
             background-color: colors.$text-color;
-            border-radius: 0.5rem;
+            border-radius: 1.5rem;
           }
         }
         #log_in {
 
           a {
-            border-radius: 0.5rem;
+            border-radius: 1.5rem;
             padding: 15px;
             border: 0.1rem solid colors.$text-color;
             color: colors.$text-color;

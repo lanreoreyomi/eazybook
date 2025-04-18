@@ -41,9 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
     }
 
     VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"), username);
-
     final String response = checkoutItemsService.addBookItemsToCheckout(verifyTokenRequest, bookisbn);
-
     return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
