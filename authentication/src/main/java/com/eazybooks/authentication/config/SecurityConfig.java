@@ -60,7 +60,8 @@ public class SecurityConfig {
 
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .exceptionHandling(exception ->
-            exception.authenticationEntryPoint((request, response, authException) -> {
+            exception.authenticationEntryPoint((request,
+                response, authException) -> {
               response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
             })
         )

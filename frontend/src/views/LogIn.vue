@@ -19,6 +19,8 @@
         <div v-else-if="!isSuccessful" id="user_not_created">{{statusText}}</div>
       </form>
     </div>
+
+  </div>
   </div>
 </template>
 <script lang="ts">
@@ -63,14 +65,14 @@ body,
     text-align: center;
     padding: 20px;
   }
+
   #logInForm {
 
     padding: 30px;
 
     form {
       margin: 0 auto;
-      color: colors.$color-primary;
-
+       color: colors.$color-primary;
       div {
         color: colors.$color-primary;
         text-align: start;
@@ -96,7 +98,7 @@ body,
           justify-items: start;
           align-items: start;
         }
-      }
+       }
       button {
         width: 100%;
         margin: 20px 0;
@@ -119,6 +121,7 @@ body,
         font-weight: bold;
         margin-bottom: 40px;
       }
+
     }
   }
 }

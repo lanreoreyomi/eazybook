@@ -2,7 +2,7 @@
 
   <div class="stats" v-if="checkoutStats">
     <p> <span style='font-size:20px;'>&#127775;</span>
-      {{checkoutStats.title}} is hot right now, Checkout out <span style='font-weight:bolder;'></span>{{checkoutStats?.totalCheckout}}  times</p>
+      {{checkoutStats.title}} is hot right now, checkout out <span style='font-weight:bolder;'></span>{{checkoutStats?.totalCheckout}}  times</p>
   </div>
   <div v-if="isCatalogueLoaded" id="catalogue_component">
     <div id="wishlist_control" v-if="wishListStatusText"><p id="addedToWishlist">{{ wishListStatusText }}</p></div>
@@ -85,6 +85,7 @@ export default defineComponent({
 
 .stats{
   padding: 8px;
+
   margin: 20px auto;
   width: 20%;
   background-color: colors.$error-color;
@@ -94,6 +95,7 @@ export default defineComponent({
   bottom: 0;
   padding: 20px;
   z-index: 1000;
+
   p{
     text-align: center;
     color: colors.$white-color;
@@ -113,6 +115,7 @@ export default defineComponent({
     padding-bottom: 12px;
     padding-top: 12px;
     font-size: 16px;
+
     color: colors.$text-color;
     text-align: center;
     left: 30%;

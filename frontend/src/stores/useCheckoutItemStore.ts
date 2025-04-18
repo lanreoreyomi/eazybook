@@ -58,8 +58,7 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
         this.$patch({
           statusCode: response.status,
           statusText: String(response.data),
-        })
-
+        });
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           this.$patch({
@@ -67,6 +66,9 @@ export const useCheckoutItemStore = defineStore('checkoutItem', {
             statusText: String(error.response.data),
           })
         }
+
+
+        console.log("statusText :", this.statusText);
       }
     },
     async removeBookFromCheckoutItem(bookIsbn: number) {

@@ -3,7 +3,7 @@
     <nav>
       <ul>
         <li id="welcome_username"  v-if="checkAuthenticated()">
-          <p v-if="loggedInUser !=null"> Welcome back {{ loggedInUser.toUpperCase() }}</p>
+          <p v-if="loggedInUser !=null"> Welcome {{ loggedInUser}}</p>
         </li>
         <li>
           <router-link to="/" v-if="!checkAuthenticated()">Home</router-link>
@@ -174,12 +174,12 @@ header {
         }
       }
       #welcome_username{
-        color: colors.$accent-color;
+        color: colors.$text-color;
         p{
           border-radius: 2rem;
           padding: 10px;
           font-weight: bolder;
-          background: #ecf0f1;
+          //background: colors.$accent-color;
         }
       }
       #signup {
@@ -188,14 +188,14 @@ header {
           padding: 15px;
           color: colors.$white-color;
           background-color: colors.$text-color;
-          border-radius: 0.5rem;
+          border-radius: 1.5rem;
         }
       }
 
       #log_in {
         padding: 15px;
         a {
-          border-radius: 0.5rem;
+          border-radius: 1.5rem;
           padding: 15px;
           border: 0.1rem solid colors.$text-color;
           color: colors.$text-color;
@@ -209,7 +209,7 @@ header {
           cursor: pointer;
           border: none;
           outline: none;
-          border-radius: 0.5rem;
+          border-radius: 1.5rem;
           color: colors.$color-primary;
           font-weight: bold;
           background-color: colors.$error-color;
@@ -224,7 +224,7 @@ header {
           padding: 15px;
           border: none;
           outline: none;
-          border-radius: 0.5rem;
+          border-radius: 1.5rem;
           color: colors.$color-primary;
           font-weight: bold;
           background-color: colors.$text-color;
@@ -235,7 +235,10 @@ header {
       }
     }
   }
-
+   .router-link-exact-active{
+    background-color: colors.$accent-color;
+     color: colors.$color-primary;
+  }
   #add_new_book {
     z-index: 999;
     position: fixed;
@@ -298,7 +301,7 @@ header {
         border: none;
         color: colors.$white-color;
         font-weight: 400;
-        border-radius: 0.5rem;
+        border-radius: 1.5rem;
         font-size: 16px;
       }
       #user_created {
