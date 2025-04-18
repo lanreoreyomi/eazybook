@@ -1,13 +1,20 @@
 package com.eazybooks.wishlist.controller;
+import com.eazybooks.wishlist.DTO.VerifyToken;
+import com.eazybooks.wishlist.exceptions.AuthorizationHeaderNotFound;
+import com.eazybooks.wishlist.exceptions.BookExistException;
+import com.eazybooks.wishlist.exceptions.BookNotFoundException;
+import com.eazybooks.wishlist.exceptions.InvalidUserRequestException;
 import com.eazybooks.wishlist.model.BookCatalogue;
 import com.eazybooks.wishlist.model.CreateWishListRequest;
 import com.eazybooks.wishlist.model.RemoveBookFromWishListRequest;
 import com.eazybooks.wishlist.model.Wishlist;
 import com.eazybooks.wishlist.service.VerificationService;
 import com.eazybooks.wishlist.service.WishlistService;
+import interfaces.IWishlist;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
  import org.springframework.http.HttpStatus;
@@ -24,117 +31,59 @@ import org.springframework.web.bind.annotation.RestController;
  public class WishlistController {
 
   private static final Logger logger = LoggerFactory.getLogger(WishlistController.class);
-  private final WishlistService wishlistService;
-  private final VerificationService verificationService;
+  private final IWishlist wishlistService;
 
-  public WishlistController(WishlistService wishlistService,
-      VerificationService verificationService) {
+  public WishlistController(IWishlist wishlistService) {
     this.wishlistService = wishlistService;
-    this.verificationService = verificationService;
-  }
-  @PostMapping("/{username}/add")
+   }
+  @PostMapping("{username}/add")
   public ResponseEntity<String> addBookToWishlist(@PathVariable String username,
-      @RequestBody CreateWishListRequest wishListRequest, HttpServletRequest request) {
+      @RequestBody CreateWishListRequest wishListRequest, HttpServletRequest request)
+      throws BookNotFoundException, AuthorizationHeaderNotFound, BookExistException {
 
-    ResponseEntity<Boolean> tokenValidation = null;
-    //verifies token
-    try {
-      tokenValidation = verificationService.verifyUserToken(request, null);
-    } catch (Exception e) {
-      logger.error(e.getMessage());
+    if (Objects.isNull(username) || Objects.isNull(wishListRequest) || Objects.isNull(request)) {
+      logger.error("Username can not be empty");
+      throw new InvalidUserRequestException("Username can not be empty");
     }
 
-    if (!Boolean.TRUE.equals(tokenValidation.getBody())) {
-      logger.error("Error validating token");
-      return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
-    }
-    final ResponseEntity<BookCatalogue> bookValidation;
-    try {
-      logger.info("Validating book isbn");
-      bookValidation = verificationService.verifyBookIsbn(request, wishListRequest.getIsbn());
-    } catch (Exception e) {
-      return new ResponseEntity<>("Error validating book isbn", HttpStatus.BAD_REQUEST);
-    }
+     VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"),
+        username);
 
-    if (bookValidation.getStatusCode() == HttpStatus.NOT_FOUND) {
-      logger.info("Book not found for Isbn {}", wishListRequest.getIsbn());
-      return new ResponseEntity<>("Book not found for Isbn", HttpStatus.NOT_FOUND);
-    }
-    //Find if book already added to wishlist
-    try {
-      Wishlist byBookIsbn = wishlistService.findByBookIsbnAndUsername(wishListRequest.getIsbn(),
-          username);
-      logger.info("Book found for Isbn {}", wishListRequest.getIsbn());
-      if (byBookIsbn != null) {
-        return new ResponseEntity<>("Book already added to wishlist", HttpStatus.CONFLICT);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
 
-    LocalDate localDate = LocalDate.now();
-    Wishlist wishlist = new Wishlist();
-    wishlist.setIsbn(wishListRequest.getIsbn());
-    wishlist.setBookTitle(bookValidation.getBody().getTitle());
-    wishlist.setUsername(username);
-    wishlist.setLocalDate(localDate);
-
-    final Wishlist createdWishList = wishlistService.save(wishlist);
-
-    return new ResponseEntity<>(
-        String.format("Added %s to wishlist ", createdWishList.getBookTitle()), HttpStatus.CREATED);
+    final String response = wishlistService.adBookToWishlist(verifyTokenRequest, wishListRequest);
+    return new ResponseEntity<>(String.format(response), HttpStatus.CREATED);
   }
 
 
   @PostMapping("/{username}/remove")
   public ResponseEntity<String> removeBookFromWishlist(@PathVariable String username,
-      @RequestBody RemoveBookFromWishListRequest removeRequest, HttpServletRequest request) {
+      @RequestBody RemoveBookFromWishListRequest removeRequest, HttpServletRequest request)
+      throws AuthorizationHeaderNotFound, BookNotFoundException {
 
-    ResponseEntity<Boolean> tokenValidation = null;
-    //verifies token
-    try {
-      tokenValidation = verificationService.verifyUserToken(request, null);
-
-    } catch (Exception e) {
-      logger.error(e.getMessage());
+    if (Objects.isNull(username) || Objects.isNull(removeRequest) || Objects.isNull(request)) {
+      logger.error("User request can not be empty");
+      throw new InvalidUserRequestException("User request can not be empty");
     }
 
-    if (!Boolean.TRUE.equals(tokenValidation.getBody())) {
-      logger.error("Error validating token");
-      return new ResponseEntity<>("Error validating token", HttpStatus.BAD_REQUEST);
-    }
-
-    Wishlist byBookIsbn;
-    try {
-      byBookIsbn = wishlistService.findByBookIsbnAndUsername(removeRequest.getIsbn(), username);
-      if (byBookIsbn == null) {
-        return new ResponseEntity<>("Book not in wishlist", HttpStatus.BAD_REQUEST);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-    wishlistService.removeByBookIsbn(removeRequest.getIsbn());
+   VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"), username);
+    final String response = wishlistService.removeByBookIsbn(verifyTokenRequest, removeRequest.getIsbn());
     return new ResponseEntity<>(
-        String.format("Removed %s from wishlist ", byBookIsbn.getBookTitle()), HttpStatus.OK);
+        String.format(response), HttpStatus.OK);
   }
 
   @GetMapping("/{username}/all")
   public ResponseEntity<List<Wishlist>> getAllWishList(@PathVariable String username,
-      HttpServletRequest request) {
-    ResponseEntity<Boolean> tokenValidation = null;
-    //verifies token
-    try {
-      tokenValidation = verificationService.verifyUserToken(request, null);
-    } catch (Exception e) {
-      logger.error(e.getMessage());
+      HttpServletRequest request) throws AuthorizationHeaderNotFound {
+
+
+    if (Objects.isNull(username) || Objects.isNull(request)) {
+      logger.error("User request can not be empty");
+      throw new InvalidUserRequestException("User request can not be empty");
     }
 
-    if (!Boolean.TRUE.equals(tokenValidation.getBody())) {
-      logger.error("Error validating token");
-      return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-    }
+    VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"), username);
 
-    final List<Wishlist> wishlists = wishlistService.findByUserName(username);
+    final List<Wishlist> wishlists = wishlistService.findByUserName(verifyTokenRequest);
 
     wishlists.forEach(wishlist -> {
       logger.info("Found wishlist {}", wishlist.toString());

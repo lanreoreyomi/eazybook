@@ -59,7 +59,7 @@ public class JwtService {
 
 
   public String extractUsername(String token) {
-    try {
+     try {
       return extractClaim(token, Claims::getSubject);
     } catch (Exception e) {
       log.error("Error getting username from token");

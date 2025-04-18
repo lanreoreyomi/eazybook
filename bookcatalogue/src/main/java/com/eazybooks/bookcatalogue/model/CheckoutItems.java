@@ -61,4 +61,22 @@ public class CheckoutItems {
 
   public CheckoutItems() {
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    CheckoutItems that = (CheckoutItems) o;
+    return id.equals(that.id) && bookIsbn.equals(that.bookIsbn) && username.equals(that.username);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = id.hashCode();
+    result = 31 * result + bookIsbn.hashCode();
+    result = 31 * result + username.hashCode();
+    return result;
+  }
 }

@@ -2,7 +2,7 @@ package com.eazybooks.user.service;
 
 
 import com.eazybooks.user.model.User;
-import com.eazybooks.user.model.UserRepositoryImpl;
+import com.eazybooks.user.interfaces.IUser;
 import com.eazybooks.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-public class UserService implements UserRepositoryImpl {
+public class UserService implements IUser {
 
   private final UserRepository userRepository;
 

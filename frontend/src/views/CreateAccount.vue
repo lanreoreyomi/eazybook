@@ -41,9 +41,9 @@ export default {
     const userStore = useUserStore();
 
     const isSuccessful = computed(() => {
-    const isSuccess = userStore.statusCode === 201;
+      const isSuccess = userStore.statusCode === 201;
       if (isSuccess) {
-       router.push("/login");
+        router.push("/login");
       }
 
       return isSuccess;
@@ -58,7 +58,7 @@ export default {
       isSuccessful,
       statusText,
       signUpMessage,
-     };
+    };
   }
 };
 </script>

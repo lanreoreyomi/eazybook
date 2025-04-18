@@ -60,8 +60,8 @@ public class Wishlist {
   public Wishlist() {
   }
 
-  public LocalDate getLocalDate() {
-    return localDate;
+  public String getLocalDate() {
+    return String.valueOf(localDate);
   }
 
   public void setLocalDate(LocalDate localDate) {

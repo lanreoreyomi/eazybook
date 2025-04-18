@@ -1,7 +1,17 @@
 package com.eazybooks.bookcatalogue.controller;
 
+import com.eazybooks.bookcatalogue.DTO.VerifyToken;
+import com.eazybooks.bookcatalogue.DTO.VerifyUserRole;
+import com.eazybooks.bookcatalogue.enums.ROLE;
+import com.eazybooks.bookcatalogue.exceptions.AuthorizationHeaderNotFound;
+import com.eazybooks.bookcatalogue.exceptions.BookExistException;
+import com.eazybooks.bookcatalogue.exceptions.BookNotFoundException;
+import com.eazybooks.bookcatalogue.exceptions.InternalServerException;
+import com.eazybooks.bookcatalogue.exceptions.InvalidUserRequestException;
+import com.eazybooks.bookcatalogue.exceptions.InvalidUserTokenException;
+import com.eazybooks.bookcatalogue.exceptions.UserNotAdminException;
+import com.eazybooks.bookcatalogue.interfaces.IBookCatalogue;
 import com.eazybooks.bookcatalogue.model.BookCatalogue;
-import com.eazybooks.bookcatalogue.service.BookCatalogueService;
 import com.eazybooks.bookcatalogue.service.VerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -9,136 +19,73 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequestMapping("/bookcatalogue/")
  public class BookCatalogueController {
 
   Logger logger = LoggerFactory.getLogger(BookCatalogueController.class);
 
-  private final BookCatalogueService bookCatalogueService;
-  private final VerificationService verificationService;
+  private final IBookCatalogue bookCatalogueService;
 
-  public BookCatalogueController(BookCatalogueService bookCatalogueService,
-      VerificationService verificationService) {
+  public BookCatalogueController(IBookCatalogue bookCatalogueService) {
     this.bookCatalogueService = bookCatalogueService;
-    this.verificationService = verificationService;
-   }
+    }
 
   @PostMapping("{username}/addbook")
   public ResponseEntity<String> addBookToCatalogues(@PathVariable String username,
-      @RequestBody BookCatalogue book, HttpServletRequest request) {
+      @RequestBody BookCatalogue book, HttpServletRequest request)
+      throws AuthorizationHeaderNotFound, BookExistException, BookNotFoundException {
 
-    ResponseEntity<Boolean> tokenValidation = null;
-
-    //verifies token
-    try {
-      tokenValidation = verificationService.verifyUserToken(request, username);
-    } catch (Exception e) {
-      logger.error(e.getMessage());
+    if (Objects.isNull(username)) {
+      logger.error("Username can not be empty");
+      throw new InvalidUserRequestException("Username can not be empty");
     }
 
-    assert tokenValidation != null;
-    if (!Boolean.TRUE.equals(tokenValidation.getBody())) {
-      logger.error("Error validating token");
-      return new ResponseEntity<>("Error validating token", HttpStatus.UNAUTHORIZED);
-    }
-    // Check if User is Admin
-    try {
-      final ResponseEntity<String> userRole = verificationService.verifyUserRole(username, request);
-      if (!Objects.equals(userRole.getBody(), "ADMIN")) {
-        return new ResponseEntity<>("Only admin can add new book", HttpStatus.FORBIDDEN);
-      }
-    } catch (Exception e) {
-      return new ResponseEntity<>("Error getting user role", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    try {
-      BookCatalogue bookByIsbn = bookCatalogueService.getBookByIsbn(book.getIsbn());
-      if (bookByIsbn != null) {
-        logger.info(bookByIsbn.toString());
-        return new ResponseEntity<>("Book already exist", HttpStatus.CONFLICT);
-
-      }
-    } catch (Exception e) {
-      logger.error(e.getMessage());
-      return new ResponseEntity<>("Something went wrong", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    final BookCatalogue addedBook = bookCatalogueService.addBookToCatalogue(book);
+    VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"),
+    username);
+    final BookCatalogue addedBook = bookCatalogueService.addBookToCatalogue(verifyTokenRequest, book);
     return new ResponseEntity<>(addedBook.getTitle() + " added successfully", HttpStatus.CREATED);
 
   }
+
   @GetMapping
-  public ResponseEntity<List<BookCatalogue>> getAllBookCatalogues(HttpServletRequest request) {
-    //verifies token
-    logger.info("request from user: " + request.toString());
-    try {
-      ResponseEntity<Boolean> tokenValidation = verificationService.verifyUserToken(request, null);
-
-      if (!Boolean.TRUE.equals(tokenValidation.getBody())) {
-        logger.error("Error validating token");
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-      }
-
-    } catch (Exception e) {
-      logger.error("Error validating user token");
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+  public ResponseEntity<List<BookCatalogue>> getAllBookCatalogues(HttpServletRequest request)
+      throws AuthorizationHeaderNotFound {
+    if(Objects.isNull(request)) {
+      logger.error("Request can not be empty");
+      throw new AuthorizationHeaderNotFound("Request can not be empty");
     }
-      try{
-        List<BookCatalogue> books = bookCatalogueService.getAllCatalogue();
+
+        VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization") );
+        List<BookCatalogue> books = bookCatalogueService.getAllCatalogue(verifyTokenRequest);
         return ResponseEntity.ok(books);
-      }catch(Exception e) {
-        logger.error(e.getMessage());
-      }
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
   }
 
   @GetMapping("isbn/{isbn}")
   public ResponseEntity<BookCatalogue> getBookByIsbn(@PathVariable Long isbn,
-      HttpServletRequest request) {
+      HttpServletRequest request) throws BookNotFoundException, AuthorizationHeaderNotFound {
 
-    logger.info("request {}", request.toString());
 
-    try {
-      final ResponseEntity<Boolean> verifyTokenResponse = verificationService.verifyUserToken(request, null);
+    if(Objects.isNull(request)) {
+      logger.error("Request can not be empty");
+      throw new InvalidUserRequestException("Request can not be empty");
+    }
+    VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization") );
 
-      if (verifyTokenResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
-          verifyTokenResponse.getBody())) {
-        logger.warn("Token validation failed");
-        return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-      }
-    } catch (Exception e) {
-      logger.error("Error validating user token");
-      return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    BookCatalogue bookByIsbn = null;
-    try {
-      bookByIsbn = bookCatalogueService.getBookByIsbn(isbn);
-      logger.info("bookByIsbn {}", bookByIsbn);
-    } catch (Exception e) {
-      logger.error("Error getting book");
-    }
-    if (bookByIsbn == null) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
+    BookCatalogue bookByIsbn = bookCatalogueService.getBookByIsbn(
+        verifyTokenRequest, isbn);
+
     return new ResponseEntity<>(bookByIsbn, HttpStatus.OK);
-  }
-
-  @GetMapping("book/{bookId}")
-  public ResponseEntity<BookCatalogue> getBookCatalogueById(HttpServletRequest request,
-      @PathVariable Long bookId) {
-    final BookCatalogue bookById = bookCatalogueService.getBookById(bookId);
-    logger.info("request {}", bookById.toString());
-    return ResponseEntity.ok(bookById);
   }
 
 }

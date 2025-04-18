@@ -17,7 +17,7 @@ export const removeBookFromWishlistWithUsername = (username: string | null): str
   return `${WISHLIST+username}/remove`
 }
 export const addBookToCatalogueWithUsername = (username: string | null): string => {
-  return `${BOOKCATALOGUE}/${username}/addbook`
+  return `${BOOKCATALOGUE}${username}/addbook`
 }
 export const addBookToCatalogueItem = (username: string | null, isbn: number): string => {
   return `${CHECKOUTITEM}/${username}/${isbn}/add`

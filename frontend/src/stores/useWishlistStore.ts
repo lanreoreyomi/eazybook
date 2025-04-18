@@ -77,6 +77,7 @@ export const useWishlistStore = defineStore('wishlist', {
         } else {
           this.statusCode = 500;
           this.statusText = 'An unexpected error occurred';
+
         }
       }
     },

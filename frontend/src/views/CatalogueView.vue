@@ -5,12 +5,8 @@
       {{checkoutStats.title}} is hot right now, checkout out <span style='font-weight:bolder;'></span>{{checkoutStats?.totalCheckout}}  times</p>
   </div>
   <div v-if="isCatalogueLoaded" id="catalogue_component">
-    <div id="wishlist_control" v-if="wishListStatusText">
-      <p id="addedToWishlist">{{ wishListStatusText }}</p>
-    </div>
-    <div id="checkout_control" v-if="checkoutStatusText">
-      <p id="addedToCheckout">{{ checkoutStatusText }}</p>
-    </div>
+    <div id="wishlist_control" v-if="wishListStatusText"><p id="addedToWishlist">{{ wishListStatusText }}</p></div>
+    <div id="checkout_control" v-if="checkoutStatusText"><p id="addedToCheckout">{{ checkoutStatusText }}</p></div>
     <div class="book_detail">
       <BookComponent :books="books" @getBookDetails="displayBook" @addToCheckout="bookCheckout" />
     </div>
@@ -89,12 +85,21 @@ export default defineComponent({
 
 .stats{
   padding: 8px;
-  margin: 5px auto;
-  width: 60%;
-   border-radius: 0.5rem;
+
+  margin: 20px auto;
+  width: 20%;
+  background-color: colors.$error-color;
+  border-radius: 0.5rem;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  padding: 20px;
+  z-index: 1000;
+
   p{
     text-align: center;
-    color: colors.$text-color;
+    color: colors.$white-color;
+    font-weight: bold;
 
   }
 }
@@ -102,49 +107,29 @@ export default defineComponent({
   font-size: 16px;
   color: colors.$text-color;
   width: 100%;
-
-  #wishlist_control {
+  padding-top: 20px;
+  #checkout_control, #wishlist_control {
     position: sticky;
-    top: 0;
-    padding-bottom: 12px;
-    padding-top: 8px;
-    font-size: 16px;
-    color: colors.$white-color;
-    //border: 1px solid colors.$text-color;
-    text-align: center;
-    width: 50%;
-    background-color: colors.$text-color;
-    border-radius: 0.5rem;
-    align-content: center;
-    box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1);
-    justify-content: center;
-    margin: 20px auto;
-    #addedToWishlist {
-      width: 90%;
-      padding-top: 10px;
-      font-weight: normal;
-    }
-  }
-
-  #checkout_control {
-    position: sticky;
-    top: 0;
+    top: 20px;
+    background: colors.$white-color;
     padding-bottom: 12px;
     padding-top: 12px;
     font-size: 16px;
-    color: colors.$white-color;
+
+    color: colors.$text-color;
     text-align: center;
-    width: 50%;
-    background-color: colors.$text-color;
+    left: 30%;
+    width: 40%;
+
     border-radius: 0.5rem;
     align-content: center;
     box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1);
     justify-content: center;
     margin: 20px auto;
-    #addedToWishlist {
+    #addedToWishlist, #addedToCheckout {
       width: 90%;
       padding-top: 10px;
-      font-weight: bold;
+      font-weight: normal;
 
 
     }

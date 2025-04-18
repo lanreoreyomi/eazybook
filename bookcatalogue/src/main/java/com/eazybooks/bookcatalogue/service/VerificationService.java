@@ -1,14 +1,20 @@
 package com.eazybooks.bookcatalogue.service;
 
-import com.eazybooks.bookcatalogue.model.VerifyToken;
-import jakarta.servlet.http.HttpServletRequest;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import com.eazybooks.bookcatalogue.DTO.VerifyToken;
+import com.eazybooks.bookcatalogue.DTO.VerifyUser;
+import com.eazybooks.bookcatalogue.DTO.VerifyUserRole;
+import com.eazybooks.bookcatalogue.enums.ROLE;
+import com.eazybooks.bookcatalogue.exceptions.AuthorizationHeaderNotFound;
+import com.eazybooks.bookcatalogue.exceptions.InternalServerException;
+import com.eazybooks.bookcatalogue.exceptions.InvalidUserRequestException;
+import com.eazybooks.bookcatalogue.exceptions.InvalidUserTokenException;
+import com.eazybooks.bookcatalogue.exceptions.UserNotAdminException;
+import com.eazybooks.bookcatalogue.exceptions.UserNotFoundException;
 import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.HttpEntity;
@@ -31,68 +37,22 @@ public class VerificationService {
   RestTemplate restTemplate = new RestTemplate();
 
 
-  private ResponseEntity<Boolean> verifyToken(HttpServletRequest request, String username) {
-    String authHeader = request.getHeader("Authorization");
+    private Boolean verifyToken (VerifyToken tokenRequest) throws AuthorizationHeaderNotFound {
 
-     logger.info(request.getHeader("Authorization"));
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      logger.warn("Authorization header missing or invalid");
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    String token = authHeader.substring(7);
-    ResponseEntity<Boolean> authResponse;
-
-    try {
-      List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
-      logger.info("Found {} instances of authentication service", instances.size());
-
-      if (instances.isEmpty()) {
-        logger.error("Authentication service not found");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-      }
-
-      ServiceInstance instance = instances.get(0);
-      String authUrl = instance.getUri() + "/auth/validate-token";
-      HttpHeaders headers = new HttpHeaders();
-      headers.set("Authorization", authHeader);
-      headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
-
-      logger.info("Service url: " + authUrl);
-      final String s = username != null ? username : null;
-      HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token, s), headers);
-      authResponse = restTemplate.exchange(
-          authUrl, HttpMethod.POST, requestEntity, Boolean.class);
-
-      if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
-          authResponse.getBody())) {
-        logger.warn("Token validation failed");
-        return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
-      }
-      return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
-    }
-    catch (Exception e) {
-      logger.error(e.getMessage());
-      return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    }
-    private ResponseEntity<Boolean> verifyToken (HttpServletRequest request)
-      throws UnknownHostException {
-
-      logger.info("request {}", request.toString());
-      String authHeader = request.getHeader("Authorization");
+       String authHeader = tokenRequest.getToken();
 
       if (authHeader == null || !authHeader.startsWith("Bearer ")) {
         logger.warn("Authorization header missing or invalid");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        throw new AuthorizationHeaderNotFound("Authorization header missing or invalid");
       }
-      String token = authHeader.substring(7);
+
+      String token = tokenRequest.getToken().substring(7);
       ResponseEntity<Boolean> authResponse;
 
        try {
          List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
          logger.info("Found {} instances of authentication service", instances.size());
+
 
         ServiceInstance instance = instances.get(0);
         String authUrl = instance.getUri() + "/auth/validate-token";
@@ -101,41 +61,82 @@ public class VerificationService {
         headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
 
         logger.info("Service url: " + authUrl);
-         HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token, null), headers);
+         HttpEntity<VerifyToken> requestEntity = new HttpEntity<>(new VerifyToken(token, tokenRequest.getUsername()), headers);
         authResponse = restTemplate.exchange(
             authUrl, HttpMethod.POST, requestEntity, Boolean.class);
 
         if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
             authResponse.getBody())) {
           logger.warn("Token validation failed");
-          return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
+          throw new InvalidUserTokenException("Token validation failed");
         }
-        return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
+        return true;
       } catch (Exception e) {
-        return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
+         throw new InvalidUserTokenException("Token validation failed");
       }
-    }
+     }
 
-    public ResponseEntity<Boolean> verifyUserToken (HttpServletRequest request, String username){
-      if (username == null) {
-        logger.debug("Verifying token without username"); // Add logging
-        try {
-          return verifyToken(request);
-        } catch (UnknownHostException e) {
-          throw new RuntimeException(e);
+     private Boolean verifyUser( VerifyUser verifyUserRequest)
+         throws AuthorizationHeaderNotFound {
+
+      String authHeader = verifyUserRequest.getToken();
+
+       if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+         logger.warn("Authorization header missing or invalid");
+         throw new AuthorizationHeaderNotFound("Authorization header missing or invalid");
+       }
+
+       String token = verifyUserRequest.getToken().substring(7);
+       ResponseEntity<Boolean> authResponse;
+       try {
+         List<ServiceInstance> instances = discoveryClient.getInstances("authentication");
+         logger.info("Found {} instances of authentication service", instances.size());
+
+         ServiceInstance instance = instances.get(0);
+         String authUrl = instance.getUri() +"/auth/"+ verifyUserRequest.getUsername()+"/verify-user";
+
+         HttpHeaders headers = new HttpHeaders();
+         headers.set("Authorization", authHeader);
+         headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
+
+         logger.info("Service url: " + authUrl);
+         HttpEntity<String> requestEntity = new HttpEntity<>(token, headers);
+
+         authResponse = restTemplate.exchange(
+             authUrl, HttpMethod.POST, requestEntity, Boolean.class);
+
+         if (authResponse.getStatusCode() != HttpStatus.OK && Boolean.FALSE.equals(
+             authResponse.getBody())) {
+           logger.warn("User verification failed");
+           throw new UserNotFoundException("User not found");
+         }
+         return true;
+       } catch (Exception e) {
+         throw new UserNotFoundException("User not found");
+       }
+
+     }
+    public Boolean verifyUserToken (VerifyToken tokenRequest) throws AuthorizationHeaderNotFound {
+
+      if (Objects.isNull(tokenRequest)) {
+        logger.debug("Verifying token without username");
+          throw new InternalServerException("verify token request is empty");
         }
-      } else {
-        logger.debug("Verifying token for username: {}", username); // Add logging
-        return verifyToken(request, username);
-      }
+
+      return verifyToken(tokenRequest);
     }
 
-    private ResponseEntity<String> getUserRole (String username, HttpServletRequest request){
-      String authHeader = request.getHeader("Authorization");
+    private String verifyRole (VerifyUserRole roleRequest){
+      String authHeader = roleRequest.getHeader();
 
       if (authHeader == null || !authHeader.startsWith("Bearer ")) {
         logger.warn("Authorization header missing or invalid");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        throw new InvalidUserTokenException("Authorization header missing or invalid");
+      }
+
+      if (Objects.isNull(roleRequest.getUsername())) {
+        logger.warn("Username and role cannot be null");
+        throw new InvalidUserRequestException("Username and role cannot be null");
       }
 
       String token = authHeader.substring(7);
@@ -147,7 +148,7 @@ public class VerificationService {
         logger.info("Found {} instances of authentication service", instances.size());
 
         ServiceInstance instance = instances.get(0);
-        String authUrl = instance.getUri()+"/auth/"+username + "/role";
+        String authUrl = instance.getUri()+"/auth/"+ roleRequest.getUsername() + "/role";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", authHeader);
         headers.setContentType(MediaType.APPLICATION_JSON); // Set Content-Type
@@ -155,20 +156,25 @@ public class VerificationService {
         HttpEntity<String> requestEntity = new HttpEntity<>(token, headers);
         authResponse = restTemplate.exchange(
             authUrl, HttpMethod.POST, requestEntity, String.class);
-        if (authResponse.getStatusCode() != HttpStatus.OK) {
-          return new ResponseEntity<>("User not admin", HttpStatus.UNAUTHORIZED);
 
-        }
-        return new ResponseEntity<>(authResponse.getBody(), HttpStatus.OK);
+           if (!authResponse.getBody().trim().equals(ROLE.ADMIN.toString())) {
+          throw new UserNotAdminException("User is not admin");
+          }
+        return authResponse.getBody();
       } catch (Exception e) {
-        return new ResponseEntity<>("Error getting user role", HttpStatus.UNAUTHORIZED);
+        throw new UserNotAdminException("User is not admin");
 
       }
 
     }
 
-    public ResponseEntity<String> verifyUserRole (String username, HttpServletRequest request){
-    return getUserRole(username, request);
+    public String verifyUserRole (VerifyUserRole roleRequest){
+    return verifyRole(roleRequest);
     }
+
+    public Boolean verifyUserExists (VerifyUser verifyUserRequest)
+        throws AuthorizationHeaderNotFound {
+   return  verifyUser(verifyUserRequest);
+  }
   }
 

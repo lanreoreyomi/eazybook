@@ -74,7 +74,7 @@ export const useAddBookCatalogueStore = defineStore('addBookCatalogue', {
   actions: {
     async addBookToCatalogue() {
       const authStore = useAuthStore();
-
+      console.log("addBookToCatalogueWithUsername: "+ addBookToCatalogueWithUsername(authStore.username));
       try {
         const response = await axios.post<AddBookCatalogueState>(addBookToCatalogueWithUsername(authStore.username),
           this.addBookCatalogue, {
