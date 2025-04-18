@@ -6,6 +6,7 @@ import com.eazybooks.bookcatalogue.exceptions.AuthorizationHeaderNotFound;
 import com.eazybooks.bookcatalogue.exceptions.InternalServerException;
 import com.eazybooks.bookcatalogue.exceptions.InvalidUserRequestException;
 import com.eazybooks.bookcatalogue.exceptions.InvalidUserTokenException;
+import com.eazybooks.bookcatalogue.interfaces.ICheckoutStats;
 import com.eazybooks.bookcatalogue.model.CheckoutStats;
 import com.eazybooks.bookcatalogue.service.checkoutStats;
 import com.eazybooks.bookcatalogue.service.VerificationService;
@@ -26,37 +27,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class CheckoutStatsController {
   Logger logger = LoggerFactory.getLogger(CheckoutStatsController.class);
 
-  final checkoutStats checkoutStatsService;
-  private final VerificationService verificationService;
+  final ICheckoutStats checkoutStatsService;
 
-  public CheckoutStatsController(checkoutStats checkoutStatsService,
-      VerificationService verificationService) {
+  public CheckoutStatsController(ICheckoutStats checkoutStatsService) {
     this.checkoutStatsService = checkoutStatsService;
-    this.verificationService = verificationService;
-   }
+    }
 
   @GetMapping("/all")
   public ResponseEntity<CheckoutStats> getMaxCheckoutOut(HttpServletRequest request)
       throws AuthorizationHeaderNotFound {
 
     if ( Objects.isNull(request)) {
-      logger.warn("Username cannot be empty");
+      logger.warn("USer request cannot be empty");
       throw new InvalidUserRequestException("Username cannot be empty");
     }
+    VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"));
 
-    try {
-      VerifyToken verifyTokenRequest = new VerifyToken(request.getHeader("Authorization"));
-      Boolean tokenValid = verificationService.verifyUserToken(verifyTokenRequest);
-      if (!Boolean.TRUE.equals(tokenValid)) {
-        logger.error("Error validating token");
-        throw new InvalidUserTokenException("Error validating token");
-      }
-    } catch (Exception e) {
-      logger.error(e.getMessage());
-      throw new InternalServerException(e.getMessage());
-    }
+    final CheckoutStats maxCheckoutStats = checkoutStatsService.getAllCheckoutStats(verifyTokenRequest);
 
-    final CheckoutStats maxCheckoutStats = checkoutStatsService.getAllCheckoutStats();
 
     return new ResponseEntity<>(maxCheckoutStats, HttpStatus.OK);
   }
