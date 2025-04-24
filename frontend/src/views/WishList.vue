@@ -2,7 +2,7 @@
   <div  v-if="wishListItems.length<=0" id="empty_list">
     <p>{{wishListInfo}}</p>
     <p >
-      <img src="https://eazybooks-images.s3.us-east-1.amazonaws.com/empty_wishlist.png" alt="">
+      <img :src="empty_wishlist"  alt="empty wishlist image">
     </p>
 
   </div>
@@ -25,6 +25,7 @@ import router from '@/router'
 import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
 import { useAuthStore } from '@/stores/useAuthStore.ts'
 import { useLogInStore } from '@/stores/useLogInStore.ts'
+import empty_wishlist from '/src/assets/images/empty_wishlist.png'
 export default defineComponent({
   name: 'WishList',
 
@@ -91,7 +92,8 @@ export default defineComponent({
       wishListInfo,
       wishListItems,
       removeBookFromWishlist,
-      addToCheckoutItem
+      addToCheckoutItem,
+      empty_wishlist
     };
   }
 })

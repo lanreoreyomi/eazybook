@@ -34,12 +34,14 @@ public class AuthenticationController {
   private static final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
   AuthenticatorService authenticatorService;
   private final DiscoveryClient discoveryClient;
-  RestTemplate restTemplate = new RestTemplate();
+   RestTemplate restTemplate = new RestTemplate();
+
 
   public AuthenticationController(AuthenticatorService authenticatorService,
       DiscoveryClient discoveryClient) {
     this.authenticatorService = authenticatorService;
     this.discoveryClient = discoveryClient;
+
   }
 
   @PostMapping("/create-account")
@@ -68,6 +70,7 @@ public class AuthenticationController {
       logger.info("AuthenticationResponse: {}", authenticationResponse);
 
       List<ServiceInstance> instances = discoveryClient.getInstances("user");
+
       if (instances.isEmpty()) {
         logger.info("User service not found");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -149,7 +152,7 @@ public class AuthenticationController {
     String token;
     try {
       token = authenticatorService.authenticate(loginRequest);
-      if (token == null && token.isEmpty()) {
+      if (token == null || token.isEmpty()) {
         logger.info("Invalid log in request for {}", loginRequest.getUsername());
         return new ResponseEntity<>("Invalid login request", HttpStatus.UNAUTHORIZED);
       }

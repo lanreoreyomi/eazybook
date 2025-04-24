@@ -21,7 +21,6 @@
     </div>
 
   </div>
-  </div>
 </template>
 <script lang="ts">
 import { useLogInStore } from '@/stores/useLogInStore.js'

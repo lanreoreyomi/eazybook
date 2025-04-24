@@ -1,12 +1,6 @@
 services:
   nginx: # Add the Nginx reverse proxy
-    image: nginx:alpine
-    container_name: eazybooks-nginx-1
-    #build: ./nginx  # Build from the Dockerfile in the ./nginx directory
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-    networks:
-      - default
+    build: ./nginx  # Build from the Dockerfile in the ./nginx directory
     ports:
       - "80:80"   # Expose port 80 on the host
     depends_on:
@@ -34,7 +28,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   authentication:
-    image: lanreoreyomi/authentication:amd64-v1.0
+    image: lanreoreyomi/authentication:local-v1.2
     ports:
       - "9084:9084"
     depends_on:
@@ -49,7 +43,7 @@ services:
     restart: on-failure
 
   user:
-    image: lanreoreyomi/user:amd64-v1.0 # Use the Docker Hub image
+    image: lanreoreyomi/user:local-v1.2 # Use the Docker Hub image
     ports:
       - "9087:9087"
     depends_on:
@@ -63,7 +57,7 @@ services:
     restart: on-failure
 
   bookcatalogue:
-    image:  lanreoreyomi/bookcatalogue:amd64-v1.0  # Use the Docker Hub image
+    image:  lanreoreyomi/bookcatalogue:local-v1.2 # Use the Docker Hub image
     ports:
       - "9189:9189"
     depends_on:
@@ -77,7 +71,7 @@ services:
     restart: on-failure
 
   wishlist:
-    image: lanreoreyomi/wishlist:v1.0  # Use the Docker Hub image
+    image: lanreoreyomi/wishlist:local-v1.2 # Use the Docker Hub image
     ports:
       - "8017:8017"
     depends_on:
@@ -91,12 +85,9 @@ services:
     restart: on-failure
 
   frontend:
-    image: lanreoreyomi/frontend:amd64-v1.0
+    image: lanreoreyomi/frontend:local-v1.2
     environment:
-      - VITE_APP_AUTHENTICATION_BASE_URL=http://authentication:9084
-      - VITE_APP_BOOK_CATALOGUE_URL=http://bookcatalogue:9189
-      - VITE_APP_WISHLIST_BASE_URL=http://wishlist:8017
-      - VITE_APP_USER_URL=http://user:9087
+      - VITE_APP_API_BASE_URL=http://localhost
     depends_on:
       - authentication
       - user

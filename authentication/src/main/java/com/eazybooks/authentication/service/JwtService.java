@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
   private static final Logger log = LoggerFactory.getLogger(JwtService.class);
-  private final String SECRET_KEY = "SECRET_KEY";
+  private final String SECRET_KEY = "f61ef9704a9371effefe9e5e684dd9e1b4a49d9576c91f64191a9a159cfb765e";
   private final TokenRepository tokenRepository;
 
   public JwtService(TokenRepository tokenRepository) {

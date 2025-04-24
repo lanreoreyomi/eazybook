@@ -1,7 +1,7 @@
 <template>
    <div class="book_card" v-for="(book, index) in books" :key="index+1">
-    <img class="book_card-img" :src="`/src/assets/images/${index + 1}-min.jpg`" alt="lib_img" />
-      <div class="book_card-body">
+    <img :src="bookImages[index % bookImages.length]" alt="lib_img"  class="book_card-img" />
+       <div class="book_card-body">
       <h5 class="book_card-title">{{ book.title }}</h5>
       <p class="book_card-text">Description: {{ book.description }}</p>
     </div>
@@ -22,6 +22,8 @@
 <script lang="ts" scoped>
 import type { BookCatalogue } from '@/model/model.ts'
 import { defineComponent, type PropType, } from 'vue'
+import { bookImages } from '@/helper/ImageHelper.ts'
+
 
 export default defineComponent({
   inheritAttrs: false,
@@ -41,11 +43,14 @@ export default defineComponent({
       emit('addToCheckout', book);
     };
 
+
     return {
       getCurrentBook,
       open,
       emit,
-      processCheckout
+      processCheckout,
+      bookImages
+
 
     }
 

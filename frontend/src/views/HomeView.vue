@@ -19,7 +19,7 @@
 </template>
 <script setup lang="ts">
 import bg_img from '/src/assets/images/bg_img.jpg'
- import { onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/useAuthStore.ts'
 import router from '@/router'
 

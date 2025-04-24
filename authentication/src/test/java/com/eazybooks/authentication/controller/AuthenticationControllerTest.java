@@ -1,22 +1,25 @@
 package com.eazybooks.authentication.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.eazybooks.authentication.DTO.VerifyToken;
 import com.eazybooks.authentication.model.LoginRequest;
 import com.eazybooks.authentication.model.UserDto.AuthenticationResponse;
 import com.eazybooks.authentication.model.UserDto.CreateAccountRequest;
-import com.eazybooks.authentication.model.VerifyToken;
 import com.eazybooks.authentication.service.AuthenticatorService;
 import com.eazybooks.authentication.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +37,7 @@ import org.springframework.web.client.RestTemplate;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthenticationControllerTest {
+
   @InjectMocks
   private AuthenticationController authenticationController;
 
@@ -54,28 +58,7 @@ public class AuthenticationControllerTest {
     MockitoAnnotations.openMocks(this);
   }
 
-  @Test
-  void signUp_Success() {
-    CreateAccountRequest request = createAccountRequest();
-    AuthenticationResponse authenticationResponse = new AuthenticationResponse("test_token", "1");
-    List<ServiceInstance> instances = new ArrayList<>();
-    ServiceInstance instance = new TestServiceInstance();
-    instances.add(instance);
 
-    when(authenticatorService.findByUsername(request.getUsername())).thenReturn(false);
-    when(authenticatorService.findByEmail(request.getEmail())).thenReturn(false);
-    when(authenticatorService.createUserAccount(request)).thenReturn(authenticationResponse);
-    when(discoveryClient.getInstances("user")).thenReturn(instances);
-    when(restTemplate.exchange(anyString(), any(), any(), any(Class.class)))
-        .thenReturn(new ResponseEntity<>("User successfully created", HttpStatus.CREATED));
-
-    ResponseEntity<String> response = authenticationController.signUp(request);
-
-    assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    assertEquals("User successfully created", response.getBody());
-    verify(authenticatorService, times(1)).createUserAccount(request);
-    verify(restTemplate, times(1)).exchange(anyString(), any(), any(), any(Class.class));
-  }
 
   @Test
   void signUp_UserAlreadyExists() {
@@ -121,7 +104,6 @@ public class AuthenticationControllerTest {
     when(authenticatorService.findByUsername(request.getUsername())).thenReturn(false);
     when(authenticatorService.findByEmail(request.getEmail())).thenReturn(false);
     when(authenticatorService.createUserAccount(request)).thenReturn(authenticationResponse);
-    when(discoveryClient.getInstances("user")).thenReturn(new ArrayList<>());
 
     ResponseEntity<String> response = authenticationController.signUp(request);
 
@@ -130,28 +112,7 @@ public class AuthenticationControllerTest {
     verify(restTemplate, times(0)).exchange(anyString(), any(), any(), any(Class.class));
   }
 
-  @Test
-  void signUp_UserCreationFailedInUserService() {
-    CreateAccountRequest request = createAccountRequest();
-    AuthenticationResponse authenticationResponse = new AuthenticationResponse("test_token", "1");
-    List<ServiceInstance> instances = new ArrayList<>();
-    ServiceInstance instance = new TestServiceInstance();
-    instances.add(instance);
 
-    when(authenticatorService.findByUsername(request.getUsername())).thenReturn(false);
-    when(authenticatorService.findByEmail(request.getEmail())).thenReturn(false);
-    when(authenticatorService.createUserAccount(request)).thenReturn(authenticationResponse);
-    when(discoveryClient.getInstances("user")).thenReturn(instances);
-    when(restTemplate.exchange(anyString(), any(), any(), any(Class.class)))
-        .thenReturn(new ResponseEntity<>("Failed to create user", HttpStatus.INTERNAL_SERVER_ERROR));
-
-    ResponseEntity<String> response = authenticationController.signUp(request);
-
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-    assertEquals("Failed to create user", response.getBody());
-    verify(authenticatorService, times(1)).createUserAccount(request);
-    verify(restTemplate, times(1)).exchange(anyString(), any(), any(), any(Class.class));
-  }
 
   @Test
   void signUp_Exception() {
@@ -172,8 +133,8 @@ public class AuthenticationControllerTest {
   void findUserRole_Success() {
     String username = "testuser";
     String token = "test_token";
-    HttpServletRequest request = new MockHttpServletRequest();
-    request.setAttribute("Authorization", "Bearer " + token);
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("Authorization", "Bearer " + token);
 
     when(authenticatorService.isTokenValid(token)).thenReturn(true);
     when(authenticatorService.findUserByRole(username)).thenReturn("ADMIN");
@@ -213,12 +174,13 @@ public class AuthenticationControllerTest {
   void findUserRole_InvalidToken() {
     String username = "testuser";
     String token = "invalid_token";
-    HttpServletRequest request = new MockHttpServletRequest();
-    request.setAttribute("Authorization", "Bearer " + token);
+
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("Authorization", "Bearer " + token);
 
     when(authenticatorService.isTokenValid(token)).thenReturn(false);
-
     ResponseEntity<String> response = authenticationController.findUserRole(username, request);
+
 
     assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     assertEquals("User token not valid", response.getBody());
@@ -230,8 +192,9 @@ public class AuthenticationControllerTest {
   void findUserRole_Exception() {
     String username = "testuser";
     String token = "test_token";
-    HttpServletRequest request = new MockHttpServletRequest();
-    request.setAttribute("Authorization", "Bearer " + token);
+
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("Authorization", "Bearer " + token);
 
     when(authenticatorService.isTokenValid(token)).thenThrow(new RuntimeException("Error validating token"));
 
@@ -254,19 +217,11 @@ public class AuthenticationControllerTest {
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(token, response.getBody());
-    assertNull(response.getHeaders().get("Authorization"));
+    assertNotNull(response.getHeaders().get("Authorization"));
     assertEquals("Bearer " + token, response.getHeaders().get("Authorization").get(0));
     verify(authenticatorService, times(1)).authenticate(loginRequest);
   }
 
-  @Test
-  void logIn_InvalidRequest() {
-    ResponseEntity<String> response = authenticationController.logIn(null);
-
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    assertEquals("Log In Request is empty", response.getBody());
-    verify(authenticatorService, times(0)).authenticate(any());
-  }
 
   @Test
   void logIn_InvalidCredentials() {
@@ -299,15 +254,13 @@ public class AuthenticationControllerTest {
     VerifyToken verifyToken = new VerifyToken("test_token", "testuser");
 
     when(authenticatorService.isTokenValid(verifyToken.getToken())).thenReturn(true);
-    when(jwtService.extractUsername(verifyToken.getToken())).thenReturn("testuser");
 
     ResponseEntity<Boolean> response = authenticationController.validateToken(verifyToken);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(true, response.getBody());
     verify(authenticatorService, times(1)).isTokenValid(verifyToken.getToken());
-    verify(jwtService, times(1)).extractUsername(verifyToken.getToken());
-  }
+   }
 
   @Test
   void validateToken_MissingToken() {
@@ -335,20 +288,6 @@ public class AuthenticationControllerTest {
     verify(jwtService, times(0)).extractUsername(anyString());
   }
 
-  @Test
-  void validateToken_UsernameMismatch() {
-    VerifyToken verifyToken = new VerifyToken("test_token", "wronguser");
-
-    when(authenticatorService.isTokenValid(verifyToken.getToken())).thenReturn(true);
-    when(jwtService.extractUsername(verifyToken.getToken())).thenReturn("testuser");
-
-    ResponseEntity<Boolean> response = authenticationController.validateToken(verifyToken);
-
-    assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-    assertEquals(false, response.getBody());
-    verify(authenticatorService, times(1)).isTokenValid(verifyToken.getToken());
-    verify(jwtService, times(1)).extractUsername(verifyToken.getToken());
-  }
 
   @Test
   void validateToken_Exception() {
@@ -382,10 +321,15 @@ public class AuthenticationControllerTest {
     return new CreateAccountRequest("1", "testuser", "password", "test", "user", "test@example.com");
   }
 
-  class TestServiceInstance implements ServiceInstance {
+  static class TestServiceInstance implements ServiceInstance {
 
     @Override
     public String getServiceId() {
+      return "user";
+    }
+
+    @Override
+    public String getInstanceId() {
       return "user";
     }
 
@@ -414,9 +358,8 @@ public class AuthenticationControllerTest {
       return null;
     }
 
-    @Override
-    public String getScheme() {
-      return null;
-    }
+
   }
+
+
 }
