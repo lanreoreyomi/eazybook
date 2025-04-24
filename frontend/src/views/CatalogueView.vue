@@ -88,10 +88,10 @@ export default defineComponent({
 
   margin: 20px auto;
   width: 20%;
-  background-color: colors.$error-color;
+  background-color: darkred;
   border-radius: 0.5rem;
   position: fixed;
-  left: 0;
+  left: 20px;
   bottom: 0;
   padding: 20px;
   z-index: 1000;

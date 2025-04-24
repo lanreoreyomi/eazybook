@@ -3,8 +3,7 @@
   <div class="checkout-container" v-for="(book, index) in books" :key="index">
     <div class="checkout_info">
       <div class="book_img">
-        <img class="book_card-img" :src="`https://eazybooks-images.s3.us-east-1.amazonaws.com/${index + 1}-min.jpg`" alt="book_img" />
-      </div>
+        <img class="book_card-img" :src="bookImages[index % bookImages.length]" alt="book_img" />      </div>
       <div class="checkout_details">
         <ul>
           <li class="book_card_links" style="font-weight: bold"> Title: {{book.title}} </li>
@@ -28,6 +27,7 @@ import { computed, type PropType } from 'vue'
 import type { BookCatalogue } from '@/model/model.ts'
 import { useCheckoutItemStore } from '@/stores/useCheckoutItemStore.ts'
 import router from '@/router'
+import { bookImages } from '@/helper/ImageHelper.ts'
 
 export default {
   name: 'CheckoutComponent',
@@ -62,7 +62,8 @@ export default {
     return{
       removeBookFromCheckout,
       confirmationText,
-      checkBookout
+      checkBookout,
+      bookImages
     }
   }
 }
