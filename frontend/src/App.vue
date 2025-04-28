@@ -23,7 +23,6 @@ body,
   margin: 0;
   padding: 0;
   background-color: colors.$white-color;
-
 }
 
 </style>

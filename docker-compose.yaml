@@ -57,7 +57,7 @@ services:
     restart: on-failure
 
   bookcatalogue:
-    image:  lanreoreyomi/bookcatalogue:local-v1.2 # Use the Docker Hub image
+    image:  lanreoreyomi/bookcatalogue:local-v1.2.1 # Use the Docker Hub image
     ports:
       - "9189:9189"
     depends_on:
@@ -85,7 +85,7 @@ services:
     restart: on-failure
 
   frontend:
-    image: lanreoreyomi/frontend:local-v1.2
+    image: lanreoreyomi/frontend:local-v1.2.1
     environment:
       - VITE_APP_API_BASE_URL=http://localhost
     depends_on:
