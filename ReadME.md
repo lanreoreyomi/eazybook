@@ -15,7 +15,10 @@ Eazybook is an online book library application that allows users to browse, add 
 - [Database](#database)
 - [Service Discovery](#service-discovery)
 - [Deployment](#deployment)
-- [Running Locally](#running-locally)
+- [Local Development Setup](#local-development-setup)
+  - [Prerequisites](#prerequisites)
+  - [Installation Instructions](#installation-instructions)
+  - [Running the Application](#running-the-application)
 - [Technologies Used](#technologies-used)
 
 
@@ -44,7 +47,7 @@ Each microservice has a controller, service, and database layer.
   - Provides `/validate-token` endpoint for token validation by other services.
 - **Technologies:** Spring Boot, Spring Security, PostgreSQL
 - **Data Storage:** PostgreSQL
-- 
+-
 ### Book Catalogue Service
 
 - **Responsibilities:** Manages book data and book stats.
@@ -122,7 +125,130 @@ The entire application stack is deployed on a single DigitalOcean droplet using 
   - All containers are connected to the same Docker Compose network (`eazybooks_default`), allowing them to communicate via service names.
 
 - **Access:** Application is exposed on port 80 of the droplet’s public IP address.
-- 
+
+## Local Development Setup
+
+This section describes how to set up and run the Eazybook application locally for development purposes.
+
+### Prerequisites
+
+Make sure you have the following software installed on your system:
+
+*   Java Development Kit (JDK) 17
+*   Apache Maven
+*   Node.js and npm
+*   Docker
+
+### Installation Instructions
+
+*   **JDK 17:**
+  *   Windows: Download from [Oracle website](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html) or use a package manager like Chocolatey.
+  *   macOS: Download from [Oracle website](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html) or use Homebrew (`brew install openjdk@17`).
+  *   Linux: Use a package manager (e.g., `sudo apt-get install openjdk-17-jdk` for Debian/Ubuntu, `sudo yum install java-17-openjdk-devel` for Fedora/CentOS).
+*   **Apache Maven:**
+  *   Windows: Download from [Maven website](https://maven.apache.org/download.cgi) and follow installation instructions. Add Maven's `bin` directory to your PATH environment variable.
+  *   macOS: Use Homebrew (`brew install maven`).
+  *   Linux: Use a package manager (e.g., `sudo apt-get install maven`).
+*   **Node.js and npm:**
+  *   Windows: Download from [Node.js website](https://nodejs.org/). npm is included with Node.js.
+  *   macOS: Use Homebrew (`brew install node`).
+  *   Linux: Use a package manager (e.g., `sudo apt-get install nodejs npm`) or nvm (Node Version Manager).
+*   **Docker:**
+  *   Windows: Download Docker Desktop from [Docker website](https://www.docker.com/products/docker-desktop).
+  *   macOS: Download Docker Desktop from [Docker website](https://www.docker.com/products/docker-desktop).
+  *   Linux: Follow instructions on [Docker website](https://docs.docker.com/engine/install/).
+
+Before running `docker-compose up` for the first time, or if you want to ensure you have the latest versions of the images defined in the `docker-compose.yaml` file, you can explicitly pull them. While `docker-compose up` will automatically pull images if they are not found locally, you can also do it manually:
+
+To pull the PostgreSQL image (the `docker-compose.yaml` uses the official 'postgres' image, typically meaning latest stable):
+```bash
+docker pull postgres
+```
+
+To pull the Consul image (version `1.15.3` as specified in `docker-compose.yaml`):
+```bash
+docker pull consul:1.15.3
+```
+
+### Running the Application
+
+#### Start consul before running the appication in the terminal. IMPORTANT
+
+```bash
+docker run -d -p 8500:8500 consul:1.15.3
+```
+
+
+There are two primary ways to run the application locally:
+
+1.  **Using Docker Compose (Production-like Setup):**
+  *   This method runs all services (backend microservices, Postgres, Consul, Nginx, and frontend) in Docker containers, simulating a production environment.
+  *   Open a terminal in the project root directory and run the command:
+      ```bash
+      docker-compose up -d
+      ```
+  *   The application will be accessible at `http://localhost`.
+
+2.  **Running Backend and Frontend Separately (Development Setup):**
+  *   This method allows for more granular control and faster development iterations for individual services.
+  *   **Prerequisites:** Ensure Postgres and Consul are running. You can start them using Docker Compose:
+      ```bash
+      docker-compose up -d postgres consul
+      ```
+  *   **Backend (Spring Boot Microservices):**
+    *   Each microservice (Authentication, Book Catalogue, User, Wishlist) needs to be run separately.
+    *   Navigate to the root directory of each microservice (e.g., `cd authentication`).
+    *   Run the service using Maven:
+        ```bash
+        mvn spring-boot:run
+        ```
+    *   Repeat this for all backend microservices.
+  *   **Frontend (Vue.js):**
+    *   Navigate to the `frontend` directory:
+        ```bash
+        cd frontend
+        ```
+    *   Install dependencies (if you haven't already):
+        ```bash
+        npm install
+        ```
+    *   Run the development server:
+        ```bash
+        npm run dev
+        ```
+    *   The frontend will typically be accessible at `http://localhost:5173`. Check the terminal output for the exact URL.
+
+### Database Configuration
+
+The application uses PostgreSQL as its database. When running the application using `docker-compose up`, a PostgreSQL container is automatically started and configured.
+
+Here are the connection details:
+
+*   **Database Name:** `eazybooks`
+*   **Username:** `eazybook_dbuser`
+*   **Password:** `eazybook_dbpassword`
+*   **Host:**
+  *   `postgres`: When backend services are running as Docker containers (e.g., via `docker-compose up` or if you run a backend service container manually and connect it to the `eazybooks_default` network).
+  *   `localhost`: When running backend services directly on your host machine (e.g., via `mvn spring-boot:run`) and connecting to the PostgreSQL container started by `docker-compose`.
+*   **Port:** `5432` (This port is mapped to the host, so it's accessible whether connecting from another container on the same Docker network or from the host machine).
+
+These details are defined in the `docker-compose.yaml` file and are used by the backend microservices to connect to the database.
+
+### Service Discovery (Consul)
+
+Eazybook uses HashiCorp Consul for service discovery, allowing microservices to find and communicate with each other.
+
+*   **How it works:** When backend microservices start, they register themselves with Consul. Other services can then query Consul to discover the network locations (IP address and port) of these registered services.
+*   **Local Setup:**
+  *   When running the application using `docker-compose up`, a Consul container is automatically started.
+  *   If you are running services individually (e.g., for development), you can start Consul along with PostgreSQL using:
+      ```bash
+      docker-compose up -d postgres consul
+      ```
+*   **Consul UI:** You can access the Consul UI in your web browser at `http://localhost:8500`. This interface allows you to see which services are registered and their status.
+
+When running backend services locally (e.g., via `mvn spring-boot:run`), they will automatically try to register with the Consul instance running at `http://localhost:8500`.
+
 ## Technologies Used
 
 - **Programming Languages:**
@@ -149,7 +275,6 @@ The entire application stack is deployed on a single DigitalOcean droplet using 
 - **Service Discovery:**
   - Consul (Local)
 - **Deployment:**
-  - AWS (EC2, RDS, S3, Cloud Map, ALB)
   - Nginx (Reverse Proxy)
   - Docker
   - Docker Compose (Local)
