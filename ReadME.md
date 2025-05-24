@@ -172,13 +172,6 @@ docker pull consul:1.15.3
 
 ### Running the Application
 
-#### Start consul before running the appication in the terminal. IMPORTANT
-
-```bash
-docker run -d -p 8500:8500 consul:1.15.3
-```
-
-
 There are two primary ways to run the application locally:
 
 1.  **Using Docker Compose (Production-like Setup):**
@@ -190,11 +183,15 @@ There are two primary ways to run the application locally:
   *   The application will be accessible at `http://localhost`.
 
 2.  **Running Backend and Frontend Separately (Development Setup):**
-  *   This method allows for more granular control and faster development iterations for individual services.
-  *   **Prerequisites:** Ensure Postgres and Consul are running. You can start them using Docker Compose:
-      ```bash
-      docker-compose up -d postgres consul
-      ```
+   *   This method allows for more granular control and faster development iterations for individual services.
+     *   **Prerequisites:** Ensure Postgres and Consul are running. You can start them using Docker Compose:
+         ```bash
+         docker-compose up -d postgres consul
+         ```
+       ```bash
+       docker run -d -p 8500:8500 consul:1.15.3
+       ``` 
+
   *   **Backend (Spring Boot Microservices):**
     *   Each microservice (Authentication, Book Catalogue, User, Wishlist) needs to be run separately.
     *   Navigate to the root directory of each microservice (e.g., `cd authentication`).
